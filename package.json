@@ -1,0 +1,46 @@
+{
+  "name": "competition-codingame-ocean-of-code",
+  "version": "1.0.0",
+  "description": "CodinGame Ocean of Code Challenge",
+  "main": "index.js",
+  "scripts": {
+    "bundle:prepare": "rm -rf temp && rm -rf dist",
+    "bundle:ts": "./node_modules/.bin/tsc --outDir ./temp/src",
+    "bundle:node_modules": "cp package* ./temp && npm install --prefix ./temp --only=prod",
+    "bundle:parcel": "./node_modules/.bin/parcel build ./temp/src/index.js --out-dir ./dist",
+    "bundle:cleanup": "rm -rf temp"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GabrielDCelery/competition-codingame-ocean-of-code.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/GabrielDCelery/competition-codingame-ocean-of-code/issues"
+  },
+  "homepage": "https://github.com/GabrielDCelery/competition-codingame-ocean-of-code#readme",
+  "devDependencies": {
+    "@types/node": "^13.9.2",
+    "@types/pathfinding": "0.0.4",
+    "@typescript-eslint/eslint-plugin": "^2.15.0",
+    "@typescript-eslint/parser": "^2.15.0",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.9.0",
+    "eslint-formatter-friendly": "^7.0.0",
+    "eslint-friendly-formatter": "^4.0.1",
+    "eslint-loader": "^3.0.3",
+    "eslint-plugin-import": "^2.20.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-unicorn": "^17.2.0",
+    "lodash": "^4.17.15",
+    "parcel": "^1.12.4",
+    "prettier": "^1.19.1",
+    "ts-node": "^8.1.0",
+    "typescript": "^3.8.3"
+  },
+  "dependencies": {
+    "pathfinding": "^0.4.18"
+  }
+}
