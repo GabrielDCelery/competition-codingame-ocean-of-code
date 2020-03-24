@@ -1,4 +1,12 @@
-import graph, { ICoordinates } from '../graph';
+import {
+  ICoordinates,
+  getNeighbouringCells,
+  transformKeyToCoordinates,
+  getCoordinatesAtSpecificDistance,
+  getDistanceBetweenCoordinates,
+  createVectorFromCoordinates,
+  transformVectorToDirection,
+} from '../maps';
 import BaseAction, { IWeightedAction } from './base-action';
 import { ECommand } from '../command-interpreter';
 import * as PF from 'pathfinding';
@@ -9,7 +17,7 @@ export class MoveAction extends BaseAction {
   calculateUtility(): IWeightedAction {
     const myLocation = this.mySubmarine.getPosition();
     const gameMap = this.mySubmarine.getGameMap();
-    const possibleLocationsToMoveTo = graph.getNeighbouringCells(myLocation).filter(coordinates => {
+    const possibleLocationsToMoveTo = getNeighbouringCells(myLocation).filter(coordinates => {
       return gameMap.isCellWalkable(coordinates);
     });
 
@@ -23,17 +31,17 @@ export class MoveAction extends BaseAction {
     const possibleOpponentLocationsMap = this.phantomSubmarineTracker.getPossibleLocationsMap();
     const coordinatesAsKeys = Object.keys(possibleOpponentLocationsMap);
 
-    const possibleOpponentLocation: ICoordinates = graph.transformKeyToCoordinates(
+    const possibleOpponentLocation: ICoordinates = transformKeyToCoordinates(
       coordinatesAsKeys[Math.floor(Math.random() * coordinatesAsKeys.length)]
     );
     const targetCoordinates = [
-      ...graph.getCoordinatesAtSpecificDistance({
+      ...getCoordinatesAtSpecificDistance({
         coordinates: possibleOpponentLocation,
         distance: 3,
       }),
     ].filter(coordinates => {
       return (
-        graph.getDistanceBetweenCoordinates(myLocation, coordinates) !== 0 &&
+        getDistanceBetweenCoordinates(myLocation, coordinates) !== 0 &&
         gameMap.isCellWalkable(coordinates)
       );
     });
@@ -42,7 +50,7 @@ export class MoveAction extends BaseAction {
     let selectedCoordinates: ICoordinates = { x: 0, y: 0 };
 
     for (let i = 0, iMax = targetCoordinates.length; i < iMax; i++) {
-      const targetDistance = graph.getDistanceBetweenCoordinates(myLocation, targetCoordinates[i]);
+      const targetDistance = getDistanceBetweenCoordinates(myLocation, targetCoordinates[i]);
 
       if (targetDistance < distance) {
         distance = targetDistance;
@@ -61,8 +69,8 @@ export class MoveAction extends BaseAction {
 
     if (path[1] === undefined) {
       const { x, y } = possibleLocationsToMoveTo[0];
-      const vector = graph.createVectorFromCoordinates({ source: myLocation, target: { x, y } });
-      const direction = graph.transformVectorToDirection(vector);
+      const vector = createVectorFromCoordinates({ source: myLocation, target: { x, y } });
+      const direction = transformVectorToDirection(vector);
       return {
         type: ECommand.MOVE,
         utility: 0.3,
@@ -72,8 +80,8 @@ export class MoveAction extends BaseAction {
 
     const [x, y] = path[1];
 
-    const vector = graph.createVectorFromCoordinates({ source: myLocation, target: { x, y } });
-    const direction = graph.transformVectorToDirection(vector);
+    const vector = createVectorFromCoordinates({ source: myLocation, target: { x, y } });
+    const direction = transformVectorToDirection(vector);
 
     return {
       type: ECommand.MOVE,

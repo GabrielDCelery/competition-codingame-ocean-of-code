@@ -1,5 +1,4 @@
-import GameMap from './game-map';
-import { ICoordinates } from './graph';
+import { GameMap, ICoordinates } from './maps';
 
 class MySubmarine {
   private position: ICoordinates;

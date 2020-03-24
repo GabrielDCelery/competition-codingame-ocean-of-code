@@ -5,8 +5,14 @@ import {
   ITorpedoCommand,
   TCommand,
 } from './command-interpreter';
-import GameMap from './game-map';
-import graph, { ICoordinates } from './graph';
+import {
+  GameMap,
+  GameMapFactory,
+  ICoordinates,
+  addVectorToCoordinates,
+  getDistanceBetweenCoordinates,
+  transformCoordinatesToKey,
+} from './maps';
 import { CONST_TORPEDO_RANGE } from './constants';
 
 class PhantomSubmarine {
@@ -42,7 +48,7 @@ class PhantomSubmarine {
       case ECommand.MOVE: {
         const { vector } = command as IMoveCommand;
 
-        const newPosition = graph.addVectorToCoordinates({
+        const newPosition = addVectorToCoordinates({
           coordinates: this.position,
           vector,
         });
@@ -72,7 +78,7 @@ class PhantomSubmarine {
 
       case ECommand.TORPEDO: {
         const { coordinates } = command as ITorpedoCommand;
-        const distance = graph.getDistanceBetweenCoordinates(this.position, coordinates);
+        const distance = getDistanceBetweenCoordinates(this.position, coordinates);
 
         if (CONST_TORPEDO_RANGE < distance) {
           return false;
@@ -106,10 +112,10 @@ export class PhantomSubmarineTracker {
       for (let y = 0; y < height; y++) {
         if (this.gameMap.isCellWalkable({ x, y })) {
           const phantomSubmarine = new PhantomSubmarine()
-            .setGameMap(this.gameMap.cloneGameMap())
+            .setGameMap(GameMapFactory.getSingleton().createGameMap())
             .setPosition({ x, y });
           this.phantomSubmarines.push(phantomSubmarine);
-          this.possibleLocationsMap[graph.transformCoordinatesToKey({ x, y })] = true;
+          this.possibleLocationsMap[transformCoordinatesToKey({ x, y })] = true;
         }
       }
     }
@@ -148,7 +154,7 @@ export class PhantomSubmarineTracker {
       }
 
       filteredPhantomSubmarines.push(phantomSubmarine);
-      possibleLocationsMap[graph.transformCoordinatesToKey(phantomSubmarine.getPosition())] = true;
+      possibleLocationsMap[transformCoordinatesToKey(phantomSubmarine.getPosition())] = true;
     });
 
     this.phantomSubmarines = filteredPhantomSubmarines;

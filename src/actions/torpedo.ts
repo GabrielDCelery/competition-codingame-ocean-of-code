@@ -1,4 +1,9 @@
-import graph, { ICoordinates } from '../graph';
+import {
+  ICoordinates,
+  getNeighbouringCellsIncludingDiagonal,
+  isCoordinatesInCoordinatesList,
+  transformCoordinatesToKey,
+} from '../maps';
 import BaseAction, { IWeightedAction } from './base-action';
 import { CONST_TORPEDO_RANGE, CONST_TORPEDO_DAMAGE } from '../constants';
 import { ECommand } from '../command-interpreter';
@@ -76,19 +81,17 @@ export class TorpedoAction extends BaseAction {
 
     possibleLocationsToFireAt.forEach(possibleLocationToFireAt => {
       const utilities: number[] = [];
-      const possibleLocationsToCatchDamage = graph.getNeighbouringCellsIncludingDiagonal(
+      const possibleLocationsToCatchDamage = getNeighbouringCellsIncludingDiagonal(
         possibleLocationToFireAt
       );
-      const doesItHitMe = graph.isCoordinatesInCoordinatesList(myLocation, [
-        possibleLocationToFireAt,
-      ]);
-      const doITakeCollateral = graph.isCoordinatesInCoordinatesList(
+      const doesItHitMe = isCoordinatesInCoordinatesList(myLocation, [possibleLocationToFireAt]);
+      const doITakeCollateral = isCoordinatesInCoordinatesList(
         myLocation,
         possibleLocationsToCatchDamage
       );
 
       const damageToMe = calculateDamage({ direct: doesItHitMe, collateral: doITakeCollateral });
-      const locationHitAtAsKey = graph.transformCoordinatesToKey(possibleLocationToFireAt);
+      const locationHitAtAsKey = transformCoordinatesToKey(possibleLocationToFireAt);
 
       if (possibleOpponentLocationsMap[locationHitAtAsKey] === true) {
         utilities.push(
@@ -105,9 +108,7 @@ export class TorpedoAction extends BaseAction {
       }
 
       possibleLocationsToCatchDamage.forEach(possibleLocationToCatchDamage => {
-        const locationCaughtDamageAsKey = graph.transformCoordinatesToKey(
-          possibleLocationToCatchDamage
-        );
+        const locationCaughtDamageAsKey = transformCoordinatesToKey(possibleLocationToCatchDamage);
         if (possibleOpponentLocationsMap[locationCaughtDamageAsKey] === true) {
           utilities.push(
             expectedUtilityForDamage({

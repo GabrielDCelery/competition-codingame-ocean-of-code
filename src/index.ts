@@ -1,10 +1,15 @@
-import GameMap from './game-map';
 import PhantomSubmarineTracker from './phantom-submarine-tracker';
 import MySubmarine from './my-submarine';
 import AI from './ai';
 import commandInterpreter from './command-interpreter';
+import { ETerrain, GameMapFactory } from './maps';
 
 declare const readline: any;
+
+const gameInputToCellTransformations: { [index: string]: ETerrain } = {
+  '.': ETerrain.WATER,
+  x: ETerrain.ISLAND,
+};
 
 try {
   const readNextLine = (): string => {
@@ -17,10 +22,7 @@ try {
       return parseInt(elem, 10);
     });
 
-  const gameMap = GameMap.createInstance({ width, height, sectorSize: 5 });
-  const phantomSubmarineTracker = PhantomSubmarineTracker.createInstance({ gameMap });
-  const mySubmarine = MySubmarine.createInstance({ gameMap });
-  const ai = AI.createInstance({ mySubmarine, phantomSubmarineTracker });
+  const gameMapFactory = GameMapFactory.createSingleton({ width, height, sectorSize: 5 });
 
   for (let y = 0; y < height; y++) {
     const line: string = readNextLine();
@@ -28,14 +30,20 @@ try {
 
     for (let x = 0; x < width; x++) {
       const cell = cells[x];
-      gameMap.setCellTerrain({
-        terrain: GameMap.transformGameInputToTerrain(cell),
+      gameMapFactory.setTerrainCell({
+        type: gameInputToCellTransformations[cell],
         coordinates: { x, y },
       });
     }
   }
 
-  const walkableCoordinates = gameMap.getWalkableCoordinates();
+  const phantomSubmarineTracker = PhantomSubmarineTracker.createInstance({
+    gameMap: gameMapFactory.createGameMap(),
+  });
+  const mySubmarine = MySubmarine.createInstance({ gameMap: gameMapFactory.createGameMap() });
+  const ai = AI.createInstance({ mySubmarine, phantomSubmarineTracker });
+
+  const walkableCoordinates = mySubmarine.getGameMap().getWalkableCoordinatesList();
   const mySubmarineStartingAt =
     walkableCoordinates[Math.floor(Math.random() * walkableCoordinates.length)];
 

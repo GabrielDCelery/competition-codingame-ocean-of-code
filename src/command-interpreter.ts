@@ -1,4 +1,4 @@
-import graph, { EDirection, ICoordinates, IVector } from './graph';
+import { EDirection, ICoordinates, IVector, transformDirectionToVector } from './maps';
 import { IWeightedAction } from './actions';
 import MySubmarine from './my-submarine';
 
@@ -48,7 +48,7 @@ class CommandInterpreter {
         const direction = params[0] as EDirection;
         return {
           type: ECommand.MOVE,
-          vector: graph.transformDirectionToVector(direction),
+          vector: transformDirectionToVector(direction),
         };
       }
 
