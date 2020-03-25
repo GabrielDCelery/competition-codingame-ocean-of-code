@@ -36,7 +36,6 @@ try {
       });
     }
   }
-
   const phantomSubmarineTracker = PhantomSubmarineTracker.createInstance({
     gameMap: gameMapFactory.createGameMap(),
   });

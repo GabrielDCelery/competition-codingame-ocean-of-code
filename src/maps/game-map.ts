@@ -58,7 +58,7 @@ export class GameMap {
   }
 
   resetHaveBeenVisitedCells(): this {
-    this.visitedMap.resetCells();
+    this.visitedMap.reset();
 
     return this;
   }

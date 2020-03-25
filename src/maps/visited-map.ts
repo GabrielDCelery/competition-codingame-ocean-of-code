@@ -8,16 +8,11 @@ export class VisitedMap {
   constructor({ width, height }: { width: number; height: number }) {
     this.width = width;
     this.height = height;
-    this.grid = new Array(this.width).fill(null).map(() => new Array(this.height).fill(null));
-    this.resetCells;
+    this.reset();
   }
 
-  resetCells(): void {
-    for (let x = 0; x < this.width; x++) {
-      for (let y = 0; y < this.height; y++) {
-        this.grid[x][y] = false;
-      }
-    }
+  reset(): void {
+    this.grid = new Array(this.width).fill(null).map(() => new Array(this.height).fill(false));
   }
 
   static createInstance({ width, height }: { width: number; height: number }): VisitedMap {
