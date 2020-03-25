@@ -53,8 +53,8 @@ try {
     const [
       x,
       y,
-      myLife,
-      oppLife,
+      myHealth,
+      oppHealth,
       torpedoCooldown,
       sonarCooldown,
       silenceCooldown,
@@ -71,11 +71,13 @@ try {
       opponentCommandsString
     );
 
-    phantomSubmarineTracker.setOpponentLife(oppLife).processCommandsForSubmarines(opponentCommands);
+    phantomSubmarineTracker
+      .setOpponentLife(oppHealth)
+      .processCommandsForSubmarines(opponentCommands);
     mySubmarine.setState({
       x,
       y,
-      myLife,
+      myHealth,
       torpedoCooldown,
       sonarCooldown,
       silenceCooldown,

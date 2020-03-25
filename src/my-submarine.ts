@@ -2,7 +2,7 @@ import { GameMap, ICoordinates } from './maps';
 
 class MySubmarine {
   private position: ICoordinates;
-  private life: number;
+  private health: number;
   private torpedoCooldown: number;
   private sonarCooldown: number;
   private silenceCooldown: number;
@@ -18,7 +18,7 @@ class MySubmarine {
   }
 
   getLife(): number {
-    return this.life;
+    return this.health;
   }
 
   getPosition(): ICoordinates {
@@ -44,7 +44,7 @@ class MySubmarine {
   setState({
     x,
     y,
-    myLife,
+    myHealth,
     torpedoCooldown,
     sonarCooldown,
     silenceCooldown,
@@ -52,14 +52,14 @@ class MySubmarine {
   }: {
     x: number;
     y: number;
-    myLife: number;
+    myHealth: number;
     torpedoCooldown: number;
     sonarCooldown: number;
     silenceCooldown: number;
     mineCooldown: number;
   }): this {
     this.position = { x, y };
-    this.life = myLife;
+    this.health = myHealth;
     this.torpedoCooldown = torpedoCooldown;
     this.sonarCooldown = sonarCooldown;
     this.silenceCooldown = silenceCooldown;

@@ -7,28 +7,46 @@ export enum ECommand {
   MOVE = 'MOVE',
   SURFACE = 'SURFACE',
   TORPEDO = 'TORPEDO',
+  SONAR = 'SONAR',
+  SILENCE = 'SILENCE',
 }
 
-export interface DoNothingCommand {
+export interface ICommand {
+  type: ECommand;
+  parameters: any;
+}
+
+export interface DoNothingCommand extends ICommand {
   type: ECommand.NA;
 }
 
-export interface IMoveCommand {
+export interface IMoveCommand extends ICommand {
   type: ECommand.MOVE;
-  vector: IVector;
+  parameters: {
+    vector: IVector;
+  };
 }
 
 export interface ISurfaceCommand {
   type: ECommand.SURFACE;
-  sector: number;
+  parameters: {
+    sector: number;
+  };
 }
 
 export interface ITorpedoCommand {
   type: ECommand.TORPEDO;
-  coordinates: ICoordinates;
+  parameters: {
+    coordinates: ICoordinates;
+  };
 }
 
-export type TCommand = DoNothingCommand | IMoveCommand | ISurfaceCommand | ITorpedoCommand;
+export type TCommand =
+  | ICommand
+  | DoNothingCommand
+  | IMoveCommand
+  | ISurfaceCommand
+  | ITorpedoCommand;
 
 const COMMANDS_DELIMITER = '|';
 const COMMAND_PARAMS_DELIMITER = ' ';
@@ -41,21 +59,22 @@ class CommandInterpreter {
 
     switch (command) {
       case ECommand.NA: {
-        return { type: ECommand.NA };
+        return { type: ECommand.NA, parameters: {} };
       }
 
       case ECommand.MOVE: {
-        const direction = params[0] as EDirection;
+        const vector = transformDirectionToVector(params[0] as EDirection);
         return {
           type: ECommand.MOVE,
-          vector: transformDirectionToVector(direction),
+          parameters: { vector },
         };
       }
 
       case ECommand.SURFACE: {
+        const sector = parseInt(params[0]);
         return {
           type: ECommand.SURFACE,
-          sector: parseInt(params[0]),
+          parameters: { sector },
         };
       }
 
@@ -63,7 +82,7 @@ class CommandInterpreter {
         const [x, y] = params.map(elem => parseInt(elem, 10));
         return {
           type: ECommand.TORPEDO,
-          coordinates: { x, y },
+          parameters: { coordinates: { x, y } },
         };
       }
 

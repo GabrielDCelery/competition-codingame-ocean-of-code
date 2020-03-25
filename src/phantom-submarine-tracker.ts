@@ -38,7 +38,7 @@ class PhantomSubmarine {
   }
 
   validateAndActionCommand(command: TCommand): boolean {
-    const { type } = command;
+    const { type, parameters } = command;
 
     switch (type) {
       case ECommand.NA: {
@@ -46,7 +46,7 @@ class PhantomSubmarine {
       }
 
       case ECommand.MOVE: {
-        const { vector } = command as IMoveCommand;
+        const { vector } = parameters;
 
         const newPosition = addVectorToCoordinates({
           coordinates: this.position,
@@ -97,7 +97,7 @@ class PhantomSubmarine {
 }
 
 export class PhantomSubmarineTracker {
-  private life: number;
+  private health: number;
   private phantomSubmarines: PhantomSubmarine[];
   private possibleLocationsMap: { [index: string]: boolean } = {};
   private gameMap: GameMap;
@@ -126,11 +126,11 @@ export class PhantomSubmarineTracker {
   }
 
   getOpponentLife(): number {
-    return this.life;
+    return this.health;
   }
 
   setOpponentLife(opponentLife: number): this {
-    this.life = opponentLife;
+    this.health = opponentLife;
 
     return this;
   }
