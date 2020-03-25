@@ -24,7 +24,7 @@ export class GameMap {
     this.height = height;
     this.sectorSize = sectorSize;
     this.terrainMap = terrainMap;
-    this.visitedMap = new VisitedMap({ width, height });
+    this.visitedMap = VisitedMap.createInstance({ width, height });
   }
 
   static createInstance({

@@ -22,7 +22,7 @@ export class GameMapFactory {
     this.width = width;
     this.height = height;
     this.sectorSize = sectorSize;
-    this.terrainMap = new TerrainMap({ width, height });
+    this.terrainMap = TerrainMap.createSingleton({ width, height });
   }
 
   static createSingleton({
