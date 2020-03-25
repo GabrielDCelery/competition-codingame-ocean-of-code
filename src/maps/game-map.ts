@@ -54,7 +54,7 @@ export class GameMap {
 
     for (let x = 0; x < this.width; x++) {
       for (let y = 0; y < this.height; y++) {
-        if (this.visitedMap.isCellWalkable({ x, y })) {
+        if (!this.visitedMap.isCellWalkable({ x, y })) {
           clonedVisitedMap.setCell({ type: true, coordinates: { x, y } });
         }
       }

@@ -219,6 +219,7 @@ export class PhantomSubmarine {
         });
       }
     });
+    this.possibleLocationsDataMap = newPossibleLocationsDataMap;
 
     return this;
   }
