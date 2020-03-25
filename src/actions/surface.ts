@@ -1,12 +1,12 @@
-import { getNeighbouringCells } from '../maps';
-import BaseAction, { IWeightedAction } from './base-action';
+import BaseAction, { IWeightedCommand } from './base-action';
 import { ECommand } from '../command-interpreter';
+import { uGetNeighbouringCells } from '../maps';
 
 export class SurfaceAction extends BaseAction {
-  calculateUtility(): IWeightedAction {
-    const myLocation = this.mySubmarine.getPosition();
-    const gameMap = this.mySubmarine.getGameMap();
-    const possibleLocationsToMoveTo = getNeighbouringCells(myLocation).filter(coordinates => {
+  calculateUtility(): IWeightedCommand {
+    const myLocation = this.me.getPosition();
+    const gameMap = this.me.getGameMap();
+    const possibleLocationsToMoveTo = uGetNeighbouringCells(myLocation).filter(coordinates => {
       return gameMap.isCellWalkable(coordinates);
     });
 
@@ -15,6 +15,7 @@ export class SurfaceAction extends BaseAction {
     return {
       type: ECommand.SURFACE,
       utility,
+      parameters: {},
     };
   }
 }

@@ -1,55 +1,44 @@
-import PhantomSubmarineTracker from './phantom-submarine-tracker';
-import MySubmarine from './my-submarine';
-import { MoveAction, SurfaceAction, TorpedoAction, IWeightedAction } from './actions';
-import { ECommand } from './command-interpreter';
+import { Submarine, PhantomSubmarine } from './entities';
+import { MoveAction, SurfaceAction, TorpedoAction, IWeightedCommand } from './actions';
+import { ECommand, ICommand } from './command-interpreter';
 
 class AI {
   private torpedoAction: TorpedoAction;
   private surfaceAction: SurfaceAction;
   private moveAction: MoveAction;
 
-  constructor({
-    mySubmarine,
-    phantomSubmarineTracker,
-  }: {
-    mySubmarine: MySubmarine;
-    phantomSubmarineTracker: PhantomSubmarineTracker;
-  }) {
-    this.torpedoAction = new TorpedoAction({ mySubmarine, phantomSubmarineTracker });
-    this.surfaceAction = new SurfaceAction({ mySubmarine, phantomSubmarineTracker });
-    this.moveAction = new MoveAction({ mySubmarine, phantomSubmarineTracker });
+  constructor({ me, opponent }: { me: Submarine; opponent: PhantomSubmarine }) {
+    this.torpedoAction = new TorpedoAction({ me, opponent });
+    this.surfaceAction = new SurfaceAction({ me, opponent });
+    this.moveAction = new MoveAction({ me, opponent });
   }
 
-  static createInstance({
-    mySubmarine,
-    phantomSubmarineTracker,
-  }: {
-    mySubmarine: MySubmarine;
-    phantomSubmarineTracker: PhantomSubmarineTracker;
-  }): AI {
-    return new AI({ mySubmarine, phantomSubmarineTracker });
+  static createInstance({ me, opponent }: { me: Submarine; opponent: PhantomSubmarine }): AI {
+    return new AI({ me, opponent });
   }
 
-  pickCommands(): IWeightedAction[] {
+  pickCommands(): ICommand[] {
     let maxUtility = -1;
-    let chosenAction = { type: ECommand.NA, utility: 0 };
+    let chosenCommand: IWeightedCommand = { type: ECommand.NA, utility: 0, parameters: {} };
 
-    const actionsToChoseFrom: IWeightedAction[] = [
+    const commandsToChoseFrom: IWeightedCommand[] = [
       this.torpedoAction.calculateUtility(),
       this.surfaceAction.calculateUtility(),
       this.moveAction.calculateUtility(),
     ];
 
-    for (let i = 0, iMax = actionsToChoseFrom.length; i < iMax; i++) {
-      const { utility } = actionsToChoseFrom[i];
+    for (let i = 0, iMax = commandsToChoseFrom.length; i < iMax; i++) {
+      const { utility } = commandsToChoseFrom[i];
 
       if (maxUtility < utility) {
         maxUtility = utility;
-        chosenAction = actionsToChoseFrom[i];
+        chosenCommand = commandsToChoseFrom[i];
       }
     }
 
-    return [chosenAction];
+    return [chosenCommand].map(({ type, parameters }) => {
+      return { type, parameters };
+    });
   }
 }
 

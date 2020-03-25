@@ -1,4 +1,4 @@
-import { getNeighbouringCells, transformCoordinatesToKey, ICoordinates } from './common';
+import { uGetNeighbouringCells, uTransformCoordinatesToKey, ICoordinates } from './common';
 import { TerrainMap } from './terrain-map';
 import { VisitedMap } from './visited-map';
 
@@ -14,17 +14,19 @@ export class GameMap {
     height,
     sectorSize,
     terrainMap,
+    visitedMap,
   }: {
     width: number;
     height: number;
     sectorSize: number;
     terrainMap: TerrainMap;
+    visitedMap: VisitedMap;
   }) {
     this.width = width;
     this.height = height;
     this.sectorSize = sectorSize;
     this.terrainMap = terrainMap;
-    this.visitedMap = VisitedMap.createInstance({ width, height });
+    this.visitedMap = visitedMap;
   }
 
   static createInstance({
@@ -38,7 +40,33 @@ export class GameMap {
     sectorSize: number;
     terrainMap: TerrainMap;
   }): GameMap {
-    return new GameMap({ width, height, sectorSize, terrainMap });
+    return new GameMap({
+      width,
+      height,
+      sectorSize,
+      terrainMap,
+      visitedMap: VisitedMap.createInstance({ width, height }),
+    });
+  }
+
+  cloneGameMap(): GameMap {
+    const clonedVisitedMap = VisitedMap.createInstance({ width: this.width, height: this.height });
+
+    for (let x = 0; x < this.width; x++) {
+      for (let y = 0; y < this.height; y++) {
+        if (this.visitedMap.isCellWalkable({ x, y })) {
+          clonedVisitedMap.setCell({ type: true, coordinates: { x, y } });
+        }
+      }
+    }
+
+    return new GameMap({
+      width: this.width,
+      height: this.height,
+      sectorSize: this.sectorSize,
+      terrainMap: this.terrainMap,
+      visitedMap: clonedVisitedMap,
+    });
   }
 
   getDimensions(): { width: number; height: number } {
@@ -112,17 +140,17 @@ export class GameMap {
     visitedCells: { [index: string]: boolean };
   }): void {
     reachableCoordinates.push(coordinates);
-    visitedCells[transformCoordinatesToKey(coordinates)] = true;
+    visitedCells[uTransformCoordinatesToKey(coordinates)] = true;
 
     if (distance === maxDistance) {
       return;
     }
 
-    getNeighbouringCells(coordinates).forEach(neighbourCoordinates => {
+    uGetNeighbouringCells(coordinates).forEach(neighbourCoordinates => {
       if (
         this.areCoordinatesWithinBoundaries(neighbourCoordinates) === false ||
         this.terrainMap.isCellWalkable(neighbourCoordinates) === false ||
-        visitedCells[transformCoordinatesToKey(neighbourCoordinates)] === true
+        visitedCells[uTransformCoordinatesToKey(neighbourCoordinates)] === true
       ) {
         return;
       }

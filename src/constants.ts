@@ -1,3 +1,10 @@
-export const CONST_TORPEDO_RANGE = 4;
-export const CONST_TORPEDO_DAMAGE = 2;
-export const CONST_SUBMARINE_HEALTH = 6;
+export const RANGE_TORPEDO = 4;
+export const RANGE_SILENCE = 4;
+
+export const DAMAGE_TORPEDO = 2;
+
+export const HEALTH_SUBMARINE = 6;
+
+export const CHARGE_TORPEDO = 3;
+export const CHARGE_SONAR = 4;
+export const CHARGE_SILENCE = 6;

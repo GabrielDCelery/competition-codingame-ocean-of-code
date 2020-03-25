@@ -1,23 +1,23 @@
 import {
   ICoordinates,
-  getNeighbouringCells,
-  transformKeyToCoordinates,
-  getCoordinatesAtSpecificDistance,
-  getDistanceBetweenCoordinates,
-  createVectorFromCoordinates,
-  transformVectorToDirection,
+  uGetNeighbouringCells,
+  uTransformKeyToCoordinates,
+  uGetCoordinatesAtSpecificDistance,
+  uGetDistanceBetweenCoordinates,
+  uCreateVectorFromCoordinates,
+  uTransformVectorToDirection,
 } from '../maps';
-import BaseAction, { IWeightedAction } from './base-action';
-import { ECommand } from '../command-interpreter';
+import BaseAction, { IWeightedCommand } from './base-action';
+import { ECommand, EChargeCommand } from '../command-interpreter';
 import * as PF from 'pathfinding';
 
 const finder: PF.AStarFinder = new PF.AStarFinder();
 
 export class MoveAction extends BaseAction {
-  calculateUtility(): IWeightedAction {
-    const myLocation = this.mySubmarine.getPosition();
-    const gameMap = this.mySubmarine.getGameMap();
-    const possibleLocationsToMoveTo = getNeighbouringCells(myLocation).filter(coordinates => {
+  calculateUtility(): IWeightedCommand {
+    const myLocation = this.me.getPosition();
+    const gameMap = this.me.getGameMap();
+    const possibleLocationsToMoveTo = uGetNeighbouringCells(myLocation).filter(coordinates => {
       return gameMap.isCellWalkable(coordinates);
     });
 
@@ -25,23 +25,24 @@ export class MoveAction extends BaseAction {
       return {
         type: ECommand.MOVE,
         utility: 0,
+        parameters: {},
       };
     }
 
-    const possibleOpponentLocationsMap = this.phantomSubmarineTracker.getPossibleLocationsMap();
+    const possibleOpponentLocationsMap = this.opponent.getPossibleLocationsMap();
     const coordinatesAsKeys = Object.keys(possibleOpponentLocationsMap);
 
-    const possibleOpponentLocation: ICoordinates = transformKeyToCoordinates(
+    const possibleOpponentLocation: ICoordinates = uTransformKeyToCoordinates(
       coordinatesAsKeys[Math.floor(Math.random() * coordinatesAsKeys.length)]
     );
     const targetCoordinates = [
-      ...getCoordinatesAtSpecificDistance({
+      ...uGetCoordinatesAtSpecificDistance({
         coordinates: possibleOpponentLocation,
         distance: 3,
       }),
     ].filter(coordinates => {
       return (
-        getDistanceBetweenCoordinates(myLocation, coordinates) !== 0 &&
+        uGetDistanceBetweenCoordinates(myLocation, coordinates) !== 0 &&
         gameMap.isCellWalkable(coordinates)
       );
     });
@@ -50,7 +51,7 @@ export class MoveAction extends BaseAction {
     let selectedCoordinates: ICoordinates = { x: 0, y: 0 };
 
     for (let i = 0, iMax = targetCoordinates.length; i < iMax; i++) {
-      const targetDistance = getDistanceBetweenCoordinates(myLocation, targetCoordinates[i]);
+      const targetDistance = uGetDistanceBetweenCoordinates(myLocation, targetCoordinates[i]);
 
       if (targetDistance < distance) {
         distance = targetDistance;
@@ -69,24 +70,24 @@ export class MoveAction extends BaseAction {
 
     if (path[1] === undefined) {
       const { x, y } = possibleLocationsToMoveTo[0];
-      const vector = createVectorFromCoordinates({ source: myLocation, target: { x, y } });
-      const direction = transformVectorToDirection(vector);
+      const vector = uCreateVectorFromCoordinates({ source: myLocation, target: { x, y } });
+      const direction = uTransformVectorToDirection(vector);
       return {
         type: ECommand.MOVE,
         utility: 0.3,
-        parameters: { direction, chargeCommand: 'TORPEDO' },
+        parameters: { direction, chargeCommand: EChargeCommand.TORPEDO },
       };
     }
 
     const [x, y] = path[1];
 
-    const vector = createVectorFromCoordinates({ source: myLocation, target: { x, y } });
-    const direction = transformVectorToDirection(vector);
+    const vector = uCreateVectorFromCoordinates({ source: myLocation, target: { x, y } });
+    const direction = uTransformVectorToDirection(vector);
 
     return {
       type: ECommand.MOVE,
       utility: 0.3,
-      parameters: { direction, chargeCommand: 'TORPEDO' },
+      parameters: { direction, chargeCommand: EChargeCommand.TORPEDO },
     };
   }
 }

@@ -1,4 +1,4 @@
 export * from './base-action';
-export * from './torpedo';
-export * from './surface';
 export * from './move';
+export * from './surface';
+export * from './torpedo';

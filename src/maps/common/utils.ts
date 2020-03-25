@@ -15,11 +15,11 @@ const directionToVectorTransformations = {
   [EDirection.E]: vectors.RIGHT,
 };
 
-export const transformDirectionToVector = (direction: EDirection): IVector => {
+export const uTransformDirectionToVector = (direction: EDirection): IVector => {
   return directionToVectorTransformations[direction];
 };
 
-export const transformVectorToDirection = ({ x, y }: IVector): EDirection => {
+export const uTransformVectorToDirection = ({ x, y }: IVector): EDirection => {
   if (x === vectors.UP.x && y === vectors.UP.y) {
     return EDirection.N;
   }
@@ -39,7 +39,21 @@ export const transformVectorToDirection = ({ x, y }: IVector): EDirection => {
   throw new Error(`Invalid vector transformation -> ${{ x, y }}`);
 };
 
-export const addVectorToCoordinates = ({
+export const uMultiplyVector = ({
+  vector,
+  amount,
+}: {
+  vector: IVector;
+  amount: number;
+}): IVector => {
+  const { x, y } = vector;
+  return {
+    x: x * amount,
+    y: y * amount,
+  };
+};
+
+export const uAddVectorToCoordinates = ({
   coordinates,
   vector,
 }: {
@@ -52,7 +66,7 @@ export const addVectorToCoordinates = ({
   };
 };
 
-export const createVectorFromCoordinates = ({
+export const uCreateVectorFromCoordinates = ({
   source,
   target,
 }: {
@@ -65,7 +79,7 @@ export const createVectorFromCoordinates = ({
   };
 };
 
-export const getDistanceBetweenCoordinates = (
+export const uGetDistanceBetweenCoordinates = (
   source: ICoordinates,
   target: ICoordinates
 ): number => {
@@ -75,45 +89,45 @@ export const getDistanceBetweenCoordinates = (
   return distX + distY;
 };
 
-export const getNeighbouringCells = (coordinates: ICoordinates): ICoordinates[] => {
+export const uGetNeighbouringCells = (coordinates: ICoordinates): ICoordinates[] => {
   const { UP, DOWN, LEFT, RIGHT } = vectors;
   return [
-    addVectorToCoordinates({ coordinates, vector: UP }),
-    addVectorToCoordinates({ coordinates, vector: DOWN }),
-    addVectorToCoordinates({ coordinates, vector: LEFT }),
-    addVectorToCoordinates({ coordinates, vector: RIGHT }),
+    uAddVectorToCoordinates({ coordinates, vector: UP }),
+    uAddVectorToCoordinates({ coordinates, vector: DOWN }),
+    uAddVectorToCoordinates({ coordinates, vector: LEFT }),
+    uAddVectorToCoordinates({ coordinates, vector: RIGHT }),
   ];
 };
 
-export const getNeighbouringCellsIncludingDiagonal = (
+export const uGetNeighbouringCellsIncludingDiagonal = (
   coordinates: ICoordinates
 ): ICoordinates[] => {
   const { UP, DOWN, LEFT, RIGHT } = vectors;
-  const coordinatesUp = addVectorToCoordinates({ coordinates, vector: UP });
-  const coordinatesDown = addVectorToCoordinates({ coordinates, vector: DOWN });
+  const coordinatesUp = uAddVectorToCoordinates({ coordinates, vector: UP });
+  const coordinatesDown = uAddVectorToCoordinates({ coordinates, vector: DOWN });
   return [
     coordinatesUp,
-    addVectorToCoordinates({ coordinates: coordinatesUp, vector: LEFT }),
-    addVectorToCoordinates({ coordinates: coordinatesUp, vector: RIGHT }),
+    uAddVectorToCoordinates({ coordinates: coordinatesUp, vector: LEFT }),
+    uAddVectorToCoordinates({ coordinates: coordinatesUp, vector: RIGHT }),
     coordinatesDown,
-    addVectorToCoordinates({ coordinates: coordinatesDown, vector: LEFT }),
-    addVectorToCoordinates({ coordinates: coordinatesDown, vector: RIGHT }),
-    addVectorToCoordinates({ coordinates, vector: LEFT }),
-    addVectorToCoordinates({ coordinates, vector: RIGHT }),
+    uAddVectorToCoordinates({ coordinates: coordinatesDown, vector: LEFT }),
+    uAddVectorToCoordinates({ coordinates: coordinatesDown, vector: RIGHT }),
+    uAddVectorToCoordinates({ coordinates, vector: LEFT }),
+    uAddVectorToCoordinates({ coordinates, vector: RIGHT }),
   ];
 };
 
-export const transformCoordinatesToKey = ({ x, y }: ICoordinates): string => {
+export const uTransformCoordinatesToKey = ({ x, y }: ICoordinates): string => {
   return `${x}_${y}`;
 };
 
-export const transformKeyToCoordinates = (key: string): ICoordinates => {
+export const uTransformKeyToCoordinates = (key: string): ICoordinates => {
   const [x, y] = key.split('_').map(elem => parseInt(elem, 10));
 
   return { x, y };
 };
 
-export const isCoordinatesInCoordinatesList = (
+export const uIsCoordinatesInCoordinatesList = (
   coordinates: ICoordinates,
   coordinatesList: ICoordinates[]
 ): boolean => {
@@ -126,7 +140,7 @@ export const isCoordinatesInCoordinatesList = (
   return false;
 };
 
-export const getCoordinatesAtSpecificDistance = ({
+export const uGetCoordinatesAtSpecificDistance = ({
   coordinates,
   distance,
 }: {

@@ -1,26 +1,17 @@
-import PhantomSubmarineTracker from '../phantom-submarine-tracker';
-import MySubmarine from '../my-submarine';
-import { ECommand } from '../command-interpreter';
+import { PhantomSubmarine, Submarine } from '../entities';
+import { ICommand } from '../command-interpreter';
 
-export interface IWeightedAction {
-  type: ECommand;
+export interface IWeightedCommand extends ICommand {
   utility: number;
-  parameters?: any;
 }
 
 class BaseAction {
-  protected mySubmarine: MySubmarine;
-  protected phantomSubmarineTracker: PhantomSubmarineTracker;
+  protected me: Submarine;
+  protected opponent: PhantomSubmarine;
 
-  constructor({
-    mySubmarine,
-    phantomSubmarineTracker,
-  }: {
-    mySubmarine: MySubmarine;
-    phantomSubmarineTracker: PhantomSubmarineTracker;
-  }) {
-    this.mySubmarine = mySubmarine;
-    this.phantomSubmarineTracker = phantomSubmarineTracker;
+  constructor({ me, opponent }: { me: Submarine; opponent: PhantomSubmarine }) {
+    this.me = me;
+    this.opponent = opponent;
   }
 }
 

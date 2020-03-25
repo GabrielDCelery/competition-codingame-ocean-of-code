@@ -1,8 +1,10 @@
-import PhantomSubmarineTracker from './phantom-submarine-tracker';
-import MySubmarine from './my-submarine';
 import AI from './ai';
-import commandInterpreter from './command-interpreter';
 import { ETerrain, GameMapFactory } from './maps';
+import { PhantomSubmarine, Submarine } from './entities';
+import {
+  uTransformCommandsStringToCommands,
+  uTransformCommandsToCommandString,
+} from './command-interpreter';
 
 declare const readline: any;
 
@@ -16,7 +18,7 @@ try {
     return readline();
   };
 
-  const [width, height, myId] = readNextLine()
+  const [width, height /*, myId*/] = readNextLine()
     .split(' ')
     .map(elem => {
       return parseInt(elem, 10);
@@ -36,13 +38,11 @@ try {
       });
     }
   }
-  const phantomSubmarineTracker = PhantomSubmarineTracker.createInstance({
-    gameMap: gameMapFactory.createGameMap(),
-  });
-  const mySubmarine = MySubmarine.createInstance({ gameMap: gameMapFactory.createGameMap() });
-  const ai = AI.createInstance({ mySubmarine, phantomSubmarineTracker });
+  const me = Submarine.createInstance();
+  const opponent = PhantomSubmarine.createInstance();
+  const ai = AI.createInstance({ me, opponent });
 
-  const walkableCoordinates = mySubmarine.getGameMap().getWalkableCoordinatesList();
+  const walkableCoordinates = me.getGameMap().getWalkableCoordinatesList();
   const mySubmarineStartingAt =
     walkableCoordinates[Math.floor(Math.random() * walkableCoordinates.length)];
 
@@ -54,7 +54,7 @@ try {
       x,
       y,
       myHealth,
-      oppHealth,
+      opponentHealth,
       torpedoCooldown,
       sonarCooldown,
       silenceCooldown,
@@ -67,29 +67,24 @@ try {
 
     const sonarResult = readNextLine();
     const opponentCommandsString = readNextLine();
-    const opponentCommands = commandInterpreter.transformCommandsStringToCommands(
-      opponentCommandsString
-    );
 
-    phantomSubmarineTracker
-      .setOpponentLife(oppHealth)
-      .processCommandsForSubmarines(opponentCommands);
-    mySubmarine.setState({
+    opponent.processPhantomCommands(uTransformCommandsStringToCommands(opponentCommandsString));
+
+    me.setState({
       x,
       y,
-      myHealth,
+      health: myHealth,
       torpedoCooldown,
       sonarCooldown,
       silenceCooldown,
       mineCooldown,
     });
 
-    const commandsStr = commandInterpreter.transformCommandsToCommandString({
-      commands: ai.pickCommands(),
-      mySubmarine,
-    });
+    const commandsToExecute = ai.pickCommands();
+    me.processCommands(commandsToExecute);
+    const commandsToExecuteStr = uTransformCommandsToCommandString(commandsToExecute);
 
-    console.log(commandsStr);
+    console.log(commandsToExecuteStr);
   }
 } catch (error) {
   console.error(error);

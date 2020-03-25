@@ -1,11 +1,11 @@
 import {
   ICoordinates,
-  getNeighbouringCellsIncludingDiagonal,
-  isCoordinatesInCoordinatesList,
-  transformCoordinatesToKey,
+  uGetNeighbouringCellsIncludingDiagonal,
+  uIsCoordinatesInCoordinatesList,
+  uTransformCoordinatesToKey,
 } from '../maps';
-import BaseAction, { IWeightedAction } from './base-action';
-import { CONST_TORPEDO_RANGE, CONST_TORPEDO_DAMAGE } from '../constants';
+import BaseAction, { IWeightedCommand } from './base-action';
+import { RANGE_TORPEDO, DAMAGE_TORPEDO } from '../constants';
 import { ECommand } from '../command-interpreter';
 
 const expectedUtilityForDamage = ({
@@ -44,36 +44,37 @@ const calculateDamage = ({
   collateral: boolean;
 }): number => {
   if (direct) {
-    return CONST_TORPEDO_DAMAGE;
+    return DAMAGE_TORPEDO;
   }
 
   if (collateral) {
-    return CONST_TORPEDO_DAMAGE / 2;
+    return DAMAGE_TORPEDO / 2;
   }
 
   return 0;
 };
 
 export class TorpedoAction extends BaseAction {
-  calculateUtility(): IWeightedAction {
-    if (this.mySubmarine.isTorpedoReady() === false) {
+  calculateUtility(): IWeightedCommand {
+    if (this.me.isTorpedoReady() === false) {
       return {
         type: ECommand.TORPEDO,
         utility: 0,
+        parameters: {},
       };
     }
 
-    const myHealth = this.mySubmarine.getLife();
-    const myLocation = this.mySubmarine.getPosition();
-    const gameMap = this.mySubmarine.getGameMap();
+    const myHealth = this.me.getLife();
+    const myLocation = this.me.getPosition();
+    const gameMap = this.me.getGameMap();
 
-    const opponentHealth = this.phantomSubmarineTracker.getOpponentLife();
-    const possibleOpponentLocationsMap = this.phantomSubmarineTracker.getPossibleLocationsMap();
+    const opponentHealth = this.opponent.getLife();
+    const possibleOpponentLocationsMap = this.opponent.getPossibleLocationsMap();
     const numOfPossibleLocationsForOpponent = Object.keys(possibleOpponentLocationsMap).length;
 
     const possibleLocationsToFireAt = gameMap.getReachableCoordinatesAtDistance({
       coordinates: myLocation,
-      maxDistance: CONST_TORPEDO_RANGE,
+      maxDistance: RANGE_TORPEDO,
     });
 
     let bestUtility = -1;
@@ -81,26 +82,26 @@ export class TorpedoAction extends BaseAction {
 
     possibleLocationsToFireAt.forEach(possibleLocationToFireAt => {
       const utilities: number[] = [];
-      const possibleLocationsToCatchDamage = getNeighbouringCellsIncludingDiagonal(
+      const possibleLocationsToCatchDamage = uGetNeighbouringCellsIncludingDiagonal(
         possibleLocationToFireAt
       );
-      const doesItHitMe = isCoordinatesInCoordinatesList(myLocation, [possibleLocationToFireAt]);
-      const doITakeCollateral = isCoordinatesInCoordinatesList(
+      const doesItHitMe = uIsCoordinatesInCoordinatesList(myLocation, [possibleLocationToFireAt]);
+      const doITakeCollateral = uIsCoordinatesInCoordinatesList(
         myLocation,
         possibleLocationsToCatchDamage
       );
 
       const damageToMe = calculateDamage({ direct: doesItHitMe, collateral: doITakeCollateral });
-      const locationHitAtAsKey = transformCoordinatesToKey(possibleLocationToFireAt);
+      const locationHitAtAsKey = uTransformCoordinatesToKey(possibleLocationToFireAt);
 
-      if (possibleOpponentLocationsMap[locationHitAtAsKey] === true) {
+      if (possibleOpponentLocationsMap.hasOwnProperty(locationHitAtAsKey)) {
         utilities.push(
           expectedUtilityForDamage({
             damageToMe,
             damageToMyOpponent: calculateDamage({ direct: true, collateral: false }),
             myHealth,
             opponentHealth,
-            maxDamage: CONST_TORPEDO_DAMAGE,
+            maxDamage: DAMAGE_TORPEDO,
           })
         );
       } else {
@@ -108,15 +109,15 @@ export class TorpedoAction extends BaseAction {
       }
 
       possibleLocationsToCatchDamage.forEach(possibleLocationToCatchDamage => {
-        const locationCaughtDamageAsKey = transformCoordinatesToKey(possibleLocationToCatchDamage);
-        if (possibleOpponentLocationsMap[locationCaughtDamageAsKey] === true) {
+        const locationCaughtDamageAsKey = uTransformCoordinatesToKey(possibleLocationToCatchDamage);
+        if (possibleOpponentLocationsMap.hasOwnProperty(locationCaughtDamageAsKey)) {
           utilities.push(
             expectedUtilityForDamage({
               damageToMe,
               damageToMyOpponent: calculateDamage({ direct: false, collateral: true }),
               myHealth,
               opponentHealth,
-              maxDamage: CONST_TORPEDO_DAMAGE,
+              maxDamage: DAMAGE_TORPEDO,
             })
           );
         } else {

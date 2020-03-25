@@ -1,9 +1,37 @@
-import { GameMap, GameMapFactory, transformCoordinatesToKey, ICoordinates } from '../maps';
-import { CONST_SUBMARINE_HEALTH } from '../constants';
-import { ECommand, TCommand } from '../command-interpreter';
+import {
+  EDirection,
+  GameMap,
+  GameMapFactory,
+  ICoordinates,
+  uAddVectorToCoordinates,
+  uGetDistanceBetweenCoordinates,
+  uMultiplyVector,
+  uTransformCoordinatesToKey,
+  uTransformDirectionToVector,
+} from '../maps';
+import {
+  CHARGE_SILENCE,
+  CHARGE_SONAR,
+  CHARGE_TORPEDO,
+  HEALTH_SUBMARINE,
+  RANGE_TORPEDO,
+  RANGE_SILENCE,
+} from '../constants';
+import {
+  ECommand,
+  ICommand,
+  IMoveCommandParameters,
+  ITorpedoCommandParameters,
+  ISurfaceCommandParameters,
+} from '../command-interpreter';
 
-interface IpossibleLocationsDictionary {
-  [index: string]: { coordinates: ICoordinates; gameMap: GameMap };
+interface IPossibleLocationData {
+  position: ICoordinates;
+  gameMap: GameMap;
+}
+
+interface IPossibleLocationsDataMap {
+  [index: string]: IPossibleLocationData;
 }
 
 enum ESonarResult {
@@ -12,24 +40,24 @@ enum ESonarResult {
   NA = 'NA',
 }
 
-class PhantomSubmarine {
+export class PhantomSubmarine {
   private health: number;
   private charges: number;
-  private possibleLocationsDictionary: IpossibleLocationsDictionary;
+  private possibleLocationsDataMap: IPossibleLocationsDataMap;
 
   constructor() {
-    this.health = CONST_SUBMARINE_HEALTH;
+    this.health = HEALTH_SUBMARINE;
     this.charges = 0;
-    this.possibleLocationsDictionary = {};
+    this.possibleLocationsDataMap = {};
     const gameMap = GameMapFactory.getSingleton().createGameMap();
     const { width, height } = gameMap.getDimensions();
 
     for (let x = 0; x < width; x++) {
       for (let y = 0; y < height; y++) {
         if (gameMap.isCellWalkable({ x, y })) {
-          const key = transformCoordinatesToKey({ x, y });
-          this.possibleLocationsDictionary[key] = {
-            coordinates: { x, y },
+          const key = uTransformCoordinatesToKey({ x, y });
+          this.possibleLocationsDataMap[key] = {
+            position: { x, y },
             gameMap: GameMapFactory.getSingleton().createGameMap(),
           };
         }
@@ -37,30 +65,16 @@ class PhantomSubmarine {
     }
   }
 
-  private validateAndActionCommand({
-    command,
-    coordinates,
-    gameMap,
-  }: {
-    command: TCommand;
-    coordinates: ICoordinates;
-    gameMap: GameMap;
-  }): { isCommandValid: boolean } {}
+  static createInstance(): PhantomSubmarine {
+    return new PhantomSubmarine();
+  }
 
-  processNewHealthInput({
-    health,
-    myCommands,
-    opponentCommands,
-  }: {
-    health: number;
-    myCommands: TCommand[];
-    opponentCommands: TCommand[];
-  }): this {
-    if (this.health === health) {
-      return this;
-    }
+  getLife(): number {
+    return this.health;
+  }
 
-    return this;
+  getPossibleLocationsMap(): IPossibleLocationsDataMap {
+    return this.possibleLocationsDataMap;
   }
 
   processSonarAction({ result, sector }: { result: ESonarResult; sector: number }): this {
@@ -68,40 +82,143 @@ class PhantomSubmarine {
       return this;
     }
 
-    const possibleLocationsDictionary: IpossibleLocationsDictionary = {};
+    const possibleLocationsDataMap: IPossibleLocationsDataMap = {};
 
-    Object.keys(this.possibleLocationsDictionary).forEach(key => {
-      const { coordinates, gameMap } = this.possibleLocationsDictionary[key];
+    Object.keys(this.possibleLocationsDataMap).forEach(key => {
+      const { position, gameMap } = this.possibleLocationsDataMap[key];
 
-      if (gameMap.getSectorForCoordinates(coordinates) !== sector) {
+      if (gameMap.getSectorForCoordinates(position) !== sector) {
         return;
       }
 
-      possibleLocationsDictionary[key] = { coordinates, gameMap };
+      possibleLocationsDataMap[key] = { position, gameMap };
     });
 
-    this.possibleLocationsDictionary = possibleLocationsDictionary;
+    this.possibleLocationsDataMap = possibleLocationsDataMap;
 
     return this;
   }
 
-  processShownCommands(commands: TCommand[]): this {
-    const possibleLocationsDictionary: IpossibleLocationsDictionary = {};
+  private processPhantomCommandsForPossibleLocation({
+    command,
+    possibleLocationData,
+    newPossibleLocationsDataMap,
+  }: {
+    command: ICommand;
+    possibleLocationData: IPossibleLocationData;
+    newPossibleLocationsDataMap: IPossibleLocationsDataMap;
+  }): void {
+    const { position, gameMap } = possibleLocationData;
+    const { type, parameters } = command;
 
-    Object.keys(this.possibleLocationsDictionary).forEach(key => {
-      const { coordinates, gameMap } = this.possibleLocationsDictionary[key];
+    switch (type) {
+      case ECommand.NA: {
+        const locationKey = uTransformCoordinatesToKey(position);
+        newPossibleLocationsDataMap[locationKey] = { position, gameMap };
+        return;
+      }
 
-      for (let i = 0, iMax = commands.length; i < iMax; i++) {
-        const command = commands[i];
-        const { isCommandValid } = this.validateAndActionCommand({ command, coordinates, gameMap });
-
-        if (!isCommandValid) {
+      case ECommand.MOVE: {
+        this.charges += 1;
+        const { direction } = parameters as IMoveCommandParameters;
+        const newPosition = uAddVectorToCoordinates({
+          coordinates: position,
+          vector: uTransformDirectionToVector(direction),
+        });
+        if (gameMap.isCellWalkable(newPosition) === false) {
           return;
         }
+        gameMap.setCellHasBeenVisited({ hasBeenVisited: true, coordinates: position });
+        const locationKey = uTransformCoordinatesToKey(newPosition);
+        newPossibleLocationsDataMap[locationKey] = { position: newPosition, gameMap };
+        return;
+      }
+
+      case ECommand.SURFACE: {
+        const { sector } = parameters as ISurfaceCommandParameters;
+        if (sector !== gameMap.getSectorForCoordinates(position)) {
+          return;
+        }
+        gameMap.resetHaveBeenVisitedCells();
+        const locationKey = uTransformCoordinatesToKey(position);
+        newPossibleLocationsDataMap[locationKey] = { position, gameMap };
+        return;
+      }
+
+      case ECommand.TORPEDO: {
+        const { coordinates } = parameters as ITorpedoCommandParameters;
+        const distance = uGetDistanceBetweenCoordinates(position, coordinates);
+        if (RANGE_TORPEDO < distance) {
+          return;
+        }
+        this.charges -= CHARGE_TORPEDO;
+        const locationKey = uTransformCoordinatesToKey(position);
+        newPossibleLocationsDataMap[locationKey] = { position, gameMap };
+        return;
+      }
+
+      case ECommand.SONAR: {
+        this.charges -= CHARGE_SONAR;
+        const locationKey = uTransformCoordinatesToKey(position);
+        newPossibleLocationsDataMap[locationKey] = { position, gameMap };
+        return;
+      }
+
+      case ECommand.SILENCE: {
+        this.charges -= CHARGE_SILENCE;
+        const locationKey = uTransformCoordinatesToKey(position);
+        newPossibleLocationsDataMap[locationKey] = { position, gameMap };
+        [EDirection.N, EDirection.S, EDirection.W, EDirection.E].forEach(direction => {
+          const vector = uTransformDirectionToVector(direction);
+          for (let range = 1; range <= RANGE_SILENCE; range++) {
+            const targetCoordinates = uAddVectorToCoordinates({
+              coordinates: position,
+              vector: uMultiplyVector({ vector, amount: range }),
+            });
+            if (!gameMap.isCellWalkable(targetCoordinates)) {
+              return;
+            }
+            const clonedGameMap = gameMap.cloneGameMap();
+            for (let i = 0; i < range; i++) {
+              const visitedCoordinates = uAddVectorToCoordinates({
+                coordinates: position,
+                vector: uMultiplyVector({ vector, amount: i }),
+              });
+              clonedGameMap.setCellHasBeenVisited({
+                hasBeenVisited: true,
+                coordinates: visitedCoordinates,
+              });
+            }
+            const locationKey = uTransformCoordinatesToKey(targetCoordinates);
+            newPossibleLocationsDataMap[locationKey] = {
+              position: targetCoordinates,
+              gameMap: clonedGameMap,
+            };
+          }
+        });
+        return;
+      }
+
+      default: {
+        console.error(`Could not process command -> ${type}`);
+      }
+    }
+
+    throw new Error(`Could not process command -> ${type}`);
+  }
+
+  processPhantomCommands(commands: ICommand[]): this {
+    const newPossibleLocationsDataMap: IPossibleLocationsDataMap = {};
+
+    Object.keys(this.possibleLocationsDataMap).forEach(key => {
+      for (let i = 0, iMax = commands.length; i < iMax; i++) {
+        this.processPhantomCommandsForPossibleLocation({
+          command: commands[i],
+          possibleLocationData: this.possibleLocationsDataMap[key],
+          newPossibleLocationsDataMap,
+        });
       }
     });
-
-    this.possibleLocationsDictionary = possibleLocationsDictionary;
 
     return this;
   }
