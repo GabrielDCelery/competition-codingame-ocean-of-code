@@ -1,6 +1,6 @@
-import { Submarine, PhantomSubmarine } from './entities';
+import { Submarine, PhantomSubmarine } from '../entities';
 import { MoveAction, SurfaceAction, TorpedoAction, IWeightedCommand } from './actions';
-import { ECommand, ICommand } from './command-interpreter';
+import { ECommand, ICommand } from '../command-interpreter';
 
 class AI {
   private torpedoAction: TorpedoAction;

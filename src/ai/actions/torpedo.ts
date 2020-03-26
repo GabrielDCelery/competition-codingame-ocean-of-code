@@ -3,10 +3,10 @@ import {
   uGetNeighbouringCellsIncludingDiagonal,
   uIsCoordinatesInCoordinatesList,
   uTransformCoordinatesToKey,
-} from '../maps';
+} from '../../maps';
 import BaseAction, { IWeightedCommand } from './base-action';
-import { RANGE_TORPEDO, DAMAGE_TORPEDO } from '../constants';
-import { ECommand } from '../command-interpreter';
+import { RANGE_TORPEDO, DAMAGE_TORPEDO } from '../../constants';
+import { ECommand } from '../../command-interpreter';
 
 const expectedUtilityForDamage = ({
   damageToMe,

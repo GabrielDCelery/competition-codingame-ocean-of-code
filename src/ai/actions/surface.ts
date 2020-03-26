@@ -1,6 +1,6 @@
 import BaseAction, { IWeightedCommand } from './base-action';
-import { ECommand } from '../command-interpreter';
-import { uGetNeighbouringCells } from '../maps';
+import { ECommand } from '../../command-interpreter';
+import { uGetNeighbouringCells } from '../../maps';
 
 export class SurfaceAction extends BaseAction {
   calculateUtility(): IWeightedCommand {

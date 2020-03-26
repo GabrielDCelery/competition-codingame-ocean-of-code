@@ -1,5 +1,5 @@
-import { PhantomSubmarine, Submarine } from '../entities';
-import { ICommand } from '../command-interpreter';
+import { PhantomSubmarine, Submarine } from '../../entities';
+import { ICommand } from '../../command-interpreter';
 
 export interface IWeightedCommand extends ICommand {
   utility: number;

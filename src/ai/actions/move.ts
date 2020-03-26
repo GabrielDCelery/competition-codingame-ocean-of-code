@@ -6,9 +6,9 @@ import {
   uGetDistanceBetweenCoordinates,
   uCreateVectorFromCoordinates,
   uTransformVectorToDirection,
-} from '../maps';
+} from '../../maps';
 import BaseAction, { IWeightedCommand } from './base-action';
-import { ECommand, EChargeCommand } from '../command-interpreter';
+import { ECommand, EChargeCommand } from '../../command-interpreter';
 import * as PF from 'pathfinding';
 
 const finder: PF.AStarFinder = new PF.AStarFinder();
