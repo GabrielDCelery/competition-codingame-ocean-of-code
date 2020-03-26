@@ -39,6 +39,10 @@ export const uTransformVectorToDirection = ({ x, y }: IVector): EDirection => {
   throw new Error(`Invalid vector transformation -> ${{ x, y }}`);
 };
 
+export const uAreCoordinatesTheSame = (source: ICoordinates, target: ICoordinates): boolean => {
+  return source.x === target.x && source.y === target.y;
+};
+
 export const uMultiplyVector = ({
   vector,
   amount,

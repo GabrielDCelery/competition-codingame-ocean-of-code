@@ -7,6 +7,7 @@ import {
   uTransformCommandsToCommandString,
   uGetSonaredSectorFromCommands,
 } from './command-interpreter';
+import { DamageSummarizer } from './damage-summarizer';
 
 declare const readline: any;
 
@@ -66,6 +67,8 @@ try {
       .map(elem => {
         return parseInt(elem, 10);
       });
+    const sonarResultByMe = readNextLine() as ESonarResult;
+    const opponentCommandsString = readNextLine();
 
     me.setState({
       x,
@@ -77,13 +80,20 @@ try {
       mineCooldown,
     });
 
-    const sonarResultByMe = readNextLine() as ESonarResult;
-    const opponentCommandsString = readNextLine();
+    const damageSummarizer = DamageSummarizer.createInstance();
 
-    const sonaredSectorByMe = uGetSonaredSectorFromCommands(me.getExecutedCommands());
+    const myCommands = me.getExecutedCommands();
+    damageSummarizer.processTorpedoDamage(myCommands);
+    const sonaredSectorByMe = uGetSonaredSectorFromCommands(myCommands);
 
     opponent.processEnemySonarAction({ result: sonarResultByMe, sector: sonaredSectorByMe });
-    opponent.processPhantomCommands(uTransformCommandsStringToCommands(opponentCommandsString));
+    const opponentCommands = uTransformCommandsStringToCommands(opponentCommandsString);
+    damageSummarizer.processSurfaceDamage(opponentCommands).processTorpedoDamage(opponentCommands);
+    opponent.processDamageForTurn({
+      damageSummarizerData: damageSummarizer.getData(),
+      newHealth: opponentHealth,
+    });
+    opponent.processPhantomCommands(opponentCommands);
 
     const commandsToExecute = ai.pickCommands();
     me.processCommands(commandsToExecute);

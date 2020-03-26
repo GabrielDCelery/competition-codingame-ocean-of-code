@@ -31,7 +31,7 @@ export class MoveAction extends BaseAction {
 
     const possibleOpponentLocationsMap = this.opponent.getPossibleLocationsMap();
     const coordinatesAsKeys = Object.keys(possibleOpponentLocationsMap);
-
+    console.error(Object.keys(possibleOpponentLocationsMap));
     const possibleOpponentLocation: ICoordinates = uTransformKeyToCoordinates(
       coordinatesAsKeys[Math.floor(Math.random() * coordinatesAsKeys.length)]
     );

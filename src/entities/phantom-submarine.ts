@@ -25,6 +25,7 @@ import {
   ITorpedoCommandParameters,
   ISurfaceCommandParameters,
 } from '../command-interpreter';
+import { IDamageSummarizerData } from '../damage-summarizer';
 
 interface IPossibleLocationData {
   position: ICoordinates;
@@ -70,6 +71,45 @@ export class PhantomSubmarine {
 
   getPossibleLocationsMap(): IPossibleLocationsDataMap {
     return this.possibleLocationsDataMap;
+  }
+
+  processDamageForTurn({
+    damageSummarizerData,
+    newHealth,
+  }: {
+    damageSummarizerData: IDamageSummarizerData;
+    newHealth: number;
+  }): this {
+    let healthLost = this.health - newHealth;
+    this.health = newHealth;
+    const { general, coordinatesMap } = damageSummarizerData;
+
+    healthLost = healthLost - general;
+
+    if (healthLost === 0) {
+      return this;
+    }
+
+    if (Object.keys(coordinatesMap).length === 0) {
+      return this;
+    }
+
+    const possibleLocationsDataMap: IPossibleLocationsDataMap = {};
+
+    Object.keys(this.possibleLocationsDataMap).forEach(key => {
+      const { position, gameMap } = this.possibleLocationsDataMap[key];
+      const damage = coordinatesMap[key];
+
+      if (damage !== healthLost) {
+        return;
+      }
+
+      possibleLocationsDataMap[key] = { position, gameMap };
+    });
+
+    this.possibleLocationsDataMap = possibleLocationsDataMap;
+
+    return this;
   }
 
   processEnemySonarAction({
