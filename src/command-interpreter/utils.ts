@@ -122,3 +122,17 @@ export const uTransformCommandsToCommandString = (commands: ICommand[]): string 
 
   throw new Error(`Could not process command -> ${command}`);
 };
+
+export const uGetSonaredSectorFromCommands = (commands: ICommand[]): number | null => {
+  for (let i = 0, iMax = commands.length; i < iMax; i++) {
+    const { type, parameters } = commands[i];
+
+    if (type === ECommand.SONAR) {
+      const { sector } = parameters as ISonarCommandParameters;
+
+      return sector;
+    }
+  }
+
+  return null;
+};

@@ -12,3 +12,9 @@ export enum EChargeCommand {
   SONAR = 'SONAR',
   SILENCE = 'SILENCE',
 }
+
+export enum ESonarResult {
+  YES = 'Y',
+  NO = 'N',
+  NA = 'NA',
+}

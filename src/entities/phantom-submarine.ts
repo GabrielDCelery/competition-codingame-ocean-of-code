@@ -20,6 +20,7 @@ import {
 import {
   ECommand,
   ICommand,
+  ESonarResult,
   IMoveCommandParameters,
   ITorpedoCommandParameters,
   ISurfaceCommandParameters,
@@ -32,12 +33,6 @@ interface IPossibleLocationData {
 
 interface IPossibleLocationsDataMap {
   [index: string]: IPossibleLocationData;
-}
-
-enum ESonarResult {
-  YES = 'Y',
-  NO = 'N',
-  NA = 'NA',
 }
 
 export class PhantomSubmarine {
@@ -77,8 +72,14 @@ export class PhantomSubmarine {
     return this.possibleLocationsDataMap;
   }
 
-  processSonarAction({ result, sector }: { result: ESonarResult; sector: number }): this {
-    if (result !== ESonarResult.YES) {
+  processEnemySonarAction({
+    result,
+    sector,
+  }: {
+    result: ESonarResult;
+    sector: number | null;
+  }): this {
+    if (sector === null || result !== ESonarResult.YES) {
       return this;
     }
 

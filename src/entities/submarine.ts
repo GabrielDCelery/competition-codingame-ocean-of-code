@@ -9,8 +9,10 @@ export class Submarine {
   private silenceCooldown: number;
   private mineCooldown: number;
   private gameMap: GameMap;
+  private executedCommands: ICommand[];
 
   constructor({ gameMap }: { gameMap: GameMap }) {
+    this.executedCommands = [];
     this.gameMap = gameMap;
   }
 
@@ -30,6 +32,10 @@ export class Submarine {
 
   getGameMap(): GameMap {
     return this.gameMap;
+  }
+
+  getExecutedCommands(): ICommand[] {
+    return this.executedCommands;
   }
 
   isTorpedoReady(): boolean {
@@ -70,6 +76,8 @@ export class Submarine {
   }
 
   processCommands(commands: ICommand[]): void {
+    this.executedCommands = commands;
+
     for (let i = 0, iMax = commands.length; i < iMax; i++) {
       const command = commands[i];
       const { type } = command;

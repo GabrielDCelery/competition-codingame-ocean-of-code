@@ -2,8 +2,10 @@ import AI from './ai';
 import { ETerrain, GameMapFactory } from './maps';
 import { PhantomSubmarine, Submarine } from './entities';
 import {
+  ESonarResult,
   uTransformCommandsStringToCommands,
   uTransformCommandsToCommandString,
+  uGetSonaredSectorFromCommands,
 } from './command-interpreter';
 
 declare const readline: any;
@@ -65,11 +67,6 @@ try {
         return parseInt(elem, 10);
       });
 
-    const sonarResult = readNextLine();
-    const opponentCommandsString = readNextLine();
-
-    opponent.processPhantomCommands(uTransformCommandsStringToCommands(opponentCommandsString));
-
     me.setState({
       x,
       y,
@@ -79,6 +76,14 @@ try {
       silenceCooldown,
       mineCooldown,
     });
+
+    const sonarResultByMe = readNextLine() as ESonarResult;
+    const opponentCommandsString = readNextLine();
+
+    const sonaredSectorByMe = uGetSonaredSectorFromCommands(me.getExecutedCommands());
+
+    opponent.processEnemySonarAction({ result: sonarResultByMe, sector: sonaredSectorByMe });
+    opponent.processPhantomCommands(uTransformCommandsStringToCommands(opponentCommandsString));
 
     const commandsToExecute = ai.pickCommands();
     me.processCommands(commandsToExecute);
