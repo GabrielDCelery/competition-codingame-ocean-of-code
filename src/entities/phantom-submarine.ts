@@ -39,23 +39,22 @@ interface IPossibleLocationsDataMap {
 export class PhantomSubmarine {
   private health: number;
   private charges: number;
-  private possibleLocationsDataMap: IPossibleLocationsDataMap;
+  private possibleLocations: IPossibleLocationData[];
 
   constructor() {
     this.health = HEALTH_SUBMARINE;
     this.charges = 0;
-    this.possibleLocationsDataMap = {};
+    this.possibleLocations = [];
     const gameMap = GameMapFactory.getSingleton().createGameMap();
     const { width, height } = gameMap.getDimensions();
 
     for (let x = 0; x < width; x++) {
       for (let y = 0; y < height; y++) {
         if (gameMap.isCellWalkable({ x, y })) {
-          const key = uTransformCoordinatesToKey({ x, y });
-          this.possibleLocationsDataMap[key] = {
+          this.possibleLocations.push({
             position: { x, y },
             gameMap: GameMapFactory.getSingleton().createGameMap(),
-          };
+          });
         }
       }
     }
@@ -70,7 +69,14 @@ export class PhantomSubmarine {
   }
 
   getPossibleLocationsMap(): IPossibleLocationsDataMap {
-    return this.possibleLocationsDataMap;
+    const dataMap: IPossibleLocationsDataMap = {};
+
+    this.possibleLocations.forEach(({ position, gameMap }) => {
+      const locationKey = uTransformCoordinatesToKey(position);
+      dataMap[locationKey] = { position, gameMap };
+    });
+
+    return dataMap;
   }
 
   processDamageForTurn({
@@ -94,20 +100,20 @@ export class PhantomSubmarine {
       return this;
     }
 
-    const possibleLocationsDataMap: IPossibleLocationsDataMap = {};
+    const possibleLocations: IPossibleLocationData[] = [];
 
-    Object.keys(this.possibleLocationsDataMap).forEach(key => {
-      const { position, gameMap } = this.possibleLocationsDataMap[key];
-      const damage = coordinatesMap[key];
+    this.possibleLocations.forEach(({ position, gameMap }) => {
+      const locationKey = uTransformCoordinatesToKey(position);
+      const damage = coordinatesMap[locationKey];
 
       if (damage !== healthLost) {
         return;
       }
 
-      possibleLocationsDataMap[key] = { position, gameMap };
+      possibleLocations.push({ position, gameMap });
     });
 
-    this.possibleLocationsDataMap = possibleLocationsDataMap;
+    this.possibleLocations = possibleLocations;
 
     return this;
   }
@@ -123,19 +129,17 @@ export class PhantomSubmarine {
       return this;
     }
 
-    const possibleLocationsDataMap: IPossibleLocationsDataMap = {};
+    const possibleLocations: IPossibleLocationData[] = [];
 
-    Object.keys(this.possibleLocationsDataMap).forEach(key => {
-      const { position, gameMap } = this.possibleLocationsDataMap[key];
-
+    this.possibleLocations.forEach(({ position, gameMap }) => {
       if (gameMap.getSectorForCoordinates(position) !== sector) {
         return;
       }
 
-      possibleLocationsDataMap[key] = { position, gameMap };
+      possibleLocations.push({ position, gameMap });
     });
 
-    this.possibleLocationsDataMap = possibleLocationsDataMap;
+    this.possibleLocations = possibleLocations;
 
     return this;
   }
@@ -143,20 +147,16 @@ export class PhantomSubmarine {
   private processPhantomCommandsForPossibleLocation({
     command,
     possibleLocationData,
-    newPossibleLocationsDataMap,
   }: {
     command: ICommand;
     possibleLocationData: IPossibleLocationData;
-    newPossibleLocationsDataMap: IPossibleLocationsDataMap;
-  }): void {
+  }): IPossibleLocationData[] {
     const { position, gameMap } = possibleLocationData;
     const { type, parameters } = command;
 
     switch (type) {
       case ECommand.NA: {
-        const locationKey = uTransformCoordinatesToKey(position);
-        newPossibleLocationsDataMap[locationKey] = { position, gameMap };
-        return;
+        return [{ position, gameMap }];
       }
 
       case ECommand.MOVE: {
@@ -167,48 +167,40 @@ export class PhantomSubmarine {
           vector: uTransformDirectionToVector(direction),
         });
         if (gameMap.isCellWalkable(newPosition) === false) {
-          return;
+          return [];
         }
         gameMap.setCellHasBeenVisited({ hasBeenVisited: true, coordinates: position });
-        const locationKey = uTransformCoordinatesToKey(newPosition);
-        newPossibleLocationsDataMap[locationKey] = { position: newPosition, gameMap };
-        return;
+        return [{ position: newPosition, gameMap }];
       }
 
       case ECommand.SURFACE: {
         const { sector } = parameters as ISurfaceCommandParameters;
         if (sector !== gameMap.getSectorForCoordinates(position)) {
-          return;
+          return [];
         }
         gameMap.resetHaveBeenVisitedCells();
-        const locationKey = uTransformCoordinatesToKey(position);
-        newPossibleLocationsDataMap[locationKey] = { position, gameMap };
-        return;
+        return [{ position, gameMap }];
       }
 
       case ECommand.TORPEDO: {
         const { coordinates } = parameters as ITorpedoCommandParameters;
         const distance = uGetDistanceBetweenCoordinates(position, coordinates);
         if (RANGE_TORPEDO < distance) {
-          return;
+          return [];
         }
         this.charges -= CHARGE_TORPEDO;
-        const locationKey = uTransformCoordinatesToKey(position);
-        newPossibleLocationsDataMap[locationKey] = { position, gameMap };
-        return;
+        return [{ position, gameMap }];
       }
 
       case ECommand.SONAR: {
         this.charges -= CHARGE_SONAR;
-        const locationKey = uTransformCoordinatesToKey(position);
-        newPossibleLocationsDataMap[locationKey] = { position, gameMap };
-        return;
+        return [{ position, gameMap }];
       }
 
       case ECommand.SILENCE: {
         this.charges -= CHARGE_SILENCE;
-        const locationKey = uTransformCoordinatesToKey(position);
-        newPossibleLocationsDataMap[locationKey] = { position, gameMap };
+        const newPossibleLocationsData: IPossibleLocationData[] = [];
+
         [EDirection.N, EDirection.S, EDirection.W, EDirection.E].forEach(direction => {
           const vector = uTransformDirectionToVector(direction);
           for (let range = 1; range <= RANGE_SILENCE; range++) {
@@ -230,14 +222,11 @@ export class PhantomSubmarine {
                 coordinates: visitedCoordinates,
               });
             }
-            const locationKey = uTransformCoordinatesToKey(targetCoordinates);
-            newPossibleLocationsDataMap[locationKey] = {
-              position: targetCoordinates,
-              gameMap: clonedGameMap,
-            };
+            newPossibleLocationsData.push({ position: targetCoordinates, gameMap: clonedGameMap });
           }
         });
-        return;
+
+        return newPossibleLocationsData;
       }
 
       default: {
@@ -249,18 +238,28 @@ export class PhantomSubmarine {
   }
 
   processPhantomCommands(commands: ICommand[]): this {
-    const newPossibleLocationsDataMap: IPossibleLocationsDataMap = {};
+    let possibleLocations: IPossibleLocationData[] = this.possibleLocations;
 
-    Object.keys(this.possibleLocationsDataMap).forEach(key => {
-      for (let i = 0, iMax = commands.length; i < iMax; i++) {
-        this.processPhantomCommandsForPossibleLocation({
-          command: commands[i],
-          possibleLocationData: this.possibleLocationsDataMap[key],
-          newPossibleLocationsDataMap,
+    for (let i = 0, iMax = commands.length; i < iMax; i++) {
+      const command = commands[i];
+      let newPossibleLocationsForCommand: IPossibleLocationData[] = [];
+
+      possibleLocations.forEach(possibleLocationData => {
+        const newPossibleLocations = this.processPhantomCommandsForPossibleLocation({
+          command,
+          possibleLocationData,
         });
-      }
-    });
-    this.possibleLocationsDataMap = newPossibleLocationsDataMap;
+
+        newPossibleLocationsForCommand = [
+          ...newPossibleLocationsForCommand,
+          ...newPossibleLocations,
+        ];
+      });
+
+      possibleLocations = [...newPossibleLocationsForCommand];
+    }
+
+    this.possibleLocations = possibleLocations;
 
     return this;
   }
