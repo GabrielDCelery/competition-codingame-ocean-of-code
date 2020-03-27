@@ -19,7 +19,7 @@ class AI {
 
   pickCommands(): ICommand[] {
     let maxUtility = -1;
-    let chosenCommand: IWeightedCommand = { type: ECommand.NA, utility: 0, parameters: {} };
+    let chosenCommand: IWeightedCommand = { type: ECommand.UNKNOWN, utility: 0, parameters: {} };
 
     const commandsToChoseFrom: IWeightedCommand[] = [
       this.torpedoAction.calculateUtility(),

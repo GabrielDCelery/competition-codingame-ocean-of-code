@@ -155,7 +155,7 @@ export class PhantomSubmarine {
     const { type, parameters } = command;
 
     switch (type) {
-      case ECommand.NA: {
+      case ECommand.UNKNOWN: {
         return [{ position, gameMap }];
       }
 
@@ -230,11 +230,9 @@ export class PhantomSubmarine {
       }
 
       default: {
-        console.error(`Could not process command -> ${type}`);
+        throw new Error(`Could not process command -> ${type}`);
       }
     }
-
-    throw new Error(`Could not process command -> ${type}`);
   }
 
   processPhantomCommands(commands: ICommand[]): this {

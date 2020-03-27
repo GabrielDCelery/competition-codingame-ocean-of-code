@@ -83,11 +83,6 @@ export class Submarine {
       const { type } = command;
 
       switch (type) {
-        case ECommand.NA: {
-          this.gameMap.resetHaveBeenVisitedCells();
-          return;
-        }
-
         case ECommand.MOVE: {
           this.gameMap.setCellHasBeenVisited({ hasBeenVisited: true, coordinates: this.position });
           return;

@@ -1,4 +1,5 @@
 export enum ECommand {
+  UNKNOWN = 'UNKNOWN',
   NA = 'NA',
   MOVE = 'MOVE',
   SURFACE = 'SURFACE',

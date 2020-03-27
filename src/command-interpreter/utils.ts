@@ -17,10 +17,6 @@ export const uTransformCommandStringToCommand = (commandString: string): IComman
     .map(elem => elem.trim());
 
   switch (command) {
-    case ECommand.NA: {
-      return { type: ECommand.NA, parameters: {} };
-    }
-
     case ECommand.MOVE: {
       const direction = restOfParams[0] as EDirection;
       const chargeCommand = restOfParams[1] as EChargeCommand;
@@ -67,11 +63,12 @@ export const uTransformCommandStringToCommand = (commandString: string): IComman
     }
 
     default: {
-      console.error(`Could not process command -> ${command}`);
+      return {
+        type: ECommand.UNKNOWN,
+        parameters: {},
+      };
     }
   }
-
-  throw new Error(`Could not process command -> ${command}`);
 };
 
 export const uTransformCommandsStringToCommands = (commandsString: string): ICommand[] => {
@@ -85,10 +82,6 @@ export const uTransformCommandsToCommandString = (commands: ICommand[]): string 
   const { type, parameters } = command;
 
   switch (type) {
-    case ECommand.NA: {
-      return `${ECommand.SURFACE}`;
-    }
-
     case ECommand.MOVE: {
       const { direction, chargeCommand } = parameters as IMoveCommandParameters;
       return `${ECommand.MOVE} ${direction} ${chargeCommand}`;

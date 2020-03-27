@@ -14,10 +14,6 @@ export interface ICommand {
   parameters: ICommandParameters;
 }
 
-export interface DoNothingCommand extends ICommand {
-  type: ECommand.NA;
-}
-
 export interface IMoveCommandParameters {
   direction: EDirection;
   chargeCommand?: EChargeCommand;
