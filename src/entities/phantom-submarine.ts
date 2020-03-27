@@ -238,8 +238,7 @@ export class PhantomSubmarine {
   processPhantomCommands(commands: ICommand[]): this {
     let possibleLocations: IPossibleLocationData[] = this.possibleLocations;
 
-    for (let i = 0, iMax = commands.length; i < iMax; i++) {
-      const command = commands[i];
+    commands.forEach(command => {
       let newPossibleLocationsForCommand: IPossibleLocationData[] = [];
 
       possibleLocations.forEach(possibleLocationData => {
@@ -255,7 +254,7 @@ export class PhantomSubmarine {
       });
 
       possibleLocations = [...newPossibleLocationsForCommand];
-    }
+    });
 
     this.possibleLocations = possibleLocations;
 
