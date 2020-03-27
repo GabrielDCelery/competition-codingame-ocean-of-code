@@ -79,6 +79,10 @@ export class PhantomSubmarine {
     return dataMap;
   }
 
+  getNumOfPossibleLocations(): number {
+    return this.possibleLocations.length;
+  }
+
   processDamageForTurn({
     damageSummarizerData,
     newHealth,
