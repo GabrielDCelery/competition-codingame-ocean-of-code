@@ -1,5 +1,5 @@
 import { EDirection, uTransformDirectionToVector } from '../maps';
-import { ECommand, EChargeCommand } from './enums';
+import { ECommand, EChargeCommand, ESonarResult } from './enums';
 import {
   ICommand,
   IMoveCommandParameters,
@@ -128,4 +128,17 @@ export const uGetSonaredSectorFromCommands = (commands: ICommand[]): number | nu
   }
 
   return null;
+};
+
+export const uGetSonarResultFromSectors = ({
+  entitySector,
+  targetedSector,
+}: {
+  entitySector: number;
+  targetedSector: number | null;
+}): ESonarResult => {
+  if (targetedSector === null) {
+    return ESonarResult.NA;
+  }
+  return entitySector === targetedSector ? ESonarResult.YES : ESonarResult.NO;
 };

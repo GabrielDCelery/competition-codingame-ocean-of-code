@@ -6,6 +6,7 @@ import {
   uTransformCommandsStringToCommands,
   uTransformCommandsToCommandString,
   uGetSonaredSectorFromCommands,
+  uGetSonarResultFromSectors,
 } from './command-interpreter';
 import { DamageSummarizer } from './damage-summarizer';
 
@@ -42,6 +43,7 @@ try {
     }
   }
   const me = Submarine.createInstance();
+  const mePhantom = PhantomSubmarine.createInstance();
   const opponent = PhantomSubmarine.createInstance();
   const ai = AI.createInstance({ me, opponent });
 
@@ -80,23 +82,45 @@ try {
       mineCooldown,
     });
 
-    const damageSummarizer = DamageSummarizer.createInstance();
-
-    const myCommands = me.getExecutedCommands();
-    damageSummarizer.processTorpedoDamage(myCommands);
-    const sonaredSectorByMe = uGetSonaredSectorFromCommands(myCommands);
-
-    opponent.processEnemySonarAction({ result: sonarResultByMe, sector: sonaredSectorByMe });
     const opponentCommands = uTransformCommandsStringToCommands(opponentCommandsString);
-    damageSummarizer.processSurfaceDamage(opponentCommands).processTorpedoDamage(opponentCommands);
+
+    const sonaredSectorByMe = uGetSonaredSectorFromCommands(me.getExecutedCommands());
+    opponent.processEnemySonarAction({ result: sonarResultByMe, sector: sonaredSectorByMe });
+    const opponentDamageSummarizer = DamageSummarizer.createInstance();
+    opponentDamageSummarizer.processTorpedoDamage(me.getExecutedCommands());
+    opponentDamageSummarizer
+      .processSurfaceDamage(opponentCommands)
+      .processTorpedoDamage(opponentCommands);
     opponent.processDamageForTurn({
-      damageSummarizerData: damageSummarizer.getData(),
+      damageSummarizerData: opponentDamageSummarizer.getData(),
       newHealth: opponentHealth,
     });
     opponent.processPhantomCommands(opponentCommands);
 
     const commandsToExecute = ai.pickCommands();
     me.processCommands(commandsToExecute);
+
+    const sonaredSectorByOpponent = uGetSonaredSectorFromCommands(opponentCommands);
+    const sonarResultByOpponent = uGetSonarResultFromSectors({
+      entitySector: me.getGameMap().getSectorForCoordinates(me.getPosition()),
+      targetedSector: sonaredSectorByOpponent,
+    });
+    mePhantom.processEnemySonarAction({
+      result: sonarResultByOpponent,
+      sector: sonaredSectorByOpponent,
+    });
+    const meDamageSummarizer = DamageSummarizer.createInstance();
+    meDamageSummarizer.processTorpedoDamage(opponentCommands);
+    meDamageSummarizer
+      .processSurfaceDamage(me.getExecutedCommands())
+      .processTorpedoDamage(me.getExecutedCommands());
+
+    mePhantom.processDamageForTurn({
+      damageSummarizerData: meDamageSummarizer.getData(),
+      newHealth: myHealth,
+    });
+    mePhantom.processPhantomCommands(me.getExecutedCommands());
+
     const commandsToExecuteStr = uTransformCommandsToCommandString(commandsToExecute);
 
     console.log(commandsToExecuteStr);
