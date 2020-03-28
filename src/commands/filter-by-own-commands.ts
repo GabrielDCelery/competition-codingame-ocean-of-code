@@ -1,4 +1,4 @@
-import { ISubmarine, cloneSubmarine } from '../submarines';
+import { ISubmarine, cloneSubmarine, chargePhantomSubmarine } from '../submarines';
 import { ECommand, ECharge } from './enums';
 import { ICommand, IMoveCommandParameters, ITorpedoCommandParameters } from './interfaces';
 import { areCoordinatesReachableByTorpedo, getDamageTakenFromTorpedo } from '../weapons';
@@ -48,9 +48,7 @@ const createListOfSubmarinesFromProcessedCommand = ({
 
     case ECommand.MOVE: {
       const { direction } = parameters as IMoveCommandParameters;
-      Object.keys(ECharge).forEach(key => {
-        ownSubmarine.charges[key as ECharge] += CHARGE_ANY_PER_MOVE;
-      });
+      chargePhantomSubmarine({ submarine: ownSubmarine, amount: CHARGE_ANY_PER_MOVE });
       const newCoordinates = uAddVectorToCoordinates({
         coordinates: ownSubmarine.coordinates,
         vector: transformDirectionToVector(direction),

@@ -7,9 +7,10 @@ import {
 } from './maps';
 import {
   ESonarResult,
+  applyCommandsToSubmarine,
+  calculateSonarResult,
   getSubmarinesFilteredByEnemyCommands,
   getSubmarinesFilteredByOwnCommands,
-  applyCommandsToSubmarine,
   uTransformCommandsStringToCommands,
   uTransformCommandsToCommandString,
 } from './commands';
@@ -100,19 +101,6 @@ try {
     const sonarResultByMe = readNextLine() as ESonarResult;
     const opponentCommandsString = readNextLine();
 
-    setNewSubmarineState({
-      submarine: gameState.players.me.real,
-      newState: {
-        x,
-        y,
-        health: myHealth,
-        torpedoCooldown,
-        sonarCooldown,
-        silenceCooldown,
-        mineCooldown,
-      },
-    });
-
     const opponentCommands = uTransformCommandsStringToCommands(opponentCommandsString);
 
     gameState.players.opponent.phantoms = getSubmarinesFilteredByEnemyCommands({
@@ -129,6 +117,39 @@ try {
       ownSubmarines: gameState.players.opponent.phantoms,
       ownCommands: opponentCommands,
       terrainMap: gameState.map.terrain,
+    });
+
+    gameState.players.me.phantoms = getSubmarinesFilteredByEnemyCommands({
+      gameMapDimensions: gameState.map.dimensions,
+      ownMinHealth: myHealth,
+      ownSubmarines: gameState.players.me.phantoms,
+      enemyCommands: opponentCommands,
+      enemySonarResult: calculateSonarResult({
+        entityCoordinates: gameState.players.me.real.coordinates,
+        gameMapDimensions: gameState.map.dimensions,
+        commands: opponentCommands,
+      }),
+    });
+
+    gameState.players.me.phantoms = getSubmarinesFilteredByOwnCommands({
+      gameMapDimensions: gameState.map.dimensions,
+      ownMinHealth: myHealth,
+      ownSubmarines: gameState.players.me.phantoms,
+      ownCommands: gameState.players.me.real.commands.last,
+      terrainMap: gameState.map.terrain,
+    });
+
+    setNewSubmarineState({
+      submarine: gameState.players.me.real,
+      newState: {
+        x,
+        y,
+        health: myHealth,
+        torpedoCooldown,
+        sonarCooldown,
+        silenceCooldown,
+        mineCooldown,
+      },
     });
 
     const myCommands = ai.pickCommands();

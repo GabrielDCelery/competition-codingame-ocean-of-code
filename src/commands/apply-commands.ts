@@ -1,4 +1,4 @@
-import { ISubmarine } from '../submarines';
+import { ISubmarine, chargeRealSubmarine } from '../submarines';
 import { ECommand, ECharge } from './enums';
 import { ICommand, IMoveCommandParameters, ITorpedoCommandParameters } from './interfaces';
 import { createVisitedMap, IGameMapDimensions } from '../maps';
@@ -24,7 +24,11 @@ export const applyCommandsToSubmarine = ({
         const { chargeCommand } = parameters as IMoveCommandParameters;
         const { x, y } = submarine.coordinates;
         submarine.maps.visited[x][y] = true;
-        submarine.charges[chargeCommand as ECharge] += CHARGE_ANY_PER_MOVE;
+        chargeRealSubmarine({
+          submarine,
+          amount: CHARGE_ANY_PER_MOVE,
+          type: chargeCommand as ECharge,
+        });
         return;
       }
 

@@ -51,3 +51,77 @@ export const setNewSubmarineState = ({
     [ECharge.SILENCE]: CHARGE_SILENCE - (silenceCooldown < 0 ? 0 : silenceCooldown),
   };
 };
+
+export const chargePhantomSubmarine = ({
+  submarine,
+  amount,
+}: {
+  submarine: ISubmarine;
+  amount: number;
+}): ISubmarine => {
+  submarine.charges[ECharge.TORPEDO] = Math.min(
+    CHARGE_TORPEDO,
+    (submarine.charges[ECharge.TORPEDO] += amount)
+  );
+  submarine.charges[ECharge.SONAR] = Math.min(
+    CHARGE_SONAR,
+    (submarine.charges[ECharge.SONAR] += amount)
+  );
+  submarine.charges[ECharge.MINE] = Math.min(
+    CHARGE_MINE,
+    (submarine.charges[ECharge.MINE] += amount)
+  );
+  submarine.charges[ECharge.SILENCE] = Math.min(
+    CHARGE_SILENCE,
+    (submarine.charges[ECharge.SILENCE] += amount)
+  );
+
+  return submarine;
+};
+
+export const chargeRealSubmarine = ({
+  submarine,
+  type,
+  amount,
+}: {
+  submarine: ISubmarine;
+  type: ECharge;
+  amount: number;
+}): ISubmarine => {
+  switch (type) {
+    case ECharge.TORPEDO: {
+      submarine.charges[ECharge.TORPEDO] = Math.min(
+        CHARGE_TORPEDO,
+        (submarine.charges[ECharge.TORPEDO] += amount)
+      );
+      return submarine;
+    }
+    case ECharge.SONAR: {
+      submarine.charges[ECharge.SONAR] = Math.min(
+        CHARGE_SONAR,
+        (submarine.charges[ECharge.SONAR] += amount)
+      );
+      return submarine;
+    }
+
+    case ECharge.MINE: {
+      submarine.charges[ECharge.MINE] = Math.min(
+        CHARGE_MINE,
+        (submarine.charges[ECharge.MINE] += amount)
+      );
+      return submarine;
+    }
+
+    case ECharge.SILENCE: {
+      submarine.charges[ECharge.SILENCE] = Math.min(
+        CHARGE_SILENCE,
+        (submarine.charges[ECharge.SILENCE] += amount)
+      );
+      return submarine;
+    }
+
+    default: {
+      throw new Error(`Invalid charge command -> ${type}`);
+    }
+  }
+};
