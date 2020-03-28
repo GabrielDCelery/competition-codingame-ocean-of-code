@@ -1,4 +1,4 @@
-import { EDirection } from './enums';
+import { EDirection, ETerrain } from './enums';
 import { ICoordinates, IVector } from './interfaces';
 
 const vectors = {
@@ -15,11 +15,23 @@ const directionToVectorTransformations = {
   [EDirection.E]: vectors.RIGHT,
 };
 
-export const uTransformDirectionToVector = (direction: EDirection): IVector => {
+export const transformGameInputToTerrain = (gameInput: string): ETerrain => {
+  if (gameInput === '.') {
+    return ETerrain.WATER;
+  }
+
+  if (gameInput === 'x') {
+    return ETerrain.ISLAND;
+  }
+
+  throw new Error(`Cannot process game input -> ${gameInput}`);
+};
+
+export const transformDirectionToVector = (direction: EDirection): IVector => {
   return directionToVectorTransformations[direction];
 };
 
-export const uTransformVectorToDirection = ({ x, y }: IVector): EDirection => {
+export const transformVectorToDirection = ({ x, y }: IVector): EDirection => {
   if (x === vectors.UP.x && y === vectors.UP.y) {
     return EDirection.N;
   }

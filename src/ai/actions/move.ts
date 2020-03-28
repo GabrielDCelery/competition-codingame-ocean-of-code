@@ -1,24 +1,29 @@
 import {
   ICoordinates,
   uGetNeighbouringCells,
-  uTransformKeyToCoordinates,
   uGetCoordinatesAtSpecificDistance,
   uGetDistanceBetweenCoordinates,
   uCreateVectorFromCoordinates,
-  uTransformVectorToDirection,
+  transformVectorToDirection,
+  getPathFindingWalkabilityMatrix,
 } from '../../maps';
 import BaseAction, { IWeightedCommand } from './base-action';
-import { ECommand, EChargeCommand } from '../../command-interpreter';
+import { ECommand, ECharge } from '../../commands';
 import * as PF from 'pathfinding';
+import { isCellWalkable } from '../../maps';
 
 const finder: PF.AStarFinder = new PF.AStarFinder();
 
 export class MoveAction extends BaseAction {
   calculateUtility(): IWeightedCommand {
-    const myLocation = this.me.getPosition();
-    const gameMap = this.me.getGameMap();
+    const myLocation = this.gameState.players.me.real.coordinates;
     const possibleLocationsToMoveTo = uGetNeighbouringCells(myLocation).filter(coordinates => {
-      return gameMap.isCellWalkable(coordinates);
+      return isCellWalkable({
+        coordinates,
+        gameMapDimensions: this.gameState.map.dimensions,
+        terrainMap: this.gameState.map.terrain,
+        visitedMap: this.gameState.players.me.real.maps.visited,
+      });
     });
 
     if (possibleLocationsToMoveTo.length === 0) {
@@ -29,20 +34,22 @@ export class MoveAction extends BaseAction {
       };
     }
 
-    const possibleOpponentLocationsMap = this.opponent.getPossibleLocationsMap();
-    const coordinatesAsKeys = Object.keys(possibleOpponentLocationsMap);
-    const possibleOpponentLocation: ICoordinates = uTransformKeyToCoordinates(
-      coordinatesAsKeys[Math.floor(Math.random() * coordinatesAsKeys.length)]
-    );
+    const items = this.gameState.players.opponent.phantoms;
+    const item = items[Math.floor(Math.random() * items.length)];
     const targetCoordinates = [
       ...uGetCoordinatesAtSpecificDistance({
-        coordinates: possibleOpponentLocation,
+        coordinates: item.coordinates,
         distance: 3,
       }),
     ].filter(coordinates => {
       return (
         uGetDistanceBetweenCoordinates(myLocation, coordinates) !== 0 &&
-        gameMap.isCellWalkable(coordinates)
+        isCellWalkable({
+          coordinates,
+          gameMapDimensions: this.gameState.map.dimensions,
+          terrainMap: this.gameState.map.terrain,
+          visitedMap: this.gameState.players.me.real.maps.visited,
+        })
       );
     });
 
@@ -58,7 +65,13 @@ export class MoveAction extends BaseAction {
       }
     }
 
-    const grid: PF.Grid = new PF.Grid(gameMap.getPathFindingWalkabilityMatrix());
+    const grid: PF.Grid = new PF.Grid(
+      getPathFindingWalkabilityMatrix({
+        gameMapDimensions: this.gameState.map.dimensions,
+        terrainMap: this.gameState.map.terrain,
+        visitedMap: this.gameState.players.me.real.maps.visited,
+      })
+    );
     const path: Array<Array<number>> = finder.findPath(
       myLocation.x,
       myLocation.y,
@@ -70,23 +83,23 @@ export class MoveAction extends BaseAction {
     if (path[1] === undefined) {
       const { x, y } = possibleLocationsToMoveTo[0];
       const vector = uCreateVectorFromCoordinates({ source: myLocation, target: { x, y } });
-      const direction = uTransformVectorToDirection(vector);
+      const direction = transformVectorToDirection(vector);
       return {
         type: ECommand.MOVE,
         utility: 0.3,
-        parameters: { direction, chargeCommand: EChargeCommand.TORPEDO },
+        parameters: { direction, chargeCommand: ECharge.TORPEDO },
       };
     }
 
     const [x, y] = path[1];
 
     const vector = uCreateVectorFromCoordinates({ source: myLocation, target: { x, y } });
-    const direction = uTransformVectorToDirection(vector);
+    const direction = transformVectorToDirection(vector);
 
     return {
       type: ECommand.MOVE,
       utility: 0.3,
-      parameters: { direction, chargeCommand: EChargeCommand.TORPEDO },
+      parameters: { direction, chargeCommand: ECharge.TORPEDO },
     };
   }
 }

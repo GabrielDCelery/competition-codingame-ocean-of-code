@@ -1,5 +1,5 @@
-import { EDirection, uTransformDirectionToVector } from '../maps';
-import { ECommand, EChargeCommand, ESonarResult } from './enums';
+import { EDirection, transformDirectionToVector } from '../maps';
+import { ECommand, ECharge, ESonarResult } from './enums';
 import {
   ICommand,
   IMoveCommandParameters,
@@ -19,7 +19,7 @@ export const uTransformCommandStringToCommand = (commandString: string): IComman
   switch (command) {
     case ECommand.MOVE: {
       const direction = restOfParams[0] as EDirection;
-      const chargeCommand = restOfParams[1] as EChargeCommand;
+      const chargeCommand = restOfParams[1] as ECharge;
       return {
         type: ECommand.MOVE,
         parameters: { direction, ...(chargeCommand ? { chargeCommand } : {}) },
@@ -49,7 +49,7 @@ export const uTransformCommandStringToCommand = (commandString: string): IComman
 
     case ECommand.SILENCE: {
       const vector = restOfParams[0]
-        ? uTransformDirectionToVector(restOfParams[0] as EDirection)
+        ? transformDirectionToVector(restOfParams[0] as EDirection)
         : null;
       const amount = restOfParams[1] ? parseInt(restOfParams[1], 10) : null;
 

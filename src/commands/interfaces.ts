@@ -1,12 +1,12 @@
 import { EDirection, ICoordinates } from '../maps';
-import { ECommand, EChargeCommand } from './enums';
+import { ECommand, ECharge } from './enums';
 
 export interface ICommandParameters {
   direction?: EDirection;
   sector?: number;
   coordinates?: ICoordinates;
   amount?: number;
-  chargeCommand?: EChargeCommand;
+  chargeCommand?: ECharge;
 }
 
 export interface ICommand {
@@ -16,7 +16,7 @@ export interface ICommand {
 
 export interface IMoveCommandParameters {
   direction: EDirection;
-  chargeCommand?: EChargeCommand;
+  chargeCommand?: ECharge;
 }
 
 export interface IMoveCommand extends ICommand {

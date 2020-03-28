@@ -3,10 +3,11 @@ import {
   uGetNeighbouringCellsIncludingDiagonal,
   uIsCoordinatesInCoordinatesList,
   uTransformCoordinatesToKey,
+  getReachableCoordinatesAtDistance,
 } from '../../maps';
 import BaseAction, { IWeightedCommand } from './base-action';
-import { RANGE_TORPEDO, DAMAGE_TORPEDO } from '../../constants';
-import { ECommand } from '../../command-interpreter';
+import { RANGE_TORPEDO, DAMAGE_TORPEDO, CHARGE_TORPEDO } from '../../constants';
+import { ECommand, ECharge } from '../../commands';
 
 const expectedUtilityForDamage = ({
   damageToMe,
@@ -56,7 +57,7 @@ const calculateDamage = ({
 
 export class TorpedoAction extends BaseAction {
   calculateUtility(): IWeightedCommand {
-    if (this.me.isTorpedoReady() === false) {
+    if (this.gameState.players.me.real.charges[ECharge.TORPEDO] < CHARGE_TORPEDO) {
       return {
         type: ECommand.TORPEDO,
         utility: 0,
@@ -64,17 +65,21 @@ export class TorpedoAction extends BaseAction {
       };
     }
 
-    const myHealth = this.me.getLife();
-    const myLocation = this.me.getPosition();
-    const gameMap = this.me.getGameMap();
+    const myHealth = this.gameState.players.me.real.health;
+    const myLocation = this.gameState.players.me.real.coordinates;
 
-    const opponentHealth = this.opponent.getLife();
-    const possibleOpponentLocationsMap = this.opponent.getPossibleLocationsMap();
-    const numOfPossibleLocationsForOpponent = Object.keys(possibleOpponentLocationsMap).length;
+    const opponentHealth = this.gameState.players.opponent.phantoms[0].health;
+    const possibleOpponentLocationsMap: { [index: string]: boolean } = {};
+    this.gameState.players.opponent.phantoms.forEach(submarine => {
+      possibleOpponentLocationsMap[uTransformCoordinatesToKey(submarine.coordinates)] = true;
+    });
+    const numOfPossibleLocationsForOpponent = this.gameState.players.opponent.phantoms.length;
 
-    const possibleLocationsToFireAt = gameMap.getReachableCoordinatesAtDistance({
+    const possibleLocationsToFireAt = getReachableCoordinatesAtDistance({
       coordinates: myLocation,
       maxDistance: RANGE_TORPEDO,
+      gameMapDimensions: this.gameState.map.dimensions,
+      terrainMap: this.gameState.map.terrain,
     });
 
     let bestUtility = -1;

@@ -1,26 +1,30 @@
 import AI from './ai';
-import { ETerrain, GameMapFactory } from './maps';
-import { PhantomSubmarine, Submarine } from './entities';
+import {
+  createTerrainMap,
+  transformGameInputToTerrain,
+  setTerrainMapCell,
+  getWalkableTerrainCells,
+} from './maps';
 import {
   ESonarResult,
+  getSubmarinesFilteredByEnemyCommands,
+  getSubmarinesFilteredByOwnCommands,
+  applyCommandsToSubmarine,
   uTransformCommandsStringToCommands,
   uTransformCommandsToCommandString,
-  uGetSonaredSectorFromCommands,
-  uGetSonarResultFromSectors,
-} from './command-interpreter';
-import { DamageSummarizer } from './damage-summarizer';
+} from './commands';
+import { createBlankGameState } from './game-state';
+import { createSubmarine, setNewSubmarineState } from './submarines';
+import { HEALTH_SUBMARINE } from './constants';
 
 declare const readline: any;
-
-const gameInputToCellTransformations: { [index: string]: ETerrain } = {
-  '.': ETerrain.WATER,
-  x: ETerrain.ISLAND,
-};
 
 try {
   const readNextLine = (): string => {
     return readline();
   };
+
+  const gameState = createBlankGameState();
 
   const [width, height /*, myId*/] = readNextLine()
     .split(' ')
@@ -28,7 +32,8 @@ try {
       return parseInt(elem, 10);
     });
 
-  const gameMapFactory = GameMapFactory.createSingleton({ width, height, sectorSize: 5 });
+  gameState.map.dimensions = { width, height, sectorSize: 5 };
+  gameState.map.terrain = createTerrainMap(gameState.map.dimensions);
 
   for (let y = 0; y < height; y++) {
     const line: string = readNextLine();
@@ -36,22 +41,45 @@ try {
 
     for (let x = 0; x < width; x++) {
       const cell = cells[x];
-      gameMapFactory.setTerrainCell({
-        type: gameInputToCellTransformations[cell],
+
+      setTerrainMapCell({
         coordinates: { x, y },
+        type: transformGameInputToTerrain(cell),
+        terrainMap: gameState.map.terrain,
       });
     }
   }
-  const me = Submarine.createInstance();
-  const mePhantom = PhantomSubmarine.createInstance();
-  const opponent = PhantomSubmarine.createInstance();
-  const ai = AI.createInstance({ me, opponent });
 
-  const walkableCoordinates = me.getGameMap().getWalkableCoordinatesList();
-  const mySubmarineStartingAt =
-    walkableCoordinates[Math.floor(Math.random() * walkableCoordinates.length)];
+  const walkableTerrainCells = getWalkableTerrainCells({
+    gameMapDimensions: gameState.map.dimensions,
+    terrainMap: gameState.map.terrain,
+  });
+  const mySubmarineStartingCoordinates =
+    walkableTerrainCells[Math.floor(Math.random() * walkableTerrainCells.length)];
 
-  console.log(`${mySubmarineStartingAt.x} ${mySubmarineStartingAt.y}`);
+  gameState.players.me.real = createSubmarine({
+    health: HEALTH_SUBMARINE,
+    coordinates: mySubmarineStartingCoordinates,
+    gameMapDimensions: gameState.map.dimensions,
+  });
+  gameState.players.me.phantoms = walkableTerrainCells.map(coordinates => {
+    return createSubmarine({
+      health: HEALTH_SUBMARINE,
+      coordinates,
+      gameMapDimensions: gameState.map.dimensions,
+    });
+  });
+  gameState.players.opponent.phantoms = walkableTerrainCells.map(coordinates => {
+    return createSubmarine({
+      health: HEALTH_SUBMARINE,
+      coordinates,
+      gameMapDimensions: gameState.map.dimensions,
+    });
+  });
+
+  const ai = AI.createInstance({ gameState });
+
+  console.log(`${mySubmarineStartingCoordinates.x} ${mySubmarineStartingCoordinates.y}`);
 
   // game loop
   while (true) {
@@ -72,58 +100,46 @@ try {
     const sonarResultByMe = readNextLine() as ESonarResult;
     const opponentCommandsString = readNextLine();
 
-    me.setState({
-      x,
-      y,
-      health: myHealth,
-      torpedoCooldown,
-      sonarCooldown,
-      silenceCooldown,
-      mineCooldown,
+    setNewSubmarineState({
+      submarine: gameState.players.me.real,
+      newState: {
+        x,
+        y,
+        health: myHealth,
+        torpedoCooldown,
+        sonarCooldown,
+        silenceCooldown,
+        mineCooldown,
+      },
     });
 
     const opponentCommands = uTransformCommandsStringToCommands(opponentCommandsString);
 
-    const sonaredSectorByMe = uGetSonaredSectorFromCommands(me.getExecutedCommands());
-    opponent.processEnemySonarAction({ result: sonarResultByMe, sector: sonaredSectorByMe });
-    const opponentDamageSummarizer = DamageSummarizer.createInstance();
-    opponentDamageSummarizer.processTorpedoDamage(me.getExecutedCommands());
-    opponentDamageSummarizer
-      .processSurfaceDamage(opponentCommands)
-      .processTorpedoDamage(opponentCommands);
-    opponent.processDamageForTurn({
-      damageSummarizerData: opponentDamageSummarizer.getData(),
-      newHealth: opponentHealth,
+    gameState.players.opponent.phantoms = getSubmarinesFilteredByEnemyCommands({
+      gameMapDimensions: gameState.map.dimensions,
+      ownMinHealth: opponentHealth,
+      ownSubmarines: gameState.players.opponent.phantoms,
+      enemyCommands: gameState.players.me.real.commands.last,
+      enemySonarResult: sonarResultByMe,
     });
-    opponent.processPhantomCommands(opponentCommands);
 
-    const commandsToExecute = ai.pickCommands();
-    me.processCommands(commandsToExecute);
-
-    const sonaredSectorByOpponent = uGetSonaredSectorFromCommands(opponentCommands);
-    const sonarResultByOpponent = uGetSonarResultFromSectors({
-      entitySector: me.getGameMap().getSectorForCoordinates(me.getPosition()),
-      targetedSector: sonaredSectorByOpponent,
+    gameState.players.opponent.phantoms = getSubmarinesFilteredByOwnCommands({
+      gameMapDimensions: gameState.map.dimensions,
+      ownMinHealth: opponentHealth,
+      ownSubmarines: gameState.players.opponent.phantoms,
+      ownCommands: opponentCommands,
+      terrainMap: gameState.map.terrain,
     });
-    mePhantom.processEnemySonarAction({
-      result: sonarResultByOpponent,
-      sector: sonaredSectorByOpponent,
+
+    const myCommands = ai.pickCommands();
+
+    applyCommandsToSubmarine({
+      commands: myCommands,
+      gameMapDimensions: gameState.map.dimensions,
+      submarine: gameState.players.me.real,
     });
-    const meDamageSummarizer = DamageSummarizer.createInstance();
-    meDamageSummarizer.processTorpedoDamage(opponentCommands);
-    meDamageSummarizer
-      .processSurfaceDamage(me.getExecutedCommands())
-      .processTorpedoDamage(me.getExecutedCommands());
 
-    mePhantom.processDamageForTurn({
-      damageSummarizerData: meDamageSummarizer.getData(),
-      newHealth: myHealth,
-    });
-    mePhantom.processPhantomCommands(me.getExecutedCommands());
-
-    const commandsToExecuteStr = uTransformCommandsToCommandString(commandsToExecute);
-
-    console.log(commandsToExecuteStr);
+    console.log(uTransformCommandsToCommandString(myCommands));
   }
 } catch (error) {
   console.error(error);

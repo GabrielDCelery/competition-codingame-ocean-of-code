@@ -1,6 +1,5 @@
 export enum ECommand {
   UNKNOWN = 'UNKNOWN',
-  NA = 'NA',
   MOVE = 'MOVE',
   SURFACE = 'SURFACE',
   TORPEDO = 'TORPEDO',
@@ -8,10 +7,11 @@ export enum ECommand {
   SILENCE = 'SILENCE',
 }
 
-export enum EChargeCommand {
+export enum ECharge {
   TORPEDO = 'TORPEDO',
   SONAR = 'SONAR',
   SILENCE = 'SILENCE',
+  MINE = 'MINE',
 }
 
 export enum ESonarResult {

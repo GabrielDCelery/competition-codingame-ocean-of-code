@@ -1,20 +1,20 @@
-import { Submarine, PhantomSubmarine } from '../entities';
 import { MoveAction, SurfaceAction, TorpedoAction, IWeightedCommand } from './actions';
-import { ECommand, ICommand } from '../command-interpreter';
+import { ECommand, ICommand } from '../commands';
+import { IGameState } from '../game-state';
 
 class AI {
   private torpedoAction: TorpedoAction;
   private surfaceAction: SurfaceAction;
   private moveAction: MoveAction;
 
-  constructor({ me, opponent }: { me: Submarine; opponent: PhantomSubmarine }) {
-    this.torpedoAction = new TorpedoAction({ me, opponent });
-    this.surfaceAction = new SurfaceAction({ me, opponent });
-    this.moveAction = new MoveAction({ me, opponent });
+  constructor({ gameState }: { gameState: IGameState }) {
+    this.torpedoAction = new TorpedoAction({ gameState });
+    this.surfaceAction = new SurfaceAction({ gameState });
+    this.moveAction = new MoveAction({ gameState });
   }
 
-  static createInstance({ me, opponent }: { me: Submarine; opponent: PhantomSubmarine }): AI {
-    return new AI({ me, opponent });
+  static createInstance({ gameState }: { gameState: IGameState }): AI {
+    return new AI({ gameState });
   }
 
   pickCommands(): ICommand[] {

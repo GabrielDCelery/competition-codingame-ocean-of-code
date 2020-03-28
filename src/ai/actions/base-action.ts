@@ -1,17 +1,15 @@
-import { PhantomSubmarine, Submarine } from '../../entities';
-import { ICommand } from '../../command-interpreter';
+import { ICommand } from '../../commands';
+import { IGameState } from '../../game-state';
 
 export interface IWeightedCommand extends ICommand {
   utility: number;
 }
 
 class BaseAction {
-  protected me: Submarine;
-  protected opponent: PhantomSubmarine;
+  protected gameState: IGameState;
 
-  constructor({ me, opponent }: { me: Submarine; opponent: PhantomSubmarine }) {
-    this.me = me;
-    this.opponent = opponent;
+  constructor({ gameState }: { gameState: IGameState }) {
+    this.gameState = gameState;
   }
 }
 
