@@ -1,9 +1,9 @@
 import {
   ICoordinates,
   uGetNeighbouringCells,
-  uGetCoordinatesAtSpecificDistance,
-  uGetDistanceBetweenCoordinates,
-  uCreateVectorFromCoordinates,
+  getCoordinatesAtSpecificDistance,
+  getDistanceBetweenCoordinates,
+  createVectorFromCoordinates,
   transformVectorToDirection,
   getPathFindingWalkabilityMatrix,
 } from '../../maps';
@@ -37,13 +37,13 @@ export class MoveAction extends BaseAction {
     const items = this.gameState.players.opponent.phantoms;
     const item = items[Math.floor(Math.random() * items.length)];
     const targetCoordinates = [
-      ...uGetCoordinatesAtSpecificDistance({
+      ...getCoordinatesAtSpecificDistance({
         coordinates: item.coordinates,
         distance: 3,
       }),
     ].filter(coordinates => {
       return (
-        uGetDistanceBetweenCoordinates(myLocation, coordinates) !== 0 &&
+        getDistanceBetweenCoordinates(myLocation, coordinates) !== 0 &&
         isCellWalkable({
           coordinates,
           gameMapDimensions: this.gameState.map.dimensions,
@@ -57,7 +57,7 @@ export class MoveAction extends BaseAction {
     let selectedCoordinates: ICoordinates = { x: 0, y: 0 };
 
     for (let i = 0, iMax = targetCoordinates.length; i < iMax; i++) {
-      const targetDistance = uGetDistanceBetweenCoordinates(myLocation, targetCoordinates[i]);
+      const targetDistance = getDistanceBetweenCoordinates(myLocation, targetCoordinates[i]);
 
       if (targetDistance < distance) {
         distance = targetDistance;
@@ -82,7 +82,7 @@ export class MoveAction extends BaseAction {
 
     if (path[1] === undefined) {
       const { x, y } = possibleLocationsToMoveTo[0];
-      const vector = uCreateVectorFromCoordinates({ source: myLocation, target: { x, y } });
+      const vector = createVectorFromCoordinates({ source: myLocation, target: { x, y } });
       const direction = transformVectorToDirection(vector);
       return {
         type: ECommand.MOVE,
@@ -93,7 +93,7 @@ export class MoveAction extends BaseAction {
 
     const [x, y] = path[1];
 
-    const vector = uCreateVectorFromCoordinates({ source: myLocation, target: { x, y } });
+    const vector = createVectorFromCoordinates({ source: myLocation, target: { x, y } });
     const direction = transformVectorToDirection(vector);
 
     return {

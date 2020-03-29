@@ -1,8 +1,11 @@
 import {
   ICoordinates,
-  uGetNeighbouringCellsIncludingDiagonal,
-  uTransformCoordinatesToKey,
-  uGetDistanceBetweenCoordinates,
+  getNeighbouringCellsIncludingDiagonal,
+  transformCoordinatesToKey,
+  getDistanceBetweenCoordinates,
+  getReachableCoordinatesAtDistance,
+  IGameMapDimensions,
+  ITerrainMap,
 } from '../maps';
 import { DAMAGE_TORPEDO, RANGE_TORPEDO } from '../constants';
 
@@ -11,10 +14,10 @@ export const getTorpedoSplashDamageMap = (
 ): { [index: string]: number } => {
   const map: { [index: string]: number } = {};
 
-  map[uTransformCoordinatesToKey(detonatedAtCoordinates)] = DAMAGE_TORPEDO;
+  map[transformCoordinatesToKey(detonatedAtCoordinates)] = DAMAGE_TORPEDO;
 
-  uGetNeighbouringCellsIncludingDiagonal(detonatedAtCoordinates).map(coordinates => {
-    map[uTransformCoordinatesToKey(coordinates)] = DAMAGE_TORPEDO / 2;
+  getNeighbouringCellsIncludingDiagonal(detonatedAtCoordinates).map(coordinates => {
+    map[transformCoordinatesToKey(coordinates)] = DAMAGE_TORPEDO / 2;
   });
 
   return map;
@@ -24,7 +27,7 @@ export const areCoordinatesReachableByTorpedo = (
   source: ICoordinates,
   target: ICoordinates
 ): boolean => {
-  return uGetDistanceBetweenCoordinates(source, target) <= RANGE_TORPEDO;
+  return getDistanceBetweenCoordinates(source, target) <= RANGE_TORPEDO;
 };
 
 export const getDamageTakenFromTorpedo = ({
@@ -35,7 +38,24 @@ export const getDamageTakenFromTorpedo = ({
   detonatedAtCoordinates: ICoordinates;
 }): number => {
   const damageMap = getTorpedoSplashDamageMap(detonatedAtCoordinates);
-  const damageTaken = damageMap[uTransformCoordinatesToKey(submarineCoordinates)] || 0;
+  const damageTaken = damageMap[transformCoordinatesToKey(submarineCoordinates)] || 0;
 
   return damageTaken;
+};
+
+export const getCoordinatesReachableByTorpedo = ({
+  coordinatesToShootFrom,
+  gameMapDimensions,
+  terrainMap,
+}: {
+  coordinatesToShootFrom: ICoordinates;
+  gameMapDimensions: IGameMapDimensions;
+  terrainMap: ITerrainMap;
+}): ICoordinates[] => {
+  return getReachableCoordinatesAtDistance({
+    coordinates: coordinatesToShootFrom,
+    maxDistance: RANGE_TORPEDO,
+    gameMapDimensions,
+    terrainMap,
+  });
 };

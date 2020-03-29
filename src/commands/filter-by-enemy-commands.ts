@@ -2,7 +2,7 @@ import { ISubmarine } from '../submarines';
 import { ECommand, ESonarResult } from './enums';
 import { ICommand, ISonarCommandParameters, ITorpedoCommandParameters } from './interfaces';
 import { getTorpedoSplashDamageMap } from '../weapons';
-import { uTransformCoordinatesToKey, getSectorForCoordinates, IGameMapDimensions } from '../maps';
+import { transformCoordinatesToKey, getSectorForCoordinates, IGameMapDimensions } from '../maps';
 
 const createListOfSubmarinesFromProcessedCommand = ({
   gameMapDimensions,
@@ -39,7 +39,7 @@ const createListOfSubmarinesFromProcessedCommand = ({
     case ECommand.TORPEDO: {
       const { coordinates } = parameters as ITorpedoCommandParameters;
       const damageMap = getTorpedoSplashDamageMap(coordinates);
-      const damageTaken = damageMap[uTransformCoordinatesToKey(ownSubmarine.coordinates)] || 0;
+      const damageTaken = damageMap[transformCoordinatesToKey(ownSubmarine.coordinates)] || 0;
       ownSubmarine.health = ownSubmarine.health - damageTaken;
       if (ownSubmarine.health < ownMinHealth) {
         return [];

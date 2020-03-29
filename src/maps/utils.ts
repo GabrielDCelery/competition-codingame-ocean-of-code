@@ -6,7 +6,7 @@ import {
   IGameMapDimensions,
   TWalkabilityMatrix,
 } from './interfaces';
-import { uTransformCoordinatesToKey, uGetNeighbouringCells } from './common-utils';
+import { transformCoordinatesToKey, uGetNeighbouringCells } from './common-utils';
 
 export const isTerrainCellWalkable = ({
   coordinates,
@@ -214,7 +214,7 @@ const processCoordinatesForReachibility = ({
   terrainMap: ITerrainMap;
 }): void => {
   reachableCoordinates.push(coordinates);
-  trackedCellsForReachability[uTransformCoordinatesToKey(coordinates)] = true;
+  trackedCellsForReachability[transformCoordinatesToKey(coordinates)] = true;
 
   if (distance === maxDistance) {
     return;
@@ -224,7 +224,7 @@ const processCoordinatesForReachibility = ({
     if (
       areCoordinatesWithinBoundaries({ coordinates, gameMapDimensions }) === false ||
       isTerrainCellWalkable({ coordinates, terrainMap }) === false ||
-      trackedCellsForReachability[uTransformCoordinatesToKey(neighbourCoordinates)] === true
+      trackedCellsForReachability[transformCoordinatesToKey(neighbourCoordinates)] === true
     ) {
       return;
     }

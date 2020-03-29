@@ -7,8 +7,8 @@ import {
   IGameMapDimensions,
   ITerrainMap,
   isCellWalkable,
-  uAddVectorToCoordinates,
-  uMultiplyVector,
+  addVectorToCoordinates,
+  multiplyVector,
   transformDirectionToVector,
 } from '../maps';
 import {
@@ -49,7 +49,7 @@ const createListOfSubmarinesFromProcessedCommand = ({
     case ECommand.MOVE: {
       const { direction } = parameters as IMoveCommandParameters;
       chargePhantomSubmarine({ submarine: ownSubmarine, amount: CHARGE_ANY_PER_MOVE });
-      const newCoordinates = uAddVectorToCoordinates({
+      const newCoordinates = addVectorToCoordinates({
         coordinates: ownSubmarine.coordinates,
         vector: transformDirectionToVector(direction),
       });
@@ -104,9 +104,9 @@ const createListOfSubmarinesFromProcessedCommand = ({
       [EDirection.N, EDirection.S, EDirection.W, EDirection.E].forEach(direction => {
         const vector = transformDirectionToVector(direction);
         for (let range = 1; range <= RANGE_SILENCE; range++) {
-          const targetCoordinates = uAddVectorToCoordinates({
+          const targetCoordinates = addVectorToCoordinates({
             coordinates: ownSubmarine.coordinates,
-            vector: uMultiplyVector({ vector, amount: range }),
+            vector: multiplyVector({ vector, amount: range }),
           });
           if (
             isCellWalkable({
@@ -121,9 +121,9 @@ const createListOfSubmarinesFromProcessedCommand = ({
           const clonedOwnSubmarine = cloneSubmarine(ownSubmarine);
           clonedOwnSubmarine.coordinates = targetCoordinates;
           for (let i = 0; i < range; i++) {
-            const visitedCoordinates = uAddVectorToCoordinates({
+            const visitedCoordinates = addVectorToCoordinates({
               coordinates: ownSubmarine.coordinates,
-              vector: uMultiplyVector({ vector, amount: i }),
+              vector: multiplyVector({ vector, amount: i }),
             });
             const { x, y } = visitedCoordinates;
             clonedOwnSubmarine.maps.visited[x][y] = true;

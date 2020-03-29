@@ -51,11 +51,11 @@ export const transformVectorToDirection = ({ x, y }: IVector): EDirection => {
   throw new Error(`Invalid vector transformation -> ${{ x, y }}`);
 };
 
-export const uAreCoordinatesTheSame = (source: ICoordinates, target: ICoordinates): boolean => {
+export const areCoordinatesTheSame = (source: ICoordinates, target: ICoordinates): boolean => {
   return source.x === target.x && source.y === target.y;
 };
 
-export const uMultiplyVector = ({
+export const multiplyVector = ({
   vector,
   amount,
 }: {
@@ -69,7 +69,7 @@ export const uMultiplyVector = ({
   };
 };
 
-export const uAddVectorToCoordinates = ({
+export const addVectorToCoordinates = ({
   coordinates,
   vector,
 }: {
@@ -82,7 +82,7 @@ export const uAddVectorToCoordinates = ({
   };
 };
 
-export const uCreateVectorFromCoordinates = ({
+export const createVectorFromCoordinates = ({
   source,
   target,
 }: {
@@ -95,7 +95,7 @@ export const uCreateVectorFromCoordinates = ({
   };
 };
 
-export const uGetDistanceBetweenCoordinates = (
+export const getDistanceBetweenCoordinates = (
   source: ICoordinates,
   target: ICoordinates
 ): number => {
@@ -108,42 +108,42 @@ export const uGetDistanceBetweenCoordinates = (
 export const uGetNeighbouringCells = (coordinates: ICoordinates): ICoordinates[] => {
   const { UP, DOWN, LEFT, RIGHT } = vectors;
   return [
-    uAddVectorToCoordinates({ coordinates, vector: UP }),
-    uAddVectorToCoordinates({ coordinates, vector: DOWN }),
-    uAddVectorToCoordinates({ coordinates, vector: LEFT }),
-    uAddVectorToCoordinates({ coordinates, vector: RIGHT }),
+    addVectorToCoordinates({ coordinates, vector: UP }),
+    addVectorToCoordinates({ coordinates, vector: DOWN }),
+    addVectorToCoordinates({ coordinates, vector: LEFT }),
+    addVectorToCoordinates({ coordinates, vector: RIGHT }),
   ];
 };
 
-export const uGetNeighbouringCellsIncludingDiagonal = (
+export const getNeighbouringCellsIncludingDiagonal = (
   coordinates: ICoordinates
 ): ICoordinates[] => {
   const { UP, DOWN, LEFT, RIGHT } = vectors;
-  const coordinatesUp = uAddVectorToCoordinates({ coordinates, vector: UP });
-  const coordinatesDown = uAddVectorToCoordinates({ coordinates, vector: DOWN });
+  const coordinatesUp = addVectorToCoordinates({ coordinates, vector: UP });
+  const coordinatesDown = addVectorToCoordinates({ coordinates, vector: DOWN });
   return [
     coordinatesUp,
-    uAddVectorToCoordinates({ coordinates: coordinatesUp, vector: LEFT }),
-    uAddVectorToCoordinates({ coordinates: coordinatesUp, vector: RIGHT }),
+    addVectorToCoordinates({ coordinates: coordinatesUp, vector: LEFT }),
+    addVectorToCoordinates({ coordinates: coordinatesUp, vector: RIGHT }),
     coordinatesDown,
-    uAddVectorToCoordinates({ coordinates: coordinatesDown, vector: LEFT }),
-    uAddVectorToCoordinates({ coordinates: coordinatesDown, vector: RIGHT }),
-    uAddVectorToCoordinates({ coordinates, vector: LEFT }),
-    uAddVectorToCoordinates({ coordinates, vector: RIGHT }),
+    addVectorToCoordinates({ coordinates: coordinatesDown, vector: LEFT }),
+    addVectorToCoordinates({ coordinates: coordinatesDown, vector: RIGHT }),
+    addVectorToCoordinates({ coordinates, vector: LEFT }),
+    addVectorToCoordinates({ coordinates, vector: RIGHT }),
   ];
 };
 
-export const uTransformCoordinatesToKey = ({ x, y }: ICoordinates): string => {
+export const transformCoordinatesToKey = ({ x, y }: ICoordinates): string => {
   return `${x}_${y}`;
 };
 
-export const uTransformKeyToCoordinates = (key: string): ICoordinates => {
+export const transformKeyToCoordinates = (key: string): ICoordinates => {
   const [x, y] = key.split('_').map(elem => parseInt(elem, 10));
 
   return { x, y };
 };
 
-export const uIsCoordinatesInCoordinatesList = (
+export const isCoordinatesInCoordinatesList = (
   coordinates: ICoordinates,
   coordinatesList: ICoordinates[]
 ): boolean => {
@@ -156,7 +156,7 @@ export const uIsCoordinatesInCoordinatesList = (
   return false;
 };
 
-export const uGetCoordinatesAtSpecificDistance = ({
+export const getCoordinatesAtSpecificDistance = ({
   coordinates,
   distance,
 }: {
