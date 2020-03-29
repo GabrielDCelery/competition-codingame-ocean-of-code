@@ -6,6 +6,7 @@ import {
   IGameMapDimensions,
   TWalkabilityMatrix,
 } from './interfaces';
+import { transformCoordinatesToKey, getNeighbouringCells } from './common-utils';
 
 export const isTerrainCellWalkable = ({
   coordinates,
@@ -195,16 +196,49 @@ export const getPathFindingWalkabilityMatrix = ({
   return matrix;
 };
 
-const isOffsetAtDistance = ({
-  offsetX,
-  offsetY,
+const processCoordinatesForReachibility = ({
+  coordinates,
   distance,
+  maxDistance,
+  reachableCoordinates,
+  trackedCellsForReachability,
+  gameMapDimensions,
+  terrainMap,
 }: {
-  offsetX: number;
-  offsetY: number;
+  coordinates: ICoordinates;
   distance: number;
-}): boolean => {
-  return Math.abs(offsetX) + Math.abs(offsetY) === distance;
+  maxDistance: number;
+  reachableCoordinates: ICoordinates[];
+  trackedCellsForReachability: { [index: string]: boolean };
+  gameMapDimensions: IGameMapDimensions;
+  terrainMap: ITerrainMap;
+}): void => {
+  reachableCoordinates.push(coordinates);
+  trackedCellsForReachability[transformCoordinatesToKey(coordinates)] = true;
+
+  if (distance === maxDistance) {
+    return;
+  }
+
+  getNeighbouringCells(coordinates).forEach(neighbourCoordinates => {
+    if (
+      areCoordinatesWithinBoundaries({ coordinates, gameMapDimensions }) === false ||
+      isTerrainCellWalkable({ coordinates, terrainMap }) === false ||
+      trackedCellsForReachability[transformCoordinatesToKey(neighbourCoordinates)] === true
+    ) {
+      return;
+    }
+
+    return processCoordinatesForReachibility({
+      coordinates: neighbourCoordinates,
+      distance: distance + 1,
+      maxDistance,
+      reachableCoordinates,
+      trackedCellsForReachability,
+      gameMapDimensions,
+      terrainMap,
+    });
+  });
 };
 
 export const getReachableCoordinatesAtMaxDistance = ({
@@ -218,33 +252,18 @@ export const getReachableCoordinatesAtMaxDistance = ({
   gameMapDimensions: IGameMapDimensions;
   terrainMap: ITerrainMap;
 }): ICoordinates[] => {
-  const cellsAtDistance = [];
-  const { x, y } = coordinates;
+  const reachableCoordinates: ICoordinates[] = [];
+  const trackedCellsForReachability: { [index: string]: boolean } = {};
 
-  for (let distance = 0; distance <= maxDistance; distance++) {
-    for (
-      let offsetX = -Math.abs(distance), offsetXMax = distance;
-      offsetX <= offsetXMax;
-      offsetX++
-    ) {
-      for (
-        let offsetY = -Math.abs(distance), offsetYMax = distance;
-        offsetY <= offsetYMax;
-        offsetY++
-      ) {
-        const offSettedCoordinates = { x: x + offsetX, y: y + offsetY };
-        if (
-          isOffsetAtDistance({ offsetX, offsetY, distance }) === true &&
-          areCoordinatesWithinBoundaries({
-            coordinates: offSettedCoordinates,
-            gameMapDimensions,
-          }) === true &&
-          isTerrainCellWalkable({ coordinates, terrainMap }) === true
-        ) {
-          cellsAtDistance.push(offSettedCoordinates);
-        }
-      }
-    }
-  }
-  return cellsAtDistance;
+  processCoordinatesForReachibility({
+    coordinates,
+    distance: 0,
+    maxDistance,
+    reachableCoordinates,
+    trackedCellsForReachability,
+    gameMapDimensions,
+    terrainMap,
+  });
+
+  return reachableCoordinates;
 };
