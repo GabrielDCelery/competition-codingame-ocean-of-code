@@ -1,7 +1,16 @@
 import { ISubmarine, cloneSubmarine, chargePhantomSubmarine } from '../submarines';
 import { ECommand, ECharge } from './enums';
-import { ICommand, IMoveCommandParameters, ITorpedoCommandParameters } from './interfaces';
-import { areCoordinatesReachableByTorpedo, getDamageTakenFromTorpedo } from '../weapons';
+import {
+  ICommand,
+  IMoveCommandParameters,
+  ITorpedoCommandParameters,
+  ITriggerCommandParameters,
+} from './interfaces';
+import {
+  areCoordinatesReachableByTorpedo,
+  getDamageTakenFromTorpedo,
+  getDamageTakenFromMine,
+} from '../weapons';
 import {
   EDirection,
   IGameMapDimensions,
@@ -14,6 +23,7 @@ import {
 } from '../maps';
 import {
   CHARGE_ANY_PER_MOVE,
+  CHARGE_MINE,
   CHARGE_SILENCE,
   CHARGE_SONAR,
   CHARGE_TORPEDO,
@@ -134,6 +144,26 @@ const createListOfSubmarinesFromProcessedCommand = ({
         }
       });
       return newSubmarines;
+    }
+
+    case ECommand.MINE: {
+      Object.keys(ECharge).forEach(key => {
+        ownSubmarine.charges[key as ECharge] -= CHARGE_MINE;
+      });
+      return [ownSubmarine];
+    }
+
+    case ECommand.TRIGGER: {
+      const { coordinates } = parameters as ITriggerCommandParameters;
+      const damageTaken = getDamageTakenFromMine({
+        submarineCoordinates: ownSubmarine.coordinates,
+        detonatedAtCoordinates: coordinates,
+      });
+      ownSubmarine.health = ownSubmarine.health - damageTaken;
+      if (ownSubmarine.health < ownMinHealth) {
+        return [];
+      }
+      return [ownSubmarine];
     }
 
     default: {

@@ -5,6 +5,8 @@ export enum ECommand {
   TORPEDO = 'TORPEDO',
   SONAR = 'SONAR',
   SILENCE = 'SILENCE',
+  MINE = 'MINE',
+  TRIGGER = 'TRIGGER',
 }
 
 export enum ECharge {

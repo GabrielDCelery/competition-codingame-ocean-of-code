@@ -60,3 +60,21 @@ export interface ISilenceCommand extends ICommand {
   type: ECommand.SILENCE;
   parameters: ISilenceCommandParameters;
 }
+
+export interface IMineCommandParameters {
+  direction?: EDirection;
+}
+
+export interface IMineCommand extends ICommand {
+  type: ECommand.MINE;
+  parameters: IMineCommandParameters;
+}
+
+export interface ITriggerCommandParameters {
+  coordinates: ICoordinates;
+}
+
+export interface ITriggerCommand extends ICommand {
+  type: ECommand.TRIGGER;
+  parameters: ITriggerCommandParameters;
+}

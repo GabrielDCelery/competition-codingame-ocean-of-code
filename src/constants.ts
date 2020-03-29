@@ -2,6 +2,7 @@ export const RANGE_TORPEDO = 4;
 export const RANGE_SILENCE = 4;
 
 export const DAMAGE_TORPEDO = 2;
+export const DAMAGE_MINE = 2;
 
 export const HEALTH_SUBMARINE = 6;
 

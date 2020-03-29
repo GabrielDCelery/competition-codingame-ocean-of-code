@@ -12,6 +12,8 @@ import {
   ITorpedoCommandParameters,
   ISonarCommandParameters,
   ISilenceCommandParameters,
+  IMineCommandParameters,
+  ITriggerCommandParameters,
 } from './interfaces';
 
 const COMMANDS_DELIMITER = '|';
@@ -68,6 +70,21 @@ export const uTransformCommandStringToCommand = (commandString: string): IComman
       };
     }
 
+    case ECommand.MINE: {
+      return {
+        type: ECommand.MINE,
+        parameters: {},
+      };
+    }
+
+    case ECommand.TRIGGER: {
+      const [x, y] = restOfParams.map(elem => parseInt(elem, 10));
+      return {
+        type: ECommand.TRIGGER,
+        parameters: { coordinates: { x, y } },
+      };
+    }
+
     default: {
       return {
         type: ECommand.UNKNOWN,
@@ -113,6 +130,17 @@ export const transformCommandsToCommandString = (commands: ICommand[]): string =
         case ECommand.SILENCE: {
           const { direction, amount } = parameters as ISilenceCommandParameters;
           return `${ECommand.SILENCE} ${direction} ${amount}`;
+        }
+
+        case ECommand.MINE: {
+          const { direction } = parameters as IMineCommandParameters;
+          return `${ECommand.MINE} ${direction}`;
+        }
+
+        case ECommand.TRIGGER: {
+          const { coordinates } = parameters as ITriggerCommandParameters;
+          const { x, y } = coordinates;
+          return `${ECommand.TRIGGER} ${x} ${y}`;
         }
 
         default: {

@@ -1,7 +1,12 @@
 import { ISubmarine } from '../submarines';
 import { ECommand, ESonarResult } from './enums';
-import { ICommand, ISonarCommandParameters, ITorpedoCommandParameters } from './interfaces';
-import { getDamageTakenFromTorpedo } from '../weapons';
+import {
+  ICommand,
+  ISonarCommandParameters,
+  ITorpedoCommandParameters,
+  ITriggerCommandParameters,
+} from './interfaces';
+import { getDamageTakenFromTorpedo, getDamageTakenFromMine } from '../weapons';
 import { getSectorForCoordinates, IGameMapDimensions } from '../maps';
 
 const createListOfSubmarinesFromProcessedCommand = ({
@@ -39,6 +44,23 @@ const createListOfSubmarinesFromProcessedCommand = ({
     case ECommand.TORPEDO: {
       const { coordinates } = parameters as ITorpedoCommandParameters;
       const damageTaken = getDamageTakenFromTorpedo({
+        submarineCoordinates: ownSubmarine.coordinates,
+        detonatedAtCoordinates: coordinates,
+      });
+      ownSubmarine.health = ownSubmarine.health - damageTaken;
+      if (ownSubmarine.health < ownMinHealth) {
+        return [];
+      }
+      return [ownSubmarine];
+    }
+
+    case ECommand.MINE: {
+      return [ownSubmarine];
+    }
+
+    case ECommand.TRIGGER: {
+      const { coordinates } = parameters as ITriggerCommandParameters;
+      const damageTaken = getDamageTakenFromMine({
         submarineCoordinates: ownSubmarine.coordinates,
         detonatedAtCoordinates: coordinates,
       });
