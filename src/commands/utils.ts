@@ -77,13 +77,13 @@ export const uTransformCommandStringToCommand = (commandString: string): IComman
   }
 };
 
-export const uTransformCommandsStringToCommands = (commandsString: string): ICommand[] => {
+export const transformCommandsStringToCommands = (commandsString: string): ICommand[] => {
   return commandsString.split(COMMANDS_DELIMITER).map(commandString => {
     return uTransformCommandStringToCommand(commandString.trim());
   });
 };
 
-export const uTransformCommandsToCommandString = (commands: ICommand[]): string => {
+export const transformCommandsToCommandString = (commands: ICommand[]): string => {
   const [command] = commands;
   const { type, parameters } = command;
 

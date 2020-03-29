@@ -1,9 +1,9 @@
 import AI from './ai';
 import {
   createTerrainMap,
-  transformGameInputToTerrain,
-  setTerrainMapCell,
   getWalkableTerrainCells,
+  setTerrainMapCell,
+  transformGameInputToTerrain,
 } from './maps';
 import {
   ESonarResult,
@@ -11,8 +11,8 @@ import {
   calculateSonarResult,
   getSubmarinesFilteredByEnemyCommands,
   getSubmarinesFilteredByOwnCommands,
-  uTransformCommandsStringToCommands,
-  uTransformCommandsToCommandString,
+  transformCommandsStringToCommands,
+  transformCommandsToCommandString,
 } from './commands';
 import { createBlankGameState } from './game-state';
 import { createSubmarine, setNewSubmarineState } from './submarines';
@@ -101,7 +101,7 @@ try {
     const sonarResultByMe = readNextLine() as ESonarResult;
     const opponentCommandsString = readNextLine();
 
-    const opponentCommands = uTransformCommandsStringToCommands(opponentCommandsString);
+    const opponentCommands = transformCommandsStringToCommands(opponentCommandsString);
 
     gameState.players.opponent.phantoms = getSubmarinesFilteredByEnemyCommands({
       gameMapDimensions: gameState.map.dimensions,
@@ -160,7 +160,7 @@ try {
       submarine: gameState.players.me.real,
     });
 
-    console.log(uTransformCommandsToCommandString(myCommands));
+    console.log(transformCommandsToCommandString(myCommands));
   }
 } catch (error) {
   console.error(error);

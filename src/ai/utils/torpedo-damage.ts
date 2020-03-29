@@ -1,11 +1,6 @@
 import { getDamageTakenFromTorpedo, getCoordinatesReachableByTorpedo } from '../../weapons';
 import { ISubmarine } from '../../submarines';
-import {
-  IGameMapDimensions,
-  ITerrainMap,
-  ICoordinates,
-  getDistanceBetweenCoordinates,
-} from '../../maps';
+import { IGameMapDimensions, ITerrainMap, ICoordinates } from '../../maps';
 import { DAMAGE_TORPEDO } from '../../constants';
 
 interface IUtility {
@@ -66,11 +61,6 @@ export const calculateTorpedoDamageUtility = ({
     let utility = 0;
 
     opponentSubmarines.forEach(opponentSubmarine => {
-      if (2 < getDistanceBetweenCoordinates(coordinatesToShootAt, opponentSubmarine.coordinates)) {
-        utility += 0;
-        return;
-      }
-
       const damageToMyOpponent = getDamageTakenFromTorpedo({
         submarineCoordinates: opponentSubmarine.coordinates,
         detonatedAtCoordinates: coordinatesToShootAt,

@@ -105,7 +105,7 @@ export const getDistanceBetweenCoordinates = (
   return distX + distY;
 };
 
-export const uGetNeighbouringCells = (coordinates: ICoordinates): ICoordinates[] => {
+export const getNeighbouringCells = (coordinates: ICoordinates): ICoordinates[] => {
   const { UP, DOWN, LEFT, RIGHT } = vectors;
   return [
     addVectorToCoordinates({ coordinates, vector: UP }),

@@ -20,11 +20,6 @@ export class TorpedoAction extends BaseAction {
       terrainMap: this.gameState.map.terrain,
     });
 
-    console.error({
-      type: ECommand.TORPEDO,
-      ...torpedoDamageUtility,
-    });
-
     return {
       type: ECommand.TORPEDO,
       ...torpedoDamageUtility,

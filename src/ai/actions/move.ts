@@ -1,6 +1,6 @@
 import {
   ICoordinates,
-  uGetNeighbouringCells,
+  getNeighbouringCells,
   getCoordinatesAtSpecificDistance,
   getDistanceBetweenCoordinates,
   createVectorFromCoordinates,
@@ -17,7 +17,7 @@ const finder: PF.AStarFinder = new PF.AStarFinder();
 export class MoveAction extends BaseAction {
   calculateUtility(): IWeightedCommand {
     const myLocation = this.gameState.players.me.real.coordinates;
-    const possibleLocationsToMoveTo = uGetNeighbouringCells(myLocation).filter(coordinates => {
+    const possibleLocationsToMoveTo = getNeighbouringCells(myLocation).filter(coordinates => {
       return isCellWalkable({
         coordinates,
         gameMapDimensions: this.gameState.map.dimensions,

@@ -3,9 +3,10 @@ import {
   getNeighbouringCellsIncludingDiagonal,
   transformCoordinatesToKey,
   getDistanceBetweenCoordinates,
-  getReachableCoordinatesAtDistance,
+  getReachableCoordinatesAtMaxDistance,
   IGameMapDimensions,
   ITerrainMap,
+  areCoordinatesTheSame,
 } from '../maps';
 import { DAMAGE_TORPEDO, RANGE_TORPEDO } from '../constants';
 
@@ -37,10 +38,20 @@ export const getDamageTakenFromTorpedo = ({
   submarineCoordinates: ICoordinates;
   detonatedAtCoordinates: ICoordinates;
 }): number => {
-  const damageMap = getTorpedoSplashDamageMap(detonatedAtCoordinates);
-  const damageTaken = damageMap[transformCoordinatesToKey(submarineCoordinates)] || 0;
+  if (2 < getDistanceBetweenCoordinates(submarineCoordinates, detonatedAtCoordinates)) {
+    return 0;
+  }
 
-  return damageTaken;
+  if (areCoordinatesTheSame(submarineCoordinates, detonatedAtCoordinates)) {
+    return DAMAGE_TORPEDO;
+  }
+  const splashCoordinatesList = getNeighbouringCellsIncludingDiagonal(detonatedAtCoordinates);
+  for (let i = 0, iMax = splashCoordinatesList.length; i < iMax; i++) {
+    if (areCoordinatesTheSame(submarineCoordinates, splashCoordinatesList[i])) {
+      return DAMAGE_TORPEDO / 2;
+    }
+  }
+  return 0;
 };
 
 export const getCoordinatesReachableByTorpedo = ({
@@ -52,7 +63,7 @@ export const getCoordinatesReachableByTorpedo = ({
   gameMapDimensions: IGameMapDimensions;
   terrainMap: ITerrainMap;
 }): ICoordinates[] => {
-  return getReachableCoordinatesAtDistance({
+  return getReachableCoordinatesAtMaxDistance({
     coordinates: coordinatesToShootFrom,
     maxDistance: RANGE_TORPEDO,
     gameMapDimensions,
