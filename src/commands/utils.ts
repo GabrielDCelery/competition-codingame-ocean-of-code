@@ -84,42 +84,45 @@ export const transformCommandsStringToCommands = (commandsString: string): IComm
 };
 
 export const transformCommandsToCommandString = (commands: ICommand[]): string => {
-  const [command] = commands;
-  const { type, parameters } = command;
+  return commands
+    .map(command => {
+      const { type, parameters } = command;
 
-  switch (type) {
-    case ECommand.MOVE: {
-      const { direction, chargeCommand } = parameters as IMoveCommandParameters;
-      return `${ECommand.MOVE} ${direction} ${chargeCommand}`;
-    }
+      switch (type) {
+        case ECommand.MOVE: {
+          const { direction, chargeCommand } = parameters as IMoveCommandParameters;
+          return `${ECommand.MOVE} ${direction} ${chargeCommand}`;
+        }
 
-    case ECommand.SURFACE: {
-      //const { sector } = parameters as ISurfaceCommandParameters;
-      return `${ECommand.SURFACE}`;
-    }
+        case ECommand.SURFACE: {
+          //const { sector } = parameters as ISurfaceCommandParameters;
+          return `${ECommand.SURFACE}`;
+        }
 
-    case ECommand.TORPEDO: {
-      const { coordinates } = parameters as ITorpedoCommandParameters;
-      const { x, y } = coordinates;
-      return `${ECommand.TORPEDO} ${x} ${y}`;
-    }
+        case ECommand.TORPEDO: {
+          const { coordinates } = parameters as ITorpedoCommandParameters;
+          const { x, y } = coordinates;
+          return `${ECommand.TORPEDO} ${x} ${y}`;
+        }
 
-    case ECommand.SONAR: {
-      const { sector } = parameters as ISonarCommandParameters;
-      return `${ECommand.SONAR} ${sector}`;
-    }
+        case ECommand.SONAR: {
+          const { sector } = parameters as ISonarCommandParameters;
+          return `${ECommand.SONAR} ${sector}`;
+        }
 
-    case ECommand.SILENCE: {
-      const { direction, amount } = parameters as ISilenceCommandParameters;
-      return `${ECommand.SILENCE} ${direction} ${amount}`;
-    }
+        case ECommand.SILENCE: {
+          const { direction, amount } = parameters as ISilenceCommandParameters;
+          return `${ECommand.SILENCE} ${direction} ${amount}`;
+        }
 
-    default: {
-      console.error(`Could not process command -> ${command}`);
-    }
-  }
+        default: {
+          console.error(`Could not process command -> ${command}`);
+        }
+      }
 
-  throw new Error(`Could not process command -> ${command}`);
+      throw new Error(`Could not process command -> ${command}`);
+    })
+    .join(COMMANDS_DELIMITER);
 };
 
 export const uGetSonaredSectorFromCommands = (commands: ICommand[]): number | null => {

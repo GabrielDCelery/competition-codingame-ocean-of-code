@@ -4,43 +4,106 @@ import {
   calculateTorpedoActionUtility,
   IWeightedCommand,
 } from './actions';
-import { ECommand, ICommand } from '../commands';
+import { ECommand, ICommand, applyCommandsToSubmarine } from '../commands';
 import { IGameState } from '../game-state';
+import { ISubmarine, cloneSubmarine } from '../submarines';
+import { IGameMapDimensions, ITerrainMap } from '../maps';
 
-export const pickCommandsForTurn = ({ gameState }: { gameState: IGameState }): ICommand[] => {
-  let maxUtility = -1;
-  let chosenCommand: IWeightedCommand = { type: ECommand.UNKNOWN, utility: 0, parameters: {} };
+export const appendNextCommand = ({
+  pickedCommands,
+  mySubmarine,
+  opponentSubmarines,
+  gameMapDimensions,
+  terrainMap,
+}: {
+  pickedCommands: IWeightedCommand[];
+  mySubmarine: ISubmarine;
+  opponentSubmarines: ISubmarine[];
+  gameMapDimensions: IGameMapDimensions;
+  terrainMap: ITerrainMap;
+}): IWeightedCommand[] => {
+  let maxUtility = 0.2;
 
-  const commandsToChoseFrom: IWeightedCommand[] = [
-    calculateTorpedoActionUtility({
-      mySubmarine: gameState.players.me.real,
-      opponentSubmarines: gameState.players.opponent.phantoms,
-      gameMapDimensions: gameState.map.dimensions,
-      terrainMap: gameState.map.terrain,
-    }),
-    calculateSurfaceActionUtility({
-      mySubmarine: gameState.players.me.real,
-      gameMapDimensions: gameState.map.dimensions,
-      terrainMap: gameState.map.terrain,
-    }),
-    calculateMoveActionUtility({
-      mySubmarine: gameState.players.me.real,
-      opponentSubmarines: gameState.players.opponent.phantoms,
-      gameMapDimensions: gameState.map.dimensions,
-      terrainMap: gameState.map.terrain,
-    }),
-  ];
+  const pickedCommandsMap: { [index: string]: boolean } = {};
 
-  for (let i = 0, iMax = commandsToChoseFrom.length; i < iMax; i++) {
-    const { utility } = commandsToChoseFrom[i];
+  pickedCommands.forEach(({ type }) => {
+    pickedCommandsMap[type] = true;
+  });
 
-    if (maxUtility < utility) {
-      maxUtility = utility;
-      chosenCommand = commandsToChoseFrom[i];
-    }
+  const toCheckCommands: IWeightedCommand[] = [];
+
+  if (pickedCommandsMap[ECommand.MOVE] !== true) {
+    toCheckCommands.push(
+      calculateMoveActionUtility({
+        mySubmarine,
+        opponentSubmarines,
+        gameMapDimensions,
+        terrainMap,
+      })
+    );
   }
 
-  return [chosenCommand].map(({ type, parameters }) => {
+  if (pickedCommandsMap[ECommand.TORPEDO] !== true) {
+    toCheckCommands.push(
+      calculateTorpedoActionUtility({
+        mySubmarine,
+        opponentSubmarines,
+        gameMapDimensions,
+        terrainMap,
+      })
+    );
+  }
+
+  if (pickedCommandsMap[ECommand.SURFACE] !== true) {
+    toCheckCommands.push(
+      calculateSurfaceActionUtility({
+        mySubmarine,
+        gameMapDimensions,
+        terrainMap,
+      })
+    );
+  }
+
+  const chosenCommands = toCheckCommands.filter(({ utility }) => {
+    if (maxUtility < utility) {
+      maxUtility = utility;
+      return true;
+    }
+
+    return false;
+  });
+
+  if (chosenCommands.length === 0) {
+    return pickedCommands;
+  }
+
+  const clonedSubmarine = cloneSubmarine(mySubmarine);
+
+  applyCommandsToSubmarine({
+    commands: chosenCommands,
+    gameMapDimensions,
+    submarine: clonedSubmarine,
+  });
+
+  return appendNextCommand({
+    pickedCommands: [...pickedCommands, chosenCommands[0]],
+    mySubmarine: clonedSubmarine,
+    opponentSubmarines,
+    gameMapDimensions,
+    terrainMap,
+  });
+};
+
+export const pickCommandsForTurn = ({ gameState }: { gameState: IGameState }): ICommand[] => {
+  const pickedCommands = appendNextCommand({
+    pickedCommands: [],
+    mySubmarine: gameState.players.me.real,
+    opponentSubmarines: gameState.players.opponent.phantoms,
+    gameMapDimensions: gameState.map.dimensions,
+    terrainMap: gameState.map.terrain,
+  });
+
+  return pickedCommands.map(({ type, parameters }) => {
     return { type, parameters };
   });
 };
