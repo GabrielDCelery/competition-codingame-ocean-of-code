@@ -1,27 +1,34 @@
-import BaseAction, { IWeightedCommand } from './base-action';
+import { IWeightedCommand } from './base-action';
 import { ECommand } from '../../commands';
 import { getNeighbouringCells, isCellWalkable } from '../../maps';
+import { ISubmarine } from '../../submarines';
+import { IGameMapDimensions, ITerrainMap } from '../../maps';
 
-export class SurfaceAction extends BaseAction {
-  calculateUtility(): IWeightedCommand {
-    const myLocation = this.gameState.players.me.real.coordinates;
-    const possibleLocationsToMoveTo = getNeighbouringCells(myLocation).filter(coordinates => {
+export const calculateSurfaceActionUtility = ({
+  mySubmarine,
+  gameMapDimensions,
+  terrainMap,
+}: {
+  mySubmarine: ISubmarine;
+  gameMapDimensions: IGameMapDimensions;
+  terrainMap: ITerrainMap;
+}): IWeightedCommand => {
+  const possibleLocationsToMoveTo = getNeighbouringCells(mySubmarine.coordinates).filter(
+    coordinates => {
       return isCellWalkable({
         coordinates,
-        gameMapDimensions: this.gameState.map.dimensions,
-        terrainMap: this.gameState.map.terrain,
-        visitedMap: this.gameState.players.me.real.maps.visited,
+        gameMapDimensions,
+        terrainMap,
+        visitedMap: mySubmarine.maps.visited,
       });
-    });
+    }
+  );
 
-    const utility = possibleLocationsToMoveTo.length === 0 ? 1 : 0;
+  const utility = possibleLocationsToMoveTo.length === 0 ? 1 : 0;
 
-    return {
-      type: ECommand.SURFACE,
-      utility,
-      parameters: {},
-    };
-  }
-}
-
-export default SurfaceAction;
+  return {
+    type: ECommand.SURFACE,
+    utility,
+    parameters: {},
+  };
+};

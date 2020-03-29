@@ -1,4 +1,4 @@
-import AI from './ai';
+import { pickCommandsForTurn } from './ai';
 import {
   createTerrainMap,
   getWalkableTerrainCells,
@@ -78,8 +78,6 @@ try {
     });
   });
 
-  const ai = AI.createInstance({ gameState });
-
   console.log(`${mySubmarineStartingCoordinates.x} ${mySubmarineStartingCoordinates.y}`);
 
   // game loop
@@ -152,7 +150,7 @@ try {
       },
     });
 
-    const myCommands = ai.pickCommands();
+    const myCommands = pickCommandsForTurn({ gameState });
 
     applyCommandsToSubmarine({
       commands: myCommands,
