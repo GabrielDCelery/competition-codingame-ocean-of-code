@@ -10,6 +10,7 @@ import {
   addVectorToCoordinates,
   multiplyVector,
   transformDirectionToVector,
+  createVisitedMap,
 } from '../maps';
 import {
   CHARGE_ANY_PER_MOVE,
@@ -74,6 +75,7 @@ const createListOfSubmarinesFromProcessedCommand = ({
       if (ownSubmarine.health < ownMinHealth) {
         return [];
       }
+      ownSubmarine.maps.visited = createVisitedMap(gameMapDimensions);
       return [ownSubmarine];
     }
 

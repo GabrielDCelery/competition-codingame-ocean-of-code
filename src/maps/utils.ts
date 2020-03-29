@@ -222,9 +222,9 @@ const processCoordinatesForReachibility = ({
 
   getNeighbouringCells(coordinates).forEach(neighbourCoordinates => {
     if (
-      areCoordinatesWithinBoundaries({ coordinates, gameMapDimensions }) === false ||
-      isTerrainCellWalkable({ coordinates, terrainMap }) === false ||
-      trackedCellsForReachability[transformCoordinatesToKey(neighbourCoordinates)] === true
+      !areCoordinatesWithinBoundaries({ coordinates: neighbourCoordinates, gameMapDimensions }) ||
+      !isTerrainCellWalkable({ coordinates: neighbourCoordinates, terrainMap }) ||
+      trackedCellsForReachability[transformCoordinatesToKey(neighbourCoordinates)]
     ) {
       return;
     }
