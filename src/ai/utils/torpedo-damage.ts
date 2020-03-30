@@ -1,12 +1,7 @@
-import { getDamageTakenFromTorpedo, getCoordinatesReachableByTorpedo } from '../../weapons';
+import { getDamageTakenFromTorpedo } from '../../weapons';
 import { ISubmarine } from '../../submarines';
-import { IGameMapDimensions, ITerrainMap, ICoordinates } from '../../maps';
+import { ICoordinates } from '../../maps';
 import { DAMAGE_TORPEDO } from '../../constants';
-
-interface IUtility {
-  utility: number;
-  parameters: { coordinates: ICoordinates };
-}
 
 const getUtilityForDamage = ({
   damageToMe,
@@ -35,54 +30,35 @@ const getUtilityForDamage = ({
 };
 
 export const calculateTorpedoDamageUtility = ({
+  coordinatesToShootAt,
   mySubmarine,
   opponentSubmarines,
-  gameMapDimensions,
-  terrainMap,
 }: {
+  coordinatesToShootAt: ICoordinates;
   mySubmarine: ISubmarine;
   opponentSubmarines: ISubmarine[];
-  gameMapDimensions: IGameMapDimensions;
-  terrainMap: ITerrainMap;
-}): IUtility => {
-  let chosenUtility = -1;
-  let chosenCoordinates: ICoordinates = mySubmarine.coordinates;
+}): number => {
+  const damageToMe = getDamageTakenFromTorpedo({
+    submarineCoordinates: mySubmarine.coordinates,
+    detonatedAtCoordinates: coordinatesToShootAt,
+  });
 
-  getCoordinatesReachableByTorpedo({
-    coordinatesToShootFrom: mySubmarine.coordinates,
-    gameMapDimensions,
-    terrainMap,
-  }).forEach(coordinatesToShootAt => {
-    const damageToMe = getDamageTakenFromTorpedo({
-      submarineCoordinates: mySubmarine.coordinates,
+  let utility = 0;
+
+  opponentSubmarines.forEach(opponentSubmarine => {
+    const damageToMyOpponent = getDamageTakenFromTorpedo({
+      submarineCoordinates: opponentSubmarine.coordinates,
       detonatedAtCoordinates: coordinatesToShootAt,
     });
 
-    let utility = 0;
-
-    opponentSubmarines.forEach(opponentSubmarine => {
-      const damageToMyOpponent = getDamageTakenFromTorpedo({
-        submarineCoordinates: opponentSubmarine.coordinates,
-        detonatedAtCoordinates: coordinatesToShootAt,
-      });
-
-      utility +=
-        getUtilityForDamage({
-          damageToMe,
-          damageToMyOpponent,
-          myHealth: mySubmarine.health,
-          opponentHealth: opponentSubmarine.health,
-        }) / opponentSubmarines.length;
-    });
-
-    if (chosenUtility < utility) {
-      chosenUtility = utility;
-      chosenCoordinates = coordinatesToShootAt;
-    }
+    utility +=
+      getUtilityForDamage({
+        damageToMe,
+        damageToMyOpponent,
+        myHealth: mySubmarine.health,
+        opponentHealth: opponentSubmarine.health,
+      }) / opponentSubmarines.length;
   });
 
-  return {
-    utility: chosenUtility,
-    parameters: { coordinates: chosenCoordinates },
-  };
+  return utility;
 };

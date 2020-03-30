@@ -1,20 +1,26 @@
 import { IWeightedCommand } from './base-action';
 import { CHARGE_TORPEDO } from '../../constants';
 import { ECommand, ECharge } from '../../commands';
-import { calculateTorpedoDamageUtility } from '../utils';
+import {
+  calculateTorpedoDamageUtility,
+  calculateGeneralThreateUtility,
+  chooseHighestUtility,
+} from '../utils';
 import { ISubmarine } from '../../submarines';
-import { IGameMapDimensions, ITerrainMap } from '../../maps';
+import { IGameMap, ICoordinates } from '../../maps';
+import { getCoordinatesReachableByTorpedo } from '../../weapons';
+import { average } from '../../common';
 
 export const calculateTorpedoActionUtility = ({
   mySubmarine,
+  myPhantomSubmarines,
   opponentSubmarines,
-  gameMapDimensions,
-  terrainMap,
+  gameMap,
 }: {
   mySubmarine: ISubmarine;
+  myPhantomSubmarines: ISubmarine[];
   opponentSubmarines: ISubmarine[];
-  gameMapDimensions: IGameMapDimensions;
-  terrainMap: ITerrainMap;
+  gameMap: IGameMap;
 }): IWeightedCommand => {
   if (mySubmarine.charges[ECharge.TORPEDO] < CHARGE_TORPEDO) {
     return {
@@ -24,15 +30,33 @@ export const calculateTorpedoActionUtility = ({
     };
   }
 
-  const torpedoDamageUtility = calculateTorpedoDamageUtility({
+  const generalThreatUtility = calculateGeneralThreateUtility({
+    gameMap,
     mySubmarine,
+    myPhantomSubmarines,
     opponentSubmarines,
-    gameMapDimensions,
-    terrainMap,
   });
+
+  const { utility, params } = chooseHighestUtility<ICoordinates>(
+    getCoordinatesReachableByTorpedo({
+      coordinatesToShootFrom: mySubmarine.coordinates,
+      gameMapDimensions: gameMap.dimensions,
+      terrainMap: gameMap.terrain,
+    }),
+    coordinatesToShootAt => {
+      const torpedoDamageUtility = calculateTorpedoDamageUtility({
+        coordinatesToShootAt,
+        mySubmarine,
+        opponentSubmarines,
+      });
+
+      return torpedoDamageUtility;
+    }
+  );
 
   return {
     type: ECommand.TORPEDO,
-    ...torpedoDamageUtility,
+    utility,
+    parameters: { coordinates: params },
   };
 };

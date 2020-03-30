@@ -22,6 +22,12 @@ export interface ITerrainMap {
   };
 }
 
+export interface IGameMap {
+  dimensions: IGameMapDimensions;
+  terrain: ITerrainMap;
+  numOfWalkableTerrainCells: number;
+}
+
 export interface IVisitedMap {
   [index: number]: {
     [index: number]: boolean;

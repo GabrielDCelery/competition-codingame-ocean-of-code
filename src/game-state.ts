@@ -1,12 +1,9 @@
-import { ITerrainMap, IGameMapDimensions } from './maps';
+import { IGameMap } from './maps';
 import { ISubmarine } from './submarines';
 import { ECharge } from './commands';
 
 export interface IGameState {
-  map: {
-    dimensions: IGameMapDimensions;
-    terrain: ITerrainMap;
-  };
+  map: IGameMap;
   players: {
     me: {
       real: ISubmarine;
@@ -27,6 +24,7 @@ export const createBlankGameState = (): IGameState => {
         sectorSize: 0,
       },
       terrain: [],
+      numOfWalkableTerrainCells: 0,
     },
     players: {
       me: {

@@ -7,20 +7,20 @@ import {
 import { ECommand, ICommand, applyCommandsToSubmarine } from '../commands';
 import { IGameState } from '../game-state';
 import { ISubmarine, cloneSubmarine } from '../submarines';
-import { IGameMapDimensions, ITerrainMap } from '../maps';
+import { IGameMap } from '../maps';
 
 export const appendNextCommand = ({
   pickedCommands,
   mySubmarine,
+  myPhantomSubmarines,
   opponentSubmarines,
-  gameMapDimensions,
-  terrainMap,
+  gameMap,
 }: {
   pickedCommands: IWeightedCommand[];
   mySubmarine: ISubmarine;
+  myPhantomSubmarines: ISubmarine[];
   opponentSubmarines: ISubmarine[];
-  gameMapDimensions: IGameMapDimensions;
-  terrainMap: ITerrainMap;
+  gameMap: IGameMap;
 }): IWeightedCommand[] => {
   let maxUtility = 0.2;
 
@@ -37,8 +37,8 @@ export const appendNextCommand = ({
       calculateMoveActionUtility({
         mySubmarine,
         opponentSubmarines,
-        gameMapDimensions,
-        terrainMap,
+        gameMapDimensions: gameMap.dimensions,
+        terrainMap: gameMap.terrain,
       })
     );
   }
@@ -47,9 +47,9 @@ export const appendNextCommand = ({
     toCheckCommands.push(
       calculateTorpedoActionUtility({
         mySubmarine,
+        myPhantomSubmarines,
         opponentSubmarines,
-        gameMapDimensions,
-        terrainMap,
+        gameMap,
       })
     );
   }
@@ -58,8 +58,8 @@ export const appendNextCommand = ({
     toCheckCommands.push(
       calculateSurfaceActionUtility({
         mySubmarine,
-        gameMapDimensions,
-        terrainMap,
+        gameMapDimensions: gameMap.dimensions,
+        terrainMap: gameMap.terrain,
       })
     );
   }
@@ -81,16 +81,16 @@ export const appendNextCommand = ({
 
   applyCommandsToSubmarine({
     commands: chosenCommands,
-    gameMapDimensions,
+    gameMapDimensions: gameMap.dimensions,
     submarine: clonedSubmarine,
   });
 
   return appendNextCommand({
     pickedCommands: [...pickedCommands, chosenCommands[0]],
     mySubmarine: clonedSubmarine,
+    myPhantomSubmarines,
     opponentSubmarines,
-    gameMapDimensions,
-    terrainMap,
+    gameMap,
   });
 };
 
@@ -98,9 +98,9 @@ export const pickCommandsForTurn = ({ gameState }: { gameState: IGameState }): I
   const pickedCommands = appendNextCommand({
     pickedCommands: [],
     mySubmarine: gameState.players.me.real,
+    myPhantomSubmarines: gameState.players.me.phantoms,
     opponentSubmarines: gameState.players.opponent.phantoms,
-    gameMapDimensions: gameState.map.dimensions,
-    terrainMap: gameState.map.terrain,
+    gameMap: gameState.map,
   });
 
   return pickedCommands.map(({ type, parameters }) => {
