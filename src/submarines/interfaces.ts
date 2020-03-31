@@ -16,6 +16,7 @@ export interface ISubmarine {
   maps: {
     visited: IVisitedMap;
   };
+  mines: ICoordinates[];
 }
 
 export interface INewSubmarineState {

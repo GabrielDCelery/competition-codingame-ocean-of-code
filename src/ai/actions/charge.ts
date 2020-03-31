@@ -40,13 +40,13 @@ export const chooseChargeCommand = ({
   if (mySubmarine.charges.TORPEDO < CHARGE_TORPEDO) {
     return ECharge.TORPEDO;
   }
-
+  /*
   if (
     mySubmarine.charges.SONAR < CHARGE_SONAR &&
     0.3 < getOpponentSectorSpreadRatio({ opponentSubmarines, gameMap })
   ) {
     return ECharge.SONAR;
   }
-
+*/
   return ECharge.MINE;
 };

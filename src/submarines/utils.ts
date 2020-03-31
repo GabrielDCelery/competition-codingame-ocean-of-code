@@ -27,6 +27,7 @@ export const createSubmarine = ({
     maps: {
       visited: createVisitedMap(gameMapDimensions),
     },
+    mines: [],
   };
 };
 

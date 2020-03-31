@@ -42,6 +42,7 @@ export const createBlankGameState = (): IGameState => {
           maps: {
             visited: [],
           },
+          mines: [],
         },
         phantoms: [],
       },

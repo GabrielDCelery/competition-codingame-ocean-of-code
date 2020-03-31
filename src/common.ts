@@ -31,3 +31,7 @@ export const sum = (array: Array<number>): number => {
 export const average = (array: Array<number>): number => {
   return sum(array) / array.length;
 };
+
+export const getRandomElemFromList = <T>(items: T[]): T => {
+  return items[Math.floor(Math.random() * items.length)];
+};

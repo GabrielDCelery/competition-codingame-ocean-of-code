@@ -1,8 +1,10 @@
 import {
+  IWeightedCommand,
+  calculateDeployMineUtility,
   calculateMoveActionUtility,
   calculateSurfaceActionUtility,
   calculateTorpedoActionUtility,
-  IWeightedCommand,
+  calculateTriggerMineUtility,
 } from './actions';
 import { ECommand, ICommand, applyCommandsToSubmarine } from '../commands';
 import { IGameState } from '../game-state';
@@ -61,6 +63,24 @@ export const appendNextCommand = ({
         mySubmarine,
         gameMapDimensions: gameMap.dimensions,
         terrainMap: gameMap.terrain,
+      })
+    );
+  }
+
+  if (pickedCommandsMap[ECommand.MINE] !== true && pickedCommandsMap[ECommand.TRIGGER] !== true) {
+    toCheckCommands.push(
+      calculateDeployMineUtility({
+        mySubmarine,
+        gameMap,
+      })
+    );
+  }
+
+  if (pickedCommandsMap[ECommand.MINE] !== true && pickedCommandsMap[ECommand.TRIGGER] !== true) {
+    toCheckCommands.push(
+      calculateTriggerMineUtility({
+        mySubmarine,
+        opponentSubmarines,
       })
     );
   }
