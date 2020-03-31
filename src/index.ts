@@ -57,6 +57,7 @@ try {
   });
 
   gameState.map.numOfWalkableTerrainCells = walkableTerrainCells.length;
+  gameState.map.numOfSectors = 9;
 
   const mySubmarineStartingCoordinates =
     walkableTerrainCells[Math.floor(Math.random() * walkableTerrainCells.length)];

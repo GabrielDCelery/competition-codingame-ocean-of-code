@@ -25,6 +25,7 @@ export const createBlankGameState = (): IGameState => {
       },
       terrain: [],
       numOfWalkableTerrainCells: 0,
+      numOfSectors: 0,
     },
     players: {
       me: {

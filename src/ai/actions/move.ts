@@ -12,7 +12,8 @@ import { ECommand, ECharge } from '../../commands';
 import * as PF from 'pathfinding';
 import { isCellWalkable } from '../../maps';
 import { ISubmarine } from '../../submarines';
-import { IGameMapDimensions, ITerrainMap } from '../../maps';
+import { IGameMapDimensions, ITerrainMap, IGameMap } from '../../maps';
+import { chooseChargeCommand } from './charge';
 
 const finder: PF.AStarFinder = new PF.AStarFinder();
 
@@ -21,11 +22,13 @@ export const calculateMoveActionUtility = ({
   opponentSubmarines,
   gameMapDimensions,
   terrainMap,
+  gameMap,
 }: {
   mySubmarine: ISubmarine;
   opponentSubmarines: ISubmarine[];
   gameMapDimensions: IGameMapDimensions;
   terrainMap: ITerrainMap;
+  gameMap: IGameMap;
 }): IWeightedCommand => {
   const possibleLocationsToMoveTo = getNeighbouringCells(mySubmarine.coordinates).filter(
     coordinates => {
@@ -116,6 +119,13 @@ export const calculateMoveActionUtility = ({
   return {
     type: ECommand.MOVE,
     utility: 0.3,
-    parameters: { direction, chargeCommand: ECharge.TORPEDO },
+    parameters: {
+      direction,
+      chargeCommand: chooseChargeCommand({
+        mySubmarine,
+        opponentSubmarines,
+        gameMap,
+      }),
+    },
   };
 };

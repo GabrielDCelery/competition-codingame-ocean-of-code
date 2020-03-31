@@ -39,6 +39,7 @@ export const appendNextCommand = ({
         opponentSubmarines,
         gameMapDimensions: gameMap.dimensions,
         terrainMap: gameMap.terrain,
+        gameMap,
       })
     );
   }

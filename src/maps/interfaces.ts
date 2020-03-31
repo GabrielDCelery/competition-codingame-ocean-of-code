@@ -26,6 +26,7 @@ export interface IGameMap {
   dimensions: IGameMapDimensions;
   terrain: ITerrainMap;
   numOfWalkableTerrainCells: number;
+  numOfSectors: number;
 }
 
 export interface IVisitedMap {
