@@ -1,10 +1,11 @@
 import {
   IWeightedCommand,
   calculateDeployMineUtility,
-  calculateMoveActionUtility,
+  //calculateMoveActionUtility,
   calculateSurfaceActionUtility,
   calculateTorpedoActionUtility,
   calculateTriggerMineUtility,
+  calculateGenericMoveActionUtility,
 } from './actions';
 import { ECommand, ICommand, applyCommandsToSubmarine } from '../commands';
 import { IGameState } from '../game-state';
@@ -33,7 +34,7 @@ export const appendNextCommand = ({
   });
 
   const toCheckCommands: IWeightedCommand[] = [];
-
+  /*
   if (pickedCommandsMap[ECommand.MOVE] !== true) {
     toCheckCommands.push(
       calculateMoveActionUtility({
@@ -45,12 +46,22 @@ export const appendNextCommand = ({
       })
     );
   }
+  */
+
+  if (pickedCommandsMap[ECommand.MOVE] !== true) {
+    toCheckCommands.push(
+      calculateGenericMoveActionUtility({
+        mySubmarine,
+        opponentSubmarines,
+        gameMap,
+      })
+    );
+  }
 
   if (pickedCommandsMap[ECommand.TORPEDO] !== true) {
     toCheckCommands.push(
       calculateTorpedoActionUtility({
         mySubmarine,
-        myPhantomSubmarines,
         opponentSubmarines,
         gameMap,
       })

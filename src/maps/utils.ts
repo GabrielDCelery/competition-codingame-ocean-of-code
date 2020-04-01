@@ -5,6 +5,7 @@ import {
   IVisitedMap,
   IGameMapDimensions,
   TWalkabilityMatrix,
+  IGameMap,
 } from './interfaces';
 import { transformCoordinatesToKey, getNeighbouringCells } from './common-utils';
 
@@ -102,6 +103,19 @@ export const isCellWalkable = ({
     areCoordinatesWithinBoundaries({ coordinates, gameMapDimensions }) === true &&
     isTerrainCellWalkable({ coordinates, terrainMap }) === true &&
     hasVisitedCellBefore({ coordinates, visitedMap }) === false
+  );
+};
+
+export const isCellValid = ({
+  coordinates,
+  gameMap,
+}: {
+  coordinates: ICoordinates;
+  gameMap: IGameMap;
+}): boolean => {
+  return (
+    areCoordinatesWithinBoundaries({ coordinates, gameMapDimensions: gameMap.dimensions }) ===
+      true && isTerrainCellWalkable({ coordinates, terrainMap: gameMap.terrain }) === true
   );
 };
 

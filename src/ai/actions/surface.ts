@@ -24,7 +24,7 @@ export const calculateSurfaceActionUtility = ({
     }
   );
 
-  const utility = possibleLocationsToMoveTo.length === 0 ? 1 : 0;
+  const utility = possibleLocationsToMoveTo.length === 0 ? 2 : 0;
 
   return {
     type: ECommand.SURFACE,

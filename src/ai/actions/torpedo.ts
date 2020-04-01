@@ -1,24 +1,17 @@
 import { IWeightedCommand } from './base-action';
 import { CHARGE_TORPEDO } from '../../constants';
 import { ECommand, ECharge } from '../../commands';
-import {
-  calculateTorpedoDamageUtility,
-  calculateGeneralThreateUtility,
-  chooseHighestUtility,
-} from '../utils';
+import { calculateTorpedoDamageUtility, chooseHighestUtility } from '../utils';
 import { ISubmarine } from '../../submarines';
 import { IGameMap, ICoordinates } from '../../maps';
 import { getCoordinatesReachableByTorpedo } from '../../weapons';
-import { average } from '../../common';
 
 export const calculateTorpedoActionUtility = ({
   mySubmarine,
-  myPhantomSubmarines,
   opponentSubmarines,
   gameMap,
 }: {
   mySubmarine: ISubmarine;
-  myPhantomSubmarines: ISubmarine[];
   opponentSubmarines: ISubmarine[];
   gameMap: IGameMap;
 }): IWeightedCommand => {
@@ -29,13 +22,6 @@ export const calculateTorpedoActionUtility = ({
       parameters: {},
     };
   }
-
-  const generalThreatUtility = calculateGeneralThreateUtility({
-    gameMap,
-    mySubmarine,
-    myPhantomSubmarines,
-    opponentSubmarines,
-  });
 
   const { utility, params } = chooseHighestUtility<ICoordinates>(
     getCoordinatesReachableByTorpedo({
