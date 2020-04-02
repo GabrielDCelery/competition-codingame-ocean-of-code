@@ -1,8 +1,8 @@
 import { ECharge } from '../../commands';
 import { ISubmarine } from '../../submarines';
-import { CHARGE_TORPEDO, CHARGE_SONAR } from '../../constants';
+import { CHARGE_TORPEDO, CHARGE_SILENCE } from '../../constants';
 import { getSectorForCoordinates, IGameMap } from '../../maps';
-
+/*
 const getOpponentSectorSpreadRatio = ({
   gameMap,
   opponentSubmarines,
@@ -27,7 +27,7 @@ const getOpponentSectorSpreadRatio = ({
 
   return Object.keys(sectorToOpponentCountMap).length / gameMap.numOfSectors;
 };
-
+*/
 export const chooseChargeCommand = ({
   gameMap,
   mySubmarine,
@@ -37,9 +37,14 @@ export const chooseChargeCommand = ({
   mySubmarine: ISubmarine;
   opponentSubmarines: ISubmarine[];
 }): ECharge => {
-  if (mySubmarine.charges.TORPEDO < CHARGE_TORPEDO) {
+  if (mySubmarine.charges[ECharge.TORPEDO] < CHARGE_TORPEDO) {
     return ECharge.TORPEDO;
   }
+
+  if (mySubmarine.charges[ECharge.SILENCE] < CHARGE_SILENCE) {
+    return ECharge.SILENCE;
+  }
+
   /*
   if (
     mySubmarine.charges.SONAR < CHARGE_SONAR &&

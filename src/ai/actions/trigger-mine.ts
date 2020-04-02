@@ -1,16 +1,12 @@
-import { IWeightedCommand } from './base-action';
+import { TActionUtilityCalculator } from './base-action';
 import { ECommand } from '../../commands';
 import { calculateMineDamageUtility, chooseHighestUtility } from '../utils';
-import { ISubmarine } from '../../submarines';
 import { ICoordinates } from '../../maps';
 
-export const calculateTriggerMineUtility = ({
+export const calculateTriggerMineUtility: TActionUtilityCalculator = ({
   mySubmarine,
   opponentSubmarines,
-}: {
-  mySubmarine: ISubmarine;
-  opponentSubmarines: ISubmarine[];
-}): IWeightedCommand => {
+}) => {
   const { utility, params } = chooseHighestUtility<ICoordinates>(
     mySubmarine.mines,
     coordinatesToDetonateAt => {

@@ -1,7 +1,5 @@
-import { IWeightedCommand } from './base-action';
 import { ECharge, ECommand } from '../../commands';
-import { getNeighbouringCells, isTerrainCellWalkable, ICoordinates, IGameMap } from '../../maps';
-import { ISubmarine } from '../../submarines';
+import { getNeighbouringCells, isTerrainCellWalkable, ICoordinates } from '../../maps';
 import {
   areCoordinatesWithinBoundaries,
   transformCoordinatesToKey,
@@ -10,14 +8,9 @@ import {
 } from '../../maps';
 import { getRandomElemFromList } from '../../common';
 import { CHARGE_MINE } from '../../constants';
+import { TActionUtilityCalculator } from './base-action';
 
-export const calculateDeployMineUtility = ({
-  gameMap,
-  mySubmarine,
-}: {
-  gameMap: IGameMap;
-  mySubmarine: ISubmarine;
-}): IWeightedCommand => {
+export const calculateDeployMineUtility: TActionUtilityCalculator = ({ gameMap, mySubmarine }) => {
   if (mySubmarine.charges[ECharge.MINE] < CHARGE_MINE) {
     return {
       type: ECommand.MINE,

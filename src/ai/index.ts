@@ -1,104 +1,64 @@
 import {
   IWeightedCommand,
+  TActionUtilityCalculator,
   calculateDeployMineUtility,
-  //calculateMoveActionUtility,
+  calculateMoveActionUtility,
   calculateSurfaceActionUtility,
   calculateTorpedoActionUtility,
   calculateTriggerMineUtility,
-  calculateGenericMoveActionUtility,
 } from './actions';
 import { ECommand, ICommand, applyCommandsToSubmarine } from '../commands';
 import { IGameState } from '../game-state';
 import { ISubmarine, cloneSubmarine } from '../submarines';
 import { IGameMap } from '../maps';
 
-export const appendNextCommand = ({
+export const createChainedCommands = ({
   pickedCommands,
   mySubmarine,
-  myPhantomSubmarines,
   opponentSubmarines,
   gameMap,
+  utilityActions,
+  minUtility,
 }: {
   pickedCommands: IWeightedCommand[];
   mySubmarine: ISubmarine;
-  myPhantomSubmarines: ISubmarine[];
   opponentSubmarines: ISubmarine[];
   gameMap: IGameMap;
-}): IWeightedCommand[] => {
-  let maxUtility = 0.2;
+  utilityActions: Array<{
+    utilityCalculator: TActionUtilityCalculator;
+    types: ECommand[];
+  }>;
+  minUtility: number;
+}): { mySubmarine: ISubmarine; pickedCommands: IWeightedCommand[] } => {
+  let highestUtility = minUtility;
 
-  const pickedCommandsMap: { [index: string]: boolean } = {};
+  const alreadyPickedCommansMap: { [index: string]: boolean } = {};
 
   pickedCommands.forEach(({ type }) => {
-    pickedCommandsMap[type] = true;
+    alreadyPickedCommansMap[type] = true;
   });
 
   const toCheckCommands: IWeightedCommand[] = [];
-  /*
-  if (pickedCommandsMap[ECommand.MOVE] !== true) {
-    toCheckCommands.push(
-      calculateMoveActionUtility({
-        mySubmarine,
-        opponentSubmarines,
-        gameMapDimensions: gameMap.dimensions,
-        terrainMap: gameMap.terrain,
-        gameMap,
-      })
-    );
-  }
-  */
 
-  if (pickedCommandsMap[ECommand.MOVE] !== true) {
+  utilityActions.forEach(({ utilityCalculator, types }) => {
+    for (let i = 0, iMax = types.length; i < iMax; i++) {
+      if (alreadyPickedCommansMap[types[i]]) {
+        return;
+      }
+    }
+
     toCheckCommands.push(
-      calculateGenericMoveActionUtility({
+      utilityCalculator({
         mySubmarine,
         opponentSubmarines,
         gameMap,
       })
     );
-  }
-
-  if (pickedCommandsMap[ECommand.TORPEDO] !== true) {
-    toCheckCommands.push(
-      calculateTorpedoActionUtility({
-        mySubmarine,
-        opponentSubmarines,
-        gameMap,
-      })
-    );
-  }
-
-  if (pickedCommandsMap[ECommand.SURFACE] !== true) {
-    toCheckCommands.push(
-      calculateSurfaceActionUtility({
-        mySubmarine,
-        gameMapDimensions: gameMap.dimensions,
-        terrainMap: gameMap.terrain,
-      })
-    );
-  }
-
-  if (pickedCommandsMap[ECommand.MINE] !== true && pickedCommandsMap[ECommand.TRIGGER] !== true) {
-    toCheckCommands.push(
-      calculateDeployMineUtility({
-        mySubmarine,
-        gameMap,
-      })
-    );
-  }
-
-  if (pickedCommandsMap[ECommand.MINE] !== true && pickedCommandsMap[ECommand.TRIGGER] !== true) {
-    toCheckCommands.push(
-      calculateTriggerMineUtility({
-        mySubmarine,
-        opponentSubmarines,
-      })
-    );
-  }
+  });
 
   const chosenCommands = toCheckCommands.filter(({ utility }) => {
-    if (maxUtility < utility) {
-      maxUtility = utility;
+    if (highestUtility < utility) {
+      highestUtility = utility;
       return true;
     }
 
@@ -106,7 +66,7 @@ export const appendNextCommand = ({
   });
 
   if (chosenCommands.length === 0) {
-    return pickedCommands;
+    return { mySubmarine, pickedCommands };
   }
 
   const clonedSubmarine = cloneSubmarine(mySubmarine);
@@ -117,25 +77,56 @@ export const appendNextCommand = ({
     submarine: clonedSubmarine,
   });
 
-  return appendNextCommand({
+  return createChainedCommands({
     pickedCommands: [...pickedCommands, chosenCommands[0]],
     mySubmarine: clonedSubmarine,
-    myPhantomSubmarines,
     opponentSubmarines,
     gameMap,
+    utilityActions,
+    minUtility,
   });
 };
 
 export const pickCommandsForTurn = ({ gameState }: { gameState: IGameState }): ICommand[] => {
-  const pickedCommands = appendNextCommand({
+  const tierOneCommands = createChainedCommands({
     pickedCommands: [],
-    mySubmarine: gameState.players.me.real,
-    myPhantomSubmarines: gameState.players.me.phantoms,
+    mySubmarine: cloneSubmarine(gameState.players.me.real),
     opponentSubmarines: gameState.players.opponent.phantoms,
     gameMap: gameState.map,
+    utilityActions: [
+      { utilityCalculator: calculateSurfaceActionUtility, types: [ECommand.SURFACE] },
+      { utilityCalculator: calculateDeployMineUtility, types: [ECommand.MINE, ECommand.TRIGGER] },
+      { utilityCalculator: calculateTriggerMineUtility, types: [ECommand.MINE, ECommand.TRIGGER] },
+    ],
+    minUtility: 0.2,
   });
 
-  return pickedCommands.map(({ type, parameters }) => {
+  const tierTwoCommands = createChainedCommands({
+    pickedCommands: tierOneCommands.pickedCommands,
+    mySubmarine: cloneSubmarine(tierOneCommands.mySubmarine),
+    opponentSubmarines: gameState.players.opponent.phantoms,
+    gameMap: gameState.map,
+    utilityActions: [
+      { utilityCalculator: calculateMoveActionUtility, types: [ECommand.MOVE] },
+      { utilityCalculator: calculateTorpedoActionUtility, types: [ECommand.TORPEDO] },
+    ],
+    minUtility: 0.2,
+  });
+
+  const tierThreeCommands = createChainedCommands({
+    pickedCommands: tierTwoCommands.pickedCommands,
+    mySubmarine: cloneSubmarine(tierTwoCommands.mySubmarine),
+    opponentSubmarines: gameState.players.opponent.phantoms,
+    gameMap: gameState.map,
+    utilityActions: [
+      { utilityCalculator: calculateSurfaceActionUtility, types: [ECommand.SURFACE] },
+      { utilityCalculator: calculateDeployMineUtility, types: [ECommand.MINE, ECommand.TRIGGER] },
+      { utilityCalculator: calculateTriggerMineUtility, types: [ECommand.MINE, ECommand.TRIGGER] },
+    ],
+    minUtility: 0.2,
+  });
+
+  return tierThreeCommands.pickedCommands.map(({ type, parameters }) => {
     return { type, parameters };
   });
 };

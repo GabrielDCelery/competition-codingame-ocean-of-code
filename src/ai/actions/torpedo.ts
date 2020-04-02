@@ -1,19 +1,14 @@
-import { IWeightedCommand } from './base-action';
 import { CHARGE_TORPEDO } from '../../constants';
 import { ECommand, ECharge } from '../../commands';
 import { calculateTorpedoDamageUtility, chooseHighestUtility } from '../utils';
-import { ISubmarine } from '../../submarines';
-import { IGameMap, ICoordinates } from '../../maps';
+import { ICoordinates } from '../../maps';
+import { TActionUtilityCalculator } from './base-action';
 
-export const calculateTorpedoActionUtility = ({
+export const calculateTorpedoActionUtility: TActionUtilityCalculator = ({
   mySubmarine,
   opponentSubmarines,
   gameMap,
-}: {
-  mySubmarine: ISubmarine;
-  opponentSubmarines: ISubmarine[];
-  gameMap: IGameMap;
-}): IWeightedCommand => {
+}) => {
   if (mySubmarine.charges[ECharge.TORPEDO] < CHARGE_TORPEDO) {
     return {
       type: ECommand.TORPEDO,

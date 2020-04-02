@@ -1,24 +1,17 @@
-import { IWeightedCommand } from './base-action';
 import { ECommand } from '../../commands';
 import { getNeighbouringCells, isCellWalkable } from '../../maps';
-import { ISubmarine } from '../../submarines';
-import { IGameMapDimensions, ITerrainMap } from '../../maps';
+import { TActionUtilityCalculator } from './base-action';
 
-export const calculateSurfaceActionUtility = ({
+export const calculateSurfaceActionUtility: TActionUtilityCalculator = ({
   mySubmarine,
-  gameMapDimensions,
-  terrainMap,
-}: {
-  mySubmarine: ISubmarine;
-  gameMapDimensions: IGameMapDimensions;
-  terrainMap: ITerrainMap;
-}): IWeightedCommand => {
+  gameMap,
+}) => {
   const possibleLocationsToMoveTo = getNeighbouringCells(mySubmarine.coordinates).filter(
     coordinates => {
       return isCellWalkable({
         coordinates,
-        gameMapDimensions,
-        terrainMap,
+        gameMapDimensions: gameMap.dimensions,
+        terrainMap: gameMap.terrain,
         visitedMap: mySubmarine.maps.visited,
       });
     }

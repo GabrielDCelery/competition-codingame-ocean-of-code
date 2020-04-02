@@ -1,41 +1,31 @@
+import { TActionUtilityCalculator } from './base-action';
+import { ECommand } from '../../commands';
+import {
+  calculateCoordinatesThreatUtility,
+  chooseHighestUtility,
+  calculateTorpedoDamageUtility,
+} from '../utils';
 import {
   ICoordinates,
+  isCellWalkable,
   getNeighbouringCells,
-  getCoordinatesAtSpecificDistance,
-  getDistanceBetweenCoordinates,
-  createVectorFromCoordinates,
   transformVectorToDirection,
-  getPathFindingWalkabilityMatrix,
+  createVectorFromCoordinates,
 } from '../../maps';
-import { IWeightedCommand } from './base-action';
-import { ECommand, ECharge } from '../../commands';
-import * as PF from 'pathfinding';
-import { isCellWalkable } from '../../maps';
-import { ISubmarine } from '../../submarines';
-import { IGameMapDimensions, ITerrainMap, IGameMap } from '../../maps';
 import { chooseChargeCommand } from './charge';
+import { average } from '../../common';
 
-const finder: PF.AStarFinder = new PF.AStarFinder();
-
-export const calculateMoveActionUtility = ({
+export const calculateMoveActionUtility: TActionUtilityCalculator = ({
   mySubmarine,
   opponentSubmarines,
-  gameMapDimensions,
-  terrainMap,
   gameMap,
-}: {
-  mySubmarine: ISubmarine;
-  opponentSubmarines: ISubmarine[];
-  gameMapDimensions: IGameMapDimensions;
-  terrainMap: ITerrainMap;
-  gameMap: IGameMap;
-}): IWeightedCommand => {
+}) => {
   const possibleLocationsToMoveTo = getNeighbouringCells(mySubmarine.coordinates).filter(
     coordinates => {
       return isCellWalkable({
         coordinates,
-        gameMapDimensions,
-        terrainMap,
+        gameMapDimensions: gameMap.dimensions,
+        terrainMap: gameMap.terrain,
         visitedMap: mySubmarine.maps.visited,
       });
     }
@@ -49,76 +39,41 @@ export const calculateMoveActionUtility = ({
     };
   }
 
-  const item = opponentSubmarines[Math.floor(Math.random() * opponentSubmarines.length)];
-  const targetCoordinates = [
-    ...getCoordinatesAtSpecificDistance({
-      coordinates: item.coordinates,
-      distance: 3,
-    }),
-  ].filter(coordinates => {
-    return (
-      getDistanceBetweenCoordinates(mySubmarine.coordinates, coordinates) !== 0 &&
-      isCellWalkable({
-        coordinates,
-        gameMapDimensions,
-        terrainMap,
-        visitedMap: mySubmarine.maps.visited,
-      })
-    );
-  });
+  const { utility, params } = chooseHighestUtility<ICoordinates>(
+    possibleLocationsToMoveTo,
+    possibleLocationToMoveTo => {
+      const { utility } = chooseHighestUtility<ICoordinates>(
+        gameMap.matrixes.torpedoReachability[possibleLocationToMoveTo.x][
+          possibleLocationToMoveTo.y
+        ],
+        coordinatesToShootAt => {
+          const torpedoDamageUtility = calculateTorpedoDamageUtility({
+            coordinatesToShootAt,
+            mySubmarine,
+            opponentSubmarines,
+          });
 
-  let distance = Infinity;
-  let selectedCoordinates: ICoordinates = { x: 0, y: 0 };
+          return torpedoDamageUtility;
+        }
+      );
 
-  for (let i = 0, iMax = targetCoordinates.length; i < iMax; i++) {
-    const targetDistance = getDistanceBetweenCoordinates(
-      mySubmarine.coordinates,
-      targetCoordinates[i]
-    );
+      const coordinatesThreatUtility = calculateCoordinatesThreatUtility({
+        gameMap,
+        coordinates: possibleLocationToMoveTo,
+        mySubmarine,
+        opponentSubmarines,
+      });
 
-    if (targetDistance < distance) {
-      distance = targetDistance;
-      selectedCoordinates = targetCoordinates[i];
+      return average([utility, 1 - coordinatesThreatUtility]);
     }
-  }
-
-  const grid: PF.Grid = new PF.Grid(
-    getPathFindingWalkabilityMatrix({
-      gameMapDimensions,
-      terrainMap,
-      visitedMap: mySubmarine.maps.visited,
-    })
-  );
-  const path: Array<Array<number>> = finder.findPath(
-    mySubmarine.coordinates.x,
-    mySubmarine.coordinates.y,
-    selectedCoordinates.x,
-    selectedCoordinates.y,
-    grid
   );
 
-  if (path[1] === undefined) {
-    const { x, y } = possibleLocationsToMoveTo[0];
-    const vector = createVectorFromCoordinates({
-      source: mySubmarine.coordinates,
-      target: { x, y },
-    });
-    const direction = transformVectorToDirection(vector);
-    return {
-      type: ECommand.MOVE,
-      utility: 0.3,
-      parameters: { direction, chargeCommand: ECharge.TORPEDO },
-    };
-  }
-
-  const [x, y] = path[1];
-
-  const vector = createVectorFromCoordinates({ source: mySubmarine.coordinates, target: { x, y } });
+  const vector = createVectorFromCoordinates({ source: mySubmarine.coordinates, target: params });
   const direction = transformVectorToDirection(vector);
 
   return {
     type: ECommand.MOVE,
-    utility: 0.3,
+    utility,
     parameters: {
       direction,
       chargeCommand: chooseChargeCommand({
