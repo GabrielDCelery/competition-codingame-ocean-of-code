@@ -4,6 +4,7 @@ import {
   getWalkableTerrainCells,
   setTerrainMapCell,
   transformGameInputToTerrain,
+  initTorpedoReachabilityMatrix,
 } from './maps';
 import {
   ESonarResult,
@@ -50,6 +51,8 @@ try {
       });
     }
   }
+
+  initTorpedoReachabilityMatrix(gameState.map);
 
   const walkableTerrainCells = getWalkableTerrainCells({
     gameMapDimensions: gameState.map.dimensions,

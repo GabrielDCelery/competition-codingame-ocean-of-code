@@ -22,11 +22,20 @@ export interface ITerrainMap {
   };
 }
 
+export interface ITorpedoReachabilityMatrix {
+  [index: number]: {
+    [index: number]: ICoordinates[];
+  };
+}
+
 export interface IGameMap {
   dimensions: IGameMapDimensions;
   terrain: ITerrainMap;
   numOfWalkableTerrainCells: number;
   numOfSectors: number;
+  matrixes: {
+    torpedoReachability: ITorpedoReachabilityMatrix;
+  };
 }
 
 export interface IVisitedMap {

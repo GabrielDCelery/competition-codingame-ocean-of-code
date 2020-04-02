@@ -15,7 +15,6 @@ import {
   createVectorFromCoordinates,
 } from '../../maps';
 import { chooseChargeCommand } from './charge';
-import { getCoordinatesReachableByTorpedo } from '../../weapons';
 import { average } from '../../common';
 
 export const calculateGenericMoveActionUtility = ({
@@ -50,11 +49,9 @@ export const calculateGenericMoveActionUtility = ({
     possibleLocationsToMoveTo,
     possibleLocationToMoveTo => {
       const { utility } = chooseHighestUtility<ICoordinates>(
-        getCoordinatesReachableByTorpedo({
-          coordinatesToShootFrom: possibleLocationToMoveTo,
-          gameMapDimensions: gameMap.dimensions,
-          terrainMap: gameMap.terrain,
-        }),
+        gameMap.matrixes.torpedoReachability[possibleLocationToMoveTo.x][
+          possibleLocationToMoveTo.y
+        ],
         coordinatesToShootAt => {
           const torpedoDamageUtility = calculateTorpedoDamageUtility({
             coordinatesToShootAt,
@@ -72,8 +69,6 @@ export const calculateGenericMoveActionUtility = ({
         mySubmarine,
         opponentSubmarines,
       });
-
-      console.error([utility, 1 - coordinatesThreatUtility]);
 
       return average([utility, 1 - coordinatesThreatUtility]);
     }

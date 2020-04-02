@@ -8,6 +8,7 @@ import {
   IGameMap,
 } from './interfaces';
 import { transformCoordinatesToKey, getNeighbouringCells } from './common-utils';
+import { getCoordinatesReachableByTorpedo } from '../weapons';
 
 export const isTerrainCellWalkable = ({
   coordinates,
@@ -58,6 +59,22 @@ export const setTerrainMapCell = ({
   terrainMap[x][y] = type;
 
   return terrainMap;
+};
+
+export const initTorpedoReachabilityMatrix = (gameMap: IGameMap): void => {
+  const { width, height } = gameMap.dimensions;
+  const matrix = new Array(width).fill(null).map(() => new Array(height).fill(null));
+  for (let x = 0; x < width; x++) {
+    for (let y = 0; y < height; y++) {
+      matrix[x][y] = getCoordinatesReachableByTorpedo({
+        coordinatesToShootFrom: { x, y },
+        gameMapDimensions: gameMap.dimensions,
+        terrainMap: gameMap.terrain,
+      });
+    }
+  }
+
+  gameMap.matrixes.torpedoReachability = matrix;
 };
 
 export const createVisitedMap = (gameMapDimensions: IGameMapDimensions): IVisitedMap => {
@@ -266,6 +283,13 @@ export const getReachableCoordinatesAtMaxDistance = ({
   gameMapDimensions: IGameMapDimensions;
   terrainMap: ITerrainMap;
 }): ICoordinates[] => {
+  if (
+    !areCoordinatesWithinBoundaries({ coordinates, gameMapDimensions }) ||
+    !isTerrainCellWalkable({ coordinates, terrainMap })
+  ) {
+    return [];
+  }
+
   const reachableCoordinates: ICoordinates[] = [];
   const trackedCellsForReachability: { [index: string]: boolean } = {};
 

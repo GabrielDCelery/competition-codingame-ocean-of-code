@@ -4,7 +4,6 @@ import { ECommand, ECharge } from '../../commands';
 import { calculateTorpedoDamageUtility, chooseHighestUtility } from '../utils';
 import { ISubmarine } from '../../submarines';
 import { IGameMap, ICoordinates } from '../../maps';
-import { getCoordinatesReachableByTorpedo } from '../../weapons';
 
 export const calculateTorpedoActionUtility = ({
   mySubmarine,
@@ -24,11 +23,7 @@ export const calculateTorpedoActionUtility = ({
   }
 
   const { utility, params } = chooseHighestUtility<ICoordinates>(
-    getCoordinatesReachableByTorpedo({
-      coordinatesToShootFrom: mySubmarine.coordinates,
-      gameMapDimensions: gameMap.dimensions,
-      terrainMap: gameMap.terrain,
-    }),
+    gameMap.matrixes.torpedoReachability[mySubmarine.coordinates.x][mySubmarine.coordinates.y],
     coordinatesToShootAt => {
       const torpedoDamageUtility = calculateTorpedoDamageUtility({
         coordinatesToShootAt,
