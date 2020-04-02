@@ -44,4 +44,4 @@ export interface IVisitedMap {
   };
 }
 
-export type TWalkabilityMatrix = Array<Array<number>>;
+export type TWalkabilityMatrix = Array<Array<boolean>>;

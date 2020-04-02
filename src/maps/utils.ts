@@ -201,30 +201,47 @@ export const getSectorForCoordinates = ({
   return sectorX + 1 + numOfSectorsX * sectorY;
 };
 
-export const getPathFindingWalkabilityMatrix = ({
-  gameMapDimensions,
-  terrainMap,
+export const createWalkabilityMatrix = ({
+  currentlyAtCoordinates,
+  gameMap,
   visitedMap,
 }: {
-  gameMapDimensions: IGameMapDimensions;
-  terrainMap: ITerrainMap;
+  currentlyAtCoordinates: ICoordinates;
+  gameMap: IGameMap;
   visitedMap: IVisitedMap;
 }): TWalkabilityMatrix => {
-  const { width, height } = gameMapDimensions;
+  const { width, height } = gameMap.dimensions;
   const matrix = new Array(height).fill(null).map(() => new Array(width).fill(null));
 
   for (let x = 0; x < width; x++) {
     for (let y = 0; y < height; y++) {
       const coordinates = { x, y };
-      matrix[y][x] =
-        isTerrainCellWalkable({ coordinates, terrainMap }) === true &&
+
+      matrix[x][y] =
+        isTerrainCellWalkable({ coordinates, terrainMap: gameMap.terrain }) === true &&
         hasVisitedCellBefore({ coordinates, visitedMap }) === false
-          ? 0
-          : 1;
+          ? true
+          : false;
     }
   }
 
+  matrix[currentlyAtCoordinates.x][currentlyAtCoordinates.y] = false;
+
   return matrix;
+};
+
+export const getRegionSize = ({
+  size,
+  gameMap,
+  coordinatesToCalculateFrom,
+  walkabilityMatrix,
+}: {
+  size: number;
+  gameMap: IGameMap;
+  coordinatesToCalculateFrom: ICoordinates;
+  walkabilityMatrix: TWalkabilityMatrix;
+}): number => {
+  const { x, y } = coordinatesToCalculateFrom;
 };
 
 const processCoordinatesForReachibility = ({
