@@ -7,16 +7,16 @@ import {
   ITriggerCommandParameters,
 } from './interfaces';
 import { getDamageTakenFromTorpedo, getDamageTakenFromMine } from '../weapons';
-import { getSectorForCoordinates, IGameMapDimensions } from '../maps';
+import { getSectorForCoordinates, IGameMap } from '../maps';
 
 const createListOfSubmarinesFromProcessedCommand = ({
-  gameMapDimensions,
+  gameMap,
   ownMinHealth,
   ownSubmarine,
   enemyCommand,
   enemySonarResult,
 }: {
-  gameMapDimensions: IGameMapDimensions;
+  gameMap: IGameMap;
   ownMinHealth: number;
   ownSubmarine: ISubmarine;
   enemyCommand: ICommand;
@@ -75,7 +75,7 @@ const createListOfSubmarinesFromProcessedCommand = ({
       const { sector } = parameters as ISonarCommandParameters;
       const mySector = getSectorForCoordinates({
         coordinates: ownSubmarine.coordinates,
-        gameMapDimensions,
+        gameMapDimensions: gameMap.dimensions,
       });
       if (enemySonarResult === ESonarResult.YES) {
         return mySector === sector ? [ownSubmarine] : [];
@@ -93,13 +93,13 @@ const createListOfSubmarinesFromProcessedCommand = ({
 };
 
 export const getSubmarinesFilteredByEnemyCommands = ({
-  gameMapDimensions,
+  gameMap,
   ownMinHealth,
   ownSubmarines,
   enemyCommands,
   enemySonarResult,
 }: {
-  gameMapDimensions: IGameMapDimensions;
+  gameMap: IGameMap;
   ownMinHealth: number;
   ownSubmarines: ISubmarine[];
   enemyCommands: ICommand[];
@@ -112,7 +112,7 @@ export const getSubmarinesFilteredByEnemyCommands = ({
 
     filteredSubmarines.forEach(ownSubmarine => {
       const newFilteredSubmarinesFromCommand = createListOfSubmarinesFromProcessedCommand({
-        gameMapDimensions,
+        gameMap,
         ownMinHealth,
         ownSubmarine,
         enemyCommand,

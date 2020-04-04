@@ -13,13 +13,12 @@ import {
 } from '../weapons';
 import {
   EDirection,
-  IGameMapDimensions,
-  ITerrainMap,
   isCellWalkable,
   addVectorToCoordinates,
   multiplyVector,
   transformDirectionToVector,
   createVisitedMap,
+  IGameMap,
 } from '../maps';
 import {
   CHARGE_ANY_PER_MOVE,
@@ -31,17 +30,15 @@ import {
 } from '../constants';
 
 const createListOfSubmarinesFromProcessedCommand = ({
-  gameMapDimensions,
   ownCommand,
   ownMinHealth,
   ownSubmarine,
-  terrainMap,
+  gameMap,
 }: {
-  gameMapDimensions: IGameMapDimensions;
   ownMinHealth: number;
   ownSubmarine: ISubmarine;
   ownCommand: ICommand;
-  terrainMap: ITerrainMap;
+  gameMap: IGameMap;
 }): ISubmarine[] => {
   const { type, parameters } = ownCommand;
 
@@ -67,8 +64,8 @@ const createListOfSubmarinesFromProcessedCommand = ({
       if (
         isCellWalkable({
           coordinates: newCoordinates,
-          gameMapDimensions,
-          terrainMap,
+          gameMapDimensions: gameMap.dimensions,
+          terrainMap: gameMap.terrain,
           visitedMap: ownSubmarine.maps.visited,
         }) === false
       ) {
@@ -85,7 +82,7 @@ const createListOfSubmarinesFromProcessedCommand = ({
       if (ownSubmarine.health < ownMinHealth) {
         return [];
       }
-      ownSubmarine.maps.visited = createVisitedMap(gameMapDimensions);
+      ownSubmarine.maps.visited = createVisitedMap(gameMap.dimensions);
       return [ownSubmarine];
     }
 
@@ -123,8 +120,8 @@ const createListOfSubmarinesFromProcessedCommand = ({
           if (
             isCellWalkable({
               coordinates: targetCoordinates,
-              gameMapDimensions,
-              terrainMap,
+              gameMapDimensions: gameMap.dimensions,
+              terrainMap: gameMap.terrain,
               visitedMap: ownSubmarine.maps.visited,
             }) === false
           ) {
@@ -173,17 +170,15 @@ const createListOfSubmarinesFromProcessedCommand = ({
 };
 
 export const getSubmarinesFilteredByOwnCommands = ({
-  gameMapDimensions,
   ownMinHealth,
   ownSubmarines,
   ownCommands,
-  terrainMap,
+  gameMap,
 }: {
-  gameMapDimensions: IGameMapDimensions;
   ownMinHealth: number;
   ownSubmarines: ISubmarine[];
   ownCommands: ICommand[];
-  terrainMap: ITerrainMap;
+  gameMap: IGameMap;
 }): ISubmarine[] => {
   let filteredSubmarines: ISubmarine[] = ownSubmarines;
 
@@ -192,11 +187,10 @@ export const getSubmarinesFilteredByOwnCommands = ({
 
     filteredSubmarines.forEach(ownSubmarine => {
       const newFilteredSubmarinesFromCommand = createListOfSubmarinesFromProcessedCommand({
-        gameMapDimensions,
         ownMinHealth,
         ownSubmarine,
         ownCommand,
-        terrainMap,
+        gameMap,
       });
 
       newFilteredSubmarines = [...newFilteredSubmarines, ...newFilteredSubmarinesFromCommand];

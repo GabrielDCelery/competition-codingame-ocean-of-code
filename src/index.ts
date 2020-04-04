@@ -41,7 +41,6 @@ try {
   for (let y = 0; y < height; y++) {
     const line: string = readNextLine();
     const cells = [...line.split('')];
-
     for (let x = 0; x < width; x++) {
       const cell = cells[x];
 
@@ -110,23 +109,20 @@ try {
 
     const opponentCommands = transformCommandsStringToCommands(opponentCommandsString);
     gameState.players.opponent.phantoms = getSubmarinesFilteredByEnemyCommands({
-      gameMapDimensions: gameState.map.dimensions,
+      gameMap: gameState.map,
       ownMinHealth: opponentHealth,
       ownSubmarines: gameState.players.opponent.phantoms,
       enemyCommands: gameState.players.me.real.commands.last,
       enemySonarResult: sonarResultByMe,
     });
-
     gameState.players.opponent.phantoms = getSubmarinesFilteredByOwnCommands({
-      gameMapDimensions: gameState.map.dimensions,
+      gameMap: gameState.map,
       ownMinHealth: opponentHealth,
       ownSubmarines: gameState.players.opponent.phantoms,
       ownCommands: opponentCommands,
-      terrainMap: gameState.map.terrain,
     });
-
     gameState.players.me.phantoms = getSubmarinesFilteredByEnemyCommands({
-      gameMapDimensions: gameState.map.dimensions,
+      gameMap: gameState.map,
       ownMinHealth: myHealth,
       ownSubmarines: gameState.players.me.phantoms,
       enemyCommands: opponentCommands,
@@ -136,13 +132,11 @@ try {
         commands: opponentCommands,
       }),
     });
-
     gameState.players.me.phantoms = getSubmarinesFilteredByOwnCommands({
-      gameMapDimensions: gameState.map.dimensions,
+      gameMap: gameState.map,
       ownMinHealth: myHealth,
       ownSubmarines: gameState.players.me.phantoms,
       ownCommands: gameState.players.me.real.commands.last,
-      terrainMap: gameState.map.terrain,
     });
 
     setNewSubmarineState({
