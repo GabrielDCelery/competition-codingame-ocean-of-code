@@ -4,6 +4,7 @@ import {
   calculateCoordinatesThreatUtility,
   chooseHighestUtility,
   calculateTorpedoDamageUtility,
+  calculateFreeMovementUtility,
 } from '../utils';
 import {
   ICoordinates,
@@ -11,6 +12,7 @@ import {
   getNeighbouringCells,
   transformVectorToDirection,
   createVectorFromCoordinates,
+  createWalkabilityMatrix,
 } from '../../maps';
 import { chooseChargeCommand } from './charge';
 import { average } from '../../common';
@@ -42,6 +44,18 @@ export const calculateMoveActionUtility: TActionUtilityCalculator = ({
   const { utility, params } = chooseHighestUtility<ICoordinates>(
     possibleLocationsToMoveTo,
     possibleLocationToMoveTo => {
+      const walkabilityMatrix = createWalkabilityMatrix({
+        currentlyAtCoordinates: mySubmarine.coordinates,
+        gameMap,
+        visitedMap: mySubmarine.maps.visited,
+      });
+
+      const freeMovementUtility = calculateFreeMovementUtility({
+        coordinatesToMoveTo: possibleLocationToMoveTo,
+        gameMap,
+        walkabilityMatrix,
+      });
+
       const { utility } = chooseHighestUtility<ICoordinates>(
         gameMap.matrixes.torpedoReachability[possibleLocationToMoveTo.x][
           possibleLocationToMoveTo.y
@@ -64,7 +78,7 @@ export const calculateMoveActionUtility: TActionUtilityCalculator = ({
         opponentSubmarines,
       });
 
-      return average([utility, 1 - coordinatesThreatUtility]);
+      return average([utility, 1 - coordinatesThreatUtility, freeMovementUtility]);
     }
   );
 

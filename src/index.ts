@@ -5,6 +5,7 @@ import {
   setTerrainMapCell,
   transformGameInputToTerrain,
   initTorpedoReachabilityMatrix,
+  initTorpedoReachabilityMapMatrix,
 } from './maps';
 import {
   ESonarResult,
@@ -53,6 +54,7 @@ try {
   }
 
   initTorpedoReachabilityMatrix(gameState.map);
+  initTorpedoReachabilityMapMatrix(gameState.map);
 
   const walkableTerrainCells = getWalkableTerrainCells({
     gameMapDimensions: gameState.map.dimensions,
@@ -107,7 +109,6 @@ try {
     const opponentCommandsString = readNextLine();
 
     const opponentCommands = transformCommandsStringToCommands(opponentCommandsString);
-
     gameState.players.opponent.phantoms = getSubmarinesFilteredByEnemyCommands({
       gameMapDimensions: gameState.map.dimensions,
       ownMinHealth: opponentHealth,

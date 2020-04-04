@@ -28,6 +28,12 @@ export interface ITorpedoReachabilityMatrix {
   };
 }
 
+export interface ITorpedoReachabilityMap {
+  [index: number]: {
+    [index: number]: { [index: string]: boolean };
+  };
+}
+
 export interface IGameMap {
   dimensions: IGameMapDimensions;
   terrain: ITerrainMap;
@@ -35,6 +41,7 @@ export interface IGameMap {
   numOfSectors: number;
   matrixes: {
     torpedoReachability: ITorpedoReachabilityMatrix;
+    torpedoReachabilityMap: ITorpedoReachabilityMap;
   };
 }
 

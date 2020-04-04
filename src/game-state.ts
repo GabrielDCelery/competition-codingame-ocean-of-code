@@ -28,6 +28,7 @@ export const createBlankGameState = (): IGameState => {
       numOfSectors: 0,
       matrixes: {
         torpedoReachability: [],
+        torpedoReachabilityMap: [],
       },
     },
     players: {

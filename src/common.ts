@@ -1,13 +1,13 @@
 export const normalizeLinear = ({
   value,
   max,
-  k,
+  k = 1,
 }: {
   value: number;
   max: number;
   k?: number;
 }): number => {
-  return Math.min(0, (k || 1) * (value / max));
+  return Math.min(1, k * (value / max));
 };
 
 export const normalizeExponential = ({

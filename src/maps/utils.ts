@@ -77,6 +77,28 @@ export const initTorpedoReachabilityMatrix = (gameMap: IGameMap): void => {
   gameMap.matrixes.torpedoReachability = matrix;
 };
 
+export const initTorpedoReachabilityMapMatrix = (gameMap: IGameMap): void => {
+  const { width, height } = gameMap.dimensions;
+  const matrix = new Array(width).fill(null).map(() => new Array(height).fill(null));
+  for (let x = 0; x < width; x++) {
+    for (let y = 0; y < height; y++) {
+      const map: { [index: string]: boolean } = {};
+
+      getCoordinatesReachableByTorpedo({
+        coordinatesToShootFrom: { x, y },
+        gameMapDimensions: gameMap.dimensions,
+        terrainMap: gameMap.terrain,
+      }).forEach(coordinates => {
+        map[transformCoordinatesToKey(coordinates)] = true;
+      });
+
+      matrix[x][y] = map;
+    }
+  }
+
+  gameMap.matrixes.torpedoReachabilityMap = matrix;
+};
+
 export const createVisitedMap = (gameMapDimensions: IGameMapDimensions): IVisitedMap => {
   const { width, height } = gameMapDimensions;
   return new Array(width).fill(null).map(() => new Array(height).fill(false));
@@ -218,10 +240,10 @@ export const createWalkabilityMatrix = ({
       const coordinates = { x, y };
 
       matrix[x][y] =
-        isTerrainCellWalkable({ coordinates, terrainMap: gameMap.terrain }) === true &&
-        hasVisitedCellBefore({ coordinates, visitedMap }) === false
-          ? true
-          : false;
+        isTerrainCellWalkable({ coordinates, terrainMap: gameMap.terrain }) === false ||
+        hasVisitedCellBefore({ coordinates, visitedMap }) === true
+          ? false
+          : true;
     }
   }
 
@@ -231,17 +253,36 @@ export const createWalkabilityMatrix = ({
 };
 
 export const getRegionSize = ({
-  size,
   gameMap,
   coordinatesToCalculateFrom,
   walkabilityMatrix,
 }: {
-  size: number;
   gameMap: IGameMap;
   coordinatesToCalculateFrom: ICoordinates;
   walkabilityMatrix: TWalkabilityMatrix;
 }): number => {
   const { x, y } = coordinatesToCalculateFrom;
+  if (
+    areCoordinatesWithinBoundaries({
+      coordinates: { x, y },
+      gameMapDimensions: gameMap.dimensions,
+    }) === false ||
+    walkabilityMatrix[x][y] === false
+  ) {
+    return 0;
+  }
+  walkabilityMatrix[x][y] = false;
+  let size = 1;
+
+  getNeighbouringCells({ x, y }).forEach(neighbouringCell => {
+    size += getRegionSize({
+      gameMap,
+      walkabilityMatrix,
+      coordinatesToCalculateFrom: neighbouringCell,
+    });
+  });
+
+  return size;
 };
 
 const processCoordinatesForReachibility = ({

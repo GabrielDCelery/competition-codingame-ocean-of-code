@@ -40,11 +40,11 @@ export const chooseChargeCommand = ({
   if (mySubmarine.charges[ECharge.TORPEDO] < CHARGE_TORPEDO) {
     return ECharge.TORPEDO;
   }
-
+  /*
   if (mySubmarine.charges[ECharge.SILENCE] < CHARGE_SILENCE) {
     return ECharge.SILENCE;
   }
-
+*/
   /*
   if (
     mySubmarine.charges.SONAR < CHARGE_SONAR &&

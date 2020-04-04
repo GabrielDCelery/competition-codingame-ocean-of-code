@@ -4,7 +4,7 @@
   "description": "CodinGame Ocean of Code Challenge",
   "main": "index.js",
   "scripts": {
-    "bundle:prepare": "rm -rf temp && rm -rf dist",
+    "bundle:prepare": "rm -rf temp",
     "bundle:ts": "./node_modules/.bin/tsc --outDir ./temp/src",
     "bundle:node_modules": "cp package* ./temp && npm install --prefix ./temp --only=prod",
     "bundle:parcel": "./node_modules/.bin/parcel build ./temp/src/index.js --out-dir ./dist",
