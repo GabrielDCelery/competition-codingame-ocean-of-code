@@ -73,7 +73,7 @@ export const createChainedCommands = ({
 
   applyCommandsToSubmarine({
     commands: chosenCommands,
-    gameMapDimensions: gameMap.dimensions,
+    gameMap,
     submarine: clonedSubmarine,
   });
 

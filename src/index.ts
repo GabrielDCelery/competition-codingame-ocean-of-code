@@ -1,11 +1,11 @@
 import { pickCommandsForTurn } from './ai';
 import {
-  createTerrainMap,
-  getWalkableTerrainCells,
-  setTerrainMapCell,
+  getWalkableCoordinates,
   transformGameInputToTerrain,
   initTorpedoReachabilityMatrix,
   initTorpedoReachabilityMapMatrix,
+  createBlankWalkabilityMatrix,
+  ETerrain,
 } from './maps';
 import {
   ESonarResult,
@@ -35,30 +35,24 @@ try {
       return parseInt(elem, 10);
     });
 
-  gameState.map.dimensions = { width, height, sectorSize: 5 };
-  gameState.map.terrain = createTerrainMap(gameState.map.dimensions);
+  gameState.map.width = width;
+  gameState.map.height = height;
+  gameState.map.sectorSize = 5;
+  gameState.map.walkabilityMatrix = createBlankWalkabilityMatrix(gameState.map);
 
   for (let y = 0; y < height; y++) {
     const line: string = readNextLine();
     const cells = [...line.split('')];
     for (let x = 0; x < width; x++) {
       const cell = cells[x];
-
-      setTerrainMapCell({
-        coordinates: { x, y },
-        type: transformGameInputToTerrain(cell),
-        terrainMap: gameState.map.terrain,
-      });
+      gameState.map.walkabilityMatrix[x][y] = transformGameInputToTerrain(cell) === ETerrain.WATER;
     }
   }
 
   initTorpedoReachabilityMatrix(gameState.map);
   initTorpedoReachabilityMapMatrix(gameState.map);
 
-  const walkableTerrainCells = getWalkableTerrainCells({
-    gameMapDimensions: gameState.map.dimensions,
-    terrainMap: gameState.map.terrain,
-  });
+  const walkableTerrainCells = getWalkableCoordinates(gameState.map.walkabilityMatrix);
 
   gameState.map.numOfWalkableTerrainCells = walkableTerrainCells.length;
   gameState.map.numOfSectors = 9;
@@ -69,20 +63,20 @@ try {
   gameState.players.me.real = createSubmarine({
     health: HEALTH_SUBMARINE,
     coordinates: mySubmarineStartingCoordinates,
-    gameMapDimensions: gameState.map.dimensions,
+    gameMap: gameState.map,
   });
   gameState.players.me.phantoms = walkableTerrainCells.map(coordinates => {
     return createSubmarine({
       health: HEALTH_SUBMARINE,
       coordinates,
-      gameMapDimensions: gameState.map.dimensions,
+      gameMap: gameState.map,
     });
   });
   gameState.players.opponent.phantoms = walkableTerrainCells.map(coordinates => {
     return createSubmarine({
       health: HEALTH_SUBMARINE,
       coordinates,
-      gameMapDimensions: gameState.map.dimensions,
+      gameMap: gameState.map,
     });
   });
 
@@ -108,19 +102,23 @@ try {
     const opponentCommandsString = readNextLine();
 
     const opponentCommands = transformCommandsStringToCommands(opponentCommandsString);
+
+    const start = new Date().getTime();
     gameState.players.opponent.phantoms = getSubmarinesFilteredByEnemyCommands({
       gameMap: gameState.map,
       ownMinHealth: opponentHealth,
       ownSubmarines: gameState.players.opponent.phantoms,
-      enemyCommands: gameState.players.me.real.commands.last,
+      enemyCommands: gameState.players.me.real.lastCommands,
       enemySonarResult: sonarResultByMe,
     });
+    console.error(start - new Date().getTime());
     gameState.players.opponent.phantoms = getSubmarinesFilteredByOwnCommands({
       gameMap: gameState.map,
       ownMinHealth: opponentHealth,
       ownSubmarines: gameState.players.opponent.phantoms,
       ownCommands: opponentCommands,
     });
+    console.error(start - new Date().getTime());
     gameState.players.me.phantoms = getSubmarinesFilteredByEnemyCommands({
       gameMap: gameState.map,
       ownMinHealth: myHealth,
@@ -128,7 +126,7 @@ try {
       enemyCommands: opponentCommands,
       enemySonarResult: calculateSonarResult({
         entityCoordinates: gameState.players.me.real.coordinates,
-        gameMapDimensions: gameState.map.dimensions,
+        gameMap: gameState.map,
         commands: opponentCommands,
       }),
     });
@@ -136,7 +134,7 @@ try {
       gameMap: gameState.map,
       ownMinHealth: myHealth,
       ownSubmarines: gameState.players.me.phantoms,
-      ownCommands: gameState.players.me.real.commands.last,
+      ownCommands: gameState.players.me.real.lastCommands,
     });
 
     setNewSubmarineState({
@@ -156,7 +154,7 @@ try {
 
     applyCommandsToSubmarine({
       commands: myCommands,
-      gameMapDimensions: gameState.map.dimensions,
+      gameMap: gameState.map,
       submarine: gameState.players.me.real,
     });
 

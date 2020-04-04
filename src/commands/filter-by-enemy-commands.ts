@@ -7,7 +7,7 @@ import {
   ITriggerCommandParameters,
 } from './interfaces';
 import { getDamageTakenFromTorpedo, getDamageTakenFromMine } from '../weapons';
-import { getSectorForCoordinates, IGameMap } from '../maps';
+import { getSectorForCoordinates, IGameMap, transposeWalkabilityMatrixes } from '../maps';
 
 const createListOfSubmarinesFromProcessedCommand = ({
   gameMap,
@@ -73,10 +73,7 @@ const createListOfSubmarinesFromProcessedCommand = ({
 
     case ECommand.SONAR: {
       const { sector } = parameters as ISonarCommandParameters;
-      const mySector = getSectorForCoordinates({
-        coordinates: ownSubmarine.coordinates,
-        gameMapDimensions: gameMap.dimensions,
-      });
+      const mySector = getSectorForCoordinates({ coordinates: ownSubmarine.coordinates, gameMap });
       if (enemySonarResult === ESonarResult.YES) {
         return mySector === sector ? [ownSubmarine] : [];
       }
@@ -105,25 +102,46 @@ export const getSubmarinesFilteredByEnemyCommands = ({
   enemyCommands: ICommand[];
   enemySonarResult: ESonarResult;
 }): ISubmarine[] => {
-  let filteredSubmarines: ISubmarine[] = ownSubmarines;
+  const { width, height } = gameMap;
+  let finalList: ISubmarine[] = ownSubmarines;
 
   enemyCommands.forEach(enemyCommand => {
-    let newFilteredSubmarines: ISubmarine[] = [];
+    const newFilteredSubmarinesList: ISubmarine[] = [];
+    const newFilteredSubmarinesMatrix: ISubmarine[][] = new Array(width)
+      .fill(null)
+      .map(() => new Array(height).fill(null));
 
-    filteredSubmarines.forEach(ownSubmarine => {
-      const newFilteredSubmarinesFromCommand = createListOfSubmarinesFromProcessedCommand({
+    finalList.forEach(ownSubmarine => {
+      createListOfSubmarinesFromProcessedCommand({
         gameMap,
         ownMinHealth,
         ownSubmarine,
         enemyCommand,
         enemySonarResult,
-      });
+      }).forEach(newFilteredSubmarine => {
+        const { x, y } = newFilteredSubmarine.coordinates;
+        if (newFilteredSubmarinesMatrix[x][y] === null) {
+          newFilteredSubmarinesMatrix[x][y] = newFilteredSubmarine;
+          return;
+        }
 
-      newFilteredSubmarines = [...newFilteredSubmarines, ...newFilteredSubmarinesFromCommand];
+        newFilteredSubmarinesMatrix[x][y].walkabilityMatrix = transposeWalkabilityMatrixes([
+          newFilteredSubmarinesMatrix[x][y].walkabilityMatrix,
+          newFilteredSubmarine.walkabilityMatrix,
+        ]);
+      });
     });
 
-    filteredSubmarines = [...newFilteredSubmarines];
+    for (let x = 0; x < width; x++) {
+      for (let y = 0; y < height; y++) {
+        if (newFilteredSubmarinesMatrix[x][y] !== null) {
+          newFilteredSubmarinesList.push(newFilteredSubmarinesMatrix[x][y]);
+        }
+      }
+    }
+
+    finalList = [...newFilteredSubmarinesList];
   });
 
-  return filteredSubmarines;
+  return finalList;
 };

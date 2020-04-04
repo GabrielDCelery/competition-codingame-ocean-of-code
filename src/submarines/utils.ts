@@ -1,32 +1,28 @@
 import { ISubmarine, INewSubmarineState } from './interfaces';
 import { ECharge } from '../commands';
-import { ICoordinates, IGameMapDimensions, createVisitedMap } from '../maps';
+import { ICoordinates, createTerrainWalkabilityMatrix, IGameMap } from '../maps';
 import { CHARGE_MINE, CHARGE_SILENCE, CHARGE_TORPEDO, CHARGE_SONAR } from '../constants';
 
 export const createSubmarine = ({
   health,
   coordinates,
-  gameMapDimensions,
+  gameMap,
 }: {
   health: number;
   coordinates: ICoordinates;
-  gameMapDimensions: IGameMapDimensions;
+  gameMap: IGameMap;
 }): ISubmarine => {
   return {
     health,
     coordinates,
-    commands: {
-      last: [],
-    },
+    lastCommands: [],
     charges: {
       [ECharge.TORPEDO]: 0,
       [ECharge.SONAR]: 0,
       [ECharge.SILENCE]: 0,
       [ECharge.MINE]: 0,
     },
-    maps: {
-      visited: createVisitedMap(gameMapDimensions),
-    },
+    walkabilityMatrix: createTerrainWalkabilityMatrix(gameMap),
     mines: [],
   };
 };

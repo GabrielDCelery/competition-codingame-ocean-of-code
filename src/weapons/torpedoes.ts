@@ -4,26 +4,10 @@ import {
   transformCoordinatesToKey,
   getDistanceBetweenCoordinates,
   getReachableCoordinatesAtMaxDistance,
-  IGameMapDimensions,
-  ITerrainMap,
   areCoordinatesTheSame,
   IGameMap,
 } from '../maps';
 import { DAMAGE_TORPEDO, RANGE_TORPEDO } from '../constants';
-
-export const getTorpedoSplashDamageMap = (
-  detonatedAtCoordinates: ICoordinates
-): { [index: string]: number } => {
-  const map: { [index: string]: number } = {};
-
-  map[transformCoordinatesToKey(detonatedAtCoordinates)] = DAMAGE_TORPEDO;
-
-  getNeighbouringCellsIncludingDiagonal(detonatedAtCoordinates).map(coordinates => {
-    map[transformCoordinatesToKey(coordinates)] = DAMAGE_TORPEDO / 2;
-  });
-
-  return map;
-};
 
 export const areCoordinatesReachableByTorpedo = (
   source: ICoordinates,
@@ -93,17 +77,14 @@ export const getDamageTakenFromTorpedo = ({
 
 export const getCoordinatesReachableByTorpedo = ({
   coordinatesToShootFrom,
-  gameMapDimensions,
-  terrainMap,
+  gameMap,
 }: {
   coordinatesToShootFrom: ICoordinates;
-  gameMapDimensions: IGameMapDimensions;
-  terrainMap: ITerrainMap;
+  gameMap: IGameMap;
 }): ICoordinates[] => {
   return getReachableCoordinatesAtMaxDistance({
     coordinates: coordinatesToShootFrom,
     maxDistance: RANGE_TORPEDO,
-    gameMapDimensions,
-    terrainMap,
+    walkabilityMatrix: gameMap.walkabilityMatrix,
   });
 };

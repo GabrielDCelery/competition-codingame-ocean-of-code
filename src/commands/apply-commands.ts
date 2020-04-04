@@ -2,32 +2,32 @@ import { ISubmarine, chargeRealSubmarine } from '../submarines';
 import { ECommand, ECharge } from './enums';
 import {
   ICommand,
+  IMineCommandParameters,
   IMoveCommandParameters,
   ITorpedoCommandParameters,
-  IMineCommandParameters,
   ITriggerCommandParameters,
 } from './interfaces';
 import {
   EDirection,
-  createVisitedMap,
-  IGameMapDimensions,
+  IGameMap,
   addVectorToCoordinates,
-  transformDirectionToVector,
   areCoordinatesTheSame,
+  createTerrainWalkabilityMatrix,
+  transformDirectionToVector,
 } from '../maps';
 import { CHARGE_ANY_PER_MOVE, CHARGE_TORPEDO, CHARGE_MINE } from '../constants';
 import { getDamageTakenFromTorpedo } from '../weapons';
 
 export const applyCommandsToSubmarine = ({
   commands,
-  gameMapDimensions,
+  gameMap,
   submarine,
 }: {
   commands: ICommand[];
-  gameMapDimensions: IGameMapDimensions;
+  gameMap: IGameMap;
   submarine: ISubmarine;
 }): void => {
-  submarine.commands.last = commands;
+  submarine.lastCommands = commands;
 
   commands.forEach(command => {
     const { type, parameters } = command;
@@ -40,7 +40,7 @@ export const applyCommandsToSubmarine = ({
           vector: transformDirectionToVector(direction),
         });
         const { x, y } = submarine.coordinates;
-        submarine.maps.visited[x][y] = true;
+        submarine.walkabilityMatrix[x][y] = false;
         submarine.coordinates = newCoordinates;
         chargeRealSubmarine({
           submarine,
@@ -52,7 +52,7 @@ export const applyCommandsToSubmarine = ({
 
       case ECommand.SURFACE: {
         submarine.health = submarine.health - 1;
-        submarine.maps.visited = createVisitedMap(gameMapDimensions);
+        submarine.walkabilityMatrix = createTerrainWalkabilityMatrix(gameMap);
         return;
       }
 

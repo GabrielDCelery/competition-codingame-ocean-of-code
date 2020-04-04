@@ -2,8 +2,8 @@ import {
   EDirection,
   transformDirectionToVector,
   ICoordinates,
-  IGameMapDimensions,
   getSectorForCoordinates,
+  IGameMap,
 } from '../maps';
 import { ECommand, ECharge, ESonarResult } from './enums';
 import {
@@ -181,13 +181,13 @@ export const uGetSonarResultFromSectors = ({
 };
 
 export const calculateSonarResult = ({
-  gameMapDimensions,
+  gameMap,
   entityCoordinates,
   commands,
 }: {
   entityCoordinates: ICoordinates;
   commands: ICommand[];
-  gameMapDimensions: IGameMapDimensions;
+  gameMap: IGameMap;
 }): ESonarResult => {
   let result = ESonarResult.NA;
   commands.forEach(command => {
@@ -195,10 +195,7 @@ export const calculateSonarResult = ({
     if (type !== ECommand.SONAR) {
       return;
     }
-    const entitySector = getSectorForCoordinates({
-      coordinates: entityCoordinates,
-      gameMapDimensions,
-    });
+    const entitySector = getSectorForCoordinates({ coordinates: entityCoordinates, gameMap });
     const { sector } = parameters as ISonarCommandParameters;
 
     result = entitySector === sector ? ESonarResult.YES : ESonarResult.NO;

@@ -1,5 +1,3 @@
-import { ETerrain } from './enums';
-
 export interface ICoordinates {
   x: number;
   y: number;
@@ -8,18 +6,6 @@ export interface ICoordinates {
 export interface IVector {
   x: number;
   y: number;
-}
-
-export interface IGameMapDimensions {
-  width: number;
-  height: number;
-  sectorSize: number;
-}
-
-export interface ITerrainMap {
-  [index: number]: {
-    [index: number]: ETerrain;
-  };
 }
 
 export interface ITorpedoReachabilityMatrix {
@@ -35,20 +21,16 @@ export interface ITorpedoReachabilityMap {
 }
 
 export interface IGameMap {
-  dimensions: IGameMapDimensions;
-  terrain: ITerrainMap;
+  width: number;
+  height: number;
+  sectorSize: number;
   numOfWalkableTerrainCells: number;
   numOfSectors: number;
+  walkabilityMatrix: TWalkabilityMatrix;
   matrixes: {
     torpedoReachability: ITorpedoReachabilityMatrix;
     torpedoReachabilityMap: ITorpedoReachabilityMap;
   };
 }
 
-export interface IVisitedMap {
-  [index: number]: {
-    [index: number]: boolean;
-  };
-}
-
-export type TWalkabilityMatrix = Array<Array<boolean>>;
+export type TWalkabilityMatrix = boolean[][];

@@ -1,11 +1,10 @@
-import { getDamageTakenFromTorpedo, areCoordinatesReachableByTorpedo } from '../../weapons';
-import { ISubmarine } from '../../submarines';
 import {
-  ICoordinates,
-  isCellValid,
-  getNeighbouringCellsIncludingDiagonal,
-  IGameMap,
-} from '../../maps';
+  getDamageTakenFromTorpedo,
+  canTorpedoDirectlyHitTheTarget,
+  canTorpedoSplashDamageTheTarget,
+} from '../../weapons';
+import { ISubmarine } from '../../submarines';
+import { ICoordinates, IGameMap } from '../../maps';
 import { average } from '../../common';
 import { ECharge } from '../../commands';
 import { CHARGE_TORPEDO } from '../../constants';
@@ -49,44 +48,23 @@ export const calculateCoordinatesThreatUtility = ({
     return 0;
   }
 
-  const damageToMe = getDamageTakenFromTorpedo({
-    submarineCoordinates: mySubmarine.coordinates,
-    detonatedAtCoordinates: coordinates,
-  });
-
-  const directHitUtils = opponentSubmarines.map(opponentSubmarine => {
-    if (areCoordinatesReachableByTorpedo(coordinates, opponentSubmarine.coordinates) === false) {
-      return 0;
-    }
-
-    const damageToMyOpponent = getDamageTakenFromTorpedo({
-      submarineCoordinates: opponentSubmarine.coordinates,
-      detonatedAtCoordinates: coordinates,
-    });
-
-    return getUtilityForDamage({
-      damageToMe,
-      damageToMyOpponent,
-      myHealth: mySubmarine.health,
-      opponentHealth: opponentSubmarine.health,
-    });
-  });
-
-  const splashDamageUtils = getNeighbouringCellsIncludingDiagonal(coordinates).map(coordinates => {
-    if (isCellValid({ coordinates, gameMap }) === false) {
-      return 0;
-    }
-
-    const damageToMe = getDamageTakenFromTorpedo({
-      submarineCoordinates: mySubmarine.coordinates,
-      detonatedAtCoordinates: coordinates,
-    });
-
-    const utils = opponentSubmarines.map(opponentSubmarine => {
-      if (areCoordinatesReachableByTorpedo(coordinates, opponentSubmarine.coordinates) === false) {
-        return 0;
-      }
-
+  const utils = opponentSubmarines.map(opponentSubmarine => {
+    if (
+      canTorpedoDirectlyHitTheTarget({
+        source: opponentSubmarine.coordinates,
+        target: coordinates,
+        gameMap,
+      }) ||
+      canTorpedoSplashDamageTheTarget({
+        source: opponentSubmarine.coordinates,
+        target: coordinates,
+        gameMap,
+      })
+    ) {
+      const damageToMe = getDamageTakenFromTorpedo({
+        submarineCoordinates: mySubmarine.coordinates,
+        detonatedAtCoordinates: coordinates,
+      });
       const damageToMyOpponent = getDamageTakenFromTorpedo({
         submarineCoordinates: opponentSubmarine.coordinates,
         detonatedAtCoordinates: coordinates,
@@ -98,10 +76,10 @@ export const calculateCoordinatesThreatUtility = ({
         myHealth: mySubmarine.health,
         opponentHealth: opponentSubmarine.health,
       });
-    });
+    }
 
-    return average(utils);
+    return 0;
   });
 
-  return average([...directHitUtils, ...splashDamageUtils]);
+  return average(utils);
 };

@@ -1,9 +1,10 @@
 import { ECharge, ECommand } from '../../commands';
-import { getNeighbouringCells, isTerrainCellWalkable, ICoordinates } from '../../maps';
 import {
-  areCoordinatesWithinBoundaries,
-  transformCoordinatesToKey,
+  ICoordinates,
+  areCoordinatesWalkable,
   createVectorFromCoordinates,
+  getNeighbouringCells,
+  transformCoordinatesToKey,
   transformVectorToDirection,
 } from '../../maps';
 import { getRandomElemFromList } from '../../common';
@@ -27,11 +28,9 @@ export const calculateDeployMineUtility: TActionUtilityCalculator = ({ gameMap, 
   let possibleLocationsToDeploy = getNeighbouringCells(mySubmarine.coordinates);
 
   possibleLocationsToDeploy = possibleLocationsToDeploy.filter(coordinates => {
-    const locationKey = transformCoordinatesToKey(coordinates);
     return (
-      areCoordinatesWithinBoundaries({ coordinates, gameMapDimensions: gameMap.dimensions }) &&
-      isTerrainCellWalkable({ coordinates, terrainMap: gameMap.terrain }) &&
-      minesMap[locationKey] !== true
+      areCoordinatesWalkable({ coordinates, walkabilityMatrix: gameMap.walkabilityMatrix }) &&
+      minesMap[transformCoordinatesToKey(coordinates)] !== true
     );
   });
 

@@ -8,11 +8,10 @@ import {
 } from '../utils';
 import {
   ICoordinates,
-  isCellWalkable,
   getNeighbouringCells,
   transformVectorToDirection,
   createVectorFromCoordinates,
-  createWalkabilityMatrix,
+  areCoordinatesWalkable,
 } from '../../maps';
 import { chooseChargeCommand } from './charge';
 import { average } from '../../common';
@@ -24,11 +23,9 @@ export const calculateMoveActionUtility: TActionUtilityCalculator = ({
 }) => {
   const possibleLocationsToMoveTo = getNeighbouringCells(mySubmarine.coordinates).filter(
     coordinates => {
-      return isCellWalkable({
+      return areCoordinatesWalkable({
         coordinates,
-        gameMapDimensions: gameMap.dimensions,
-        terrainMap: gameMap.terrain,
-        visitedMap: mySubmarine.maps.visited,
+        walkabilityMatrix: mySubmarine.walkabilityMatrix,
       });
     }
   );
@@ -44,16 +41,11 @@ export const calculateMoveActionUtility: TActionUtilityCalculator = ({
   const { utility, params } = chooseHighestUtility<ICoordinates>(
     possibleLocationsToMoveTo,
     possibleLocationToMoveTo => {
-      const walkabilityMatrix = createWalkabilityMatrix({
-        currentlyAtCoordinates: mySubmarine.coordinates,
-        gameMap,
-        visitedMap: mySubmarine.maps.visited,
-      });
-
       const freeMovementUtility = calculateFreeMovementUtility({
+        coordinatesToMoveFrom: mySubmarine.coordinates,
         coordinatesToMoveTo: possibleLocationToMoveTo,
         gameMap,
-        walkabilityMatrix,
+        walkabilityMatrix: mySubmarine.walkabilityMatrix,
       });
 
       const { utility } = chooseHighestUtility<ICoordinates>(

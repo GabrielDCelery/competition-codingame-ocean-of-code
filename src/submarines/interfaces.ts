@@ -1,22 +1,18 @@
 import { ECharge, ICommand } from '../commands';
-import { ICoordinates, IVisitedMap } from '../maps';
+import { ICoordinates, TWalkabilityMatrix } from '../maps';
 
 export interface ISubmarine {
   health: number;
   coordinates: ICoordinates;
-  commands: {
-    last: ICommand[];
-  };
+  lastCommands: ICommand[];
+  walkabilityMatrix: TWalkabilityMatrix;
+  mines: ICoordinates[];
   charges: {
     [ECharge.TORPEDO]: number;
     [ECharge.SONAR]: number;
     [ECharge.SILENCE]: number;
     [ECharge.MINE]: number;
   };
-  maps: {
-    visited: IVisitedMap;
-  };
-  mines: ICoordinates[];
 }
 
 export interface INewSubmarineState {

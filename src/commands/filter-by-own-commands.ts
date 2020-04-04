@@ -8,17 +8,18 @@ import {
 } from './interfaces';
 import {
   areCoordinatesReachableByTorpedo,
-  getDamageTakenFromTorpedo,
   getDamageTakenFromMine,
+  getDamageTakenFromTorpedo,
 } from '../weapons';
 import {
   EDirection,
-  isCellWalkable,
+  IGameMap,
   addVectorToCoordinates,
+  areCoordinatesWalkable,
+  createTerrainWalkabilityMatrix,
   multiplyVector,
   transformDirectionToVector,
-  createVisitedMap,
-  IGameMap,
+  transposeWalkabilityMatrixes,
 } from '../maps';
 import {
   CHARGE_ANY_PER_MOVE,
@@ -56,23 +57,21 @@ const createListOfSubmarinesFromProcessedCommand = ({
 
     case ECommand.MOVE: {
       const { direction } = parameters as IMoveCommandParameters;
-      chargePhantomSubmarine({ submarine: ownSubmarine, amount: CHARGE_ANY_PER_MOVE });
       const newCoordinates = addVectorToCoordinates({
         coordinates: ownSubmarine.coordinates,
         vector: transformDirectionToVector(direction),
       });
       if (
-        isCellWalkable({
+        !areCoordinatesWalkable({
           coordinates: newCoordinates,
-          gameMapDimensions: gameMap.dimensions,
-          terrainMap: gameMap.terrain,
-          visitedMap: ownSubmarine.maps.visited,
-        }) === false
+          walkabilityMatrix: ownSubmarine.walkabilityMatrix,
+        })
       ) {
         return [];
       }
+      chargePhantomSubmarine({ submarine: ownSubmarine, amount: CHARGE_ANY_PER_MOVE });
       const { x, y } = ownSubmarine.coordinates;
-      ownSubmarine.maps.visited[x][y] = true;
+      ownSubmarine.walkabilityMatrix[x][y] = false;
       ownSubmarine.coordinates = newCoordinates;
       return [ownSubmarine];
     }
@@ -82,7 +81,7 @@ const createListOfSubmarinesFromProcessedCommand = ({
       if (ownSubmarine.health < ownMinHealth) {
         return [];
       }
-      ownSubmarine.maps.visited = createVisitedMap(gameMap.dimensions);
+      ownSubmarine.walkabilityMatrix = createTerrainWalkabilityMatrix(gameMap);
       return [ownSubmarine];
     }
 
@@ -118,12 +117,10 @@ const createListOfSubmarinesFromProcessedCommand = ({
             vector: multiplyVector({ vector, amount: range }),
           });
           if (
-            isCellWalkable({
+            !areCoordinatesWalkable({
               coordinates: targetCoordinates,
-              gameMapDimensions: gameMap.dimensions,
-              terrainMap: gameMap.terrain,
-              visitedMap: ownSubmarine.maps.visited,
-            }) === false
+              walkabilityMatrix: ownSubmarine.walkabilityMatrix,
+            })
           ) {
             return;
           }
@@ -135,7 +132,7 @@ const createListOfSubmarinesFromProcessedCommand = ({
               vector: multiplyVector({ vector, amount: i }),
             });
             const { x, y } = visitedCoordinates;
-            clonedOwnSubmarine.maps.visited[x][y] = true;
+            clonedOwnSubmarine.walkabilityMatrix[x][y] = false;
           }
           newSubmarines.push(clonedOwnSubmarine);
         }
@@ -180,24 +177,45 @@ export const getSubmarinesFilteredByOwnCommands = ({
   ownCommands: ICommand[];
   gameMap: IGameMap;
 }): ISubmarine[] => {
-  let filteredSubmarines: ISubmarine[] = ownSubmarines;
+  const { width, height } = gameMap;
+  let finalList: ISubmarine[] = ownSubmarines;
 
   ownCommands.forEach(ownCommand => {
-    let newFilteredSubmarines: ISubmarine[] = [];
+    const newFilteredSubmarinesList: ISubmarine[] = [];
+    const newFilteredSubmarinesMatrix: ISubmarine[][] = new Array(width)
+      .fill(null)
+      .map(() => new Array(height).fill(null));
 
-    filteredSubmarines.forEach(ownSubmarine => {
-      const newFilteredSubmarinesFromCommand = createListOfSubmarinesFromProcessedCommand({
+    finalList.forEach(ownSubmarine => {
+      createListOfSubmarinesFromProcessedCommand({
         ownMinHealth,
         ownSubmarine,
         ownCommand,
         gameMap,
-      });
+      }).forEach(newFilteredSubmarine => {
+        const { x, y } = newFilteredSubmarine.coordinates;
+        if (newFilteredSubmarinesMatrix[x][y] === null) {
+          newFilteredSubmarinesMatrix[x][y] = newFilteredSubmarine;
+          return;
+        }
 
-      newFilteredSubmarines = [...newFilteredSubmarines, ...newFilteredSubmarinesFromCommand];
+        newFilteredSubmarinesMatrix[x][y].walkabilityMatrix = transposeWalkabilityMatrixes([
+          newFilteredSubmarinesMatrix[x][y].walkabilityMatrix,
+          newFilteredSubmarine.walkabilityMatrix,
+        ]);
+      });
     });
 
-    filteredSubmarines = [...newFilteredSubmarines];
+    for (let x = 0; x < width; x++) {
+      for (let y = 0; y < height; y++) {
+        if (newFilteredSubmarinesMatrix[x][y] !== null) {
+          newFilteredSubmarinesList.push(newFilteredSubmarinesMatrix[x][y]);
+        }
+      }
+    }
+
+    finalList = [...newFilteredSubmarinesList];
   });
 
-  return filteredSubmarines;
+  return finalList;
 };

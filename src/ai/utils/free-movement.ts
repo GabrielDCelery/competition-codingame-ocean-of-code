@@ -1,19 +1,29 @@
-import { ICoordinates, IGameMap, TWalkabilityMatrix, getRegionSize } from '../../maps';
+import {
+  ICoordinates,
+  IGameMap,
+  TWalkabilityMatrix,
+  cloneWalkabilityMatrix,
+  getRegionSize,
+} from '../../maps';
 import { normalizeLinear } from '../../common';
 
 export const calculateFreeMovementUtility = ({
+  coordinatesToMoveFrom,
   coordinatesToMoveTo,
   gameMap,
   walkabilityMatrix,
 }: {
+  coordinatesToMoveFrom: ICoordinates;
   coordinatesToMoveTo: ICoordinates;
   gameMap: IGameMap;
   walkabilityMatrix: TWalkabilityMatrix;
 }): number => {
+  const clonedWalkabilityMatrix = cloneWalkabilityMatrix(walkabilityMatrix);
+  const { x, y } = coordinatesToMoveFrom;
+  clonedWalkabilityMatrix[x][y] = false;
   const regionSize = getRegionSize({
-    gameMap,
     coordinatesToCalculateFrom: coordinatesToMoveTo,
-    walkabilityMatrix,
+    walkabilityMatrix: clonedWalkabilityMatrix,
   });
 
   return normalizeLinear({

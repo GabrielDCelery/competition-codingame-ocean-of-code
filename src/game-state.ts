@@ -18,14 +18,12 @@ export interface IGameState {
 export const createBlankGameState = (): IGameState => {
   return {
     map: {
-      dimensions: {
-        width: 0,
-        height: 0,
-        sectorSize: 0,
-      },
-      terrain: [],
+      width: 0,
+      height: 0,
+      sectorSize: 0,
       numOfWalkableTerrainCells: 0,
       numOfSectors: 0,
+      walkabilityMatrix: [],
       matrixes: {
         torpedoReachability: [],
         torpedoReachabilityMap: [],
@@ -36,17 +34,15 @@ export const createBlankGameState = (): IGameState => {
         real: {
           health: 0,
           coordinates: { x: 0, y: 0 },
-          commands: { last: [] },
+          lastCommands: [],
+          walkabilityMatrix: [[]],
+          mines: [],
           charges: {
             [ECharge.TORPEDO]: 0,
             [ECharge.SONAR]: 0,
             [ECharge.SILENCE]: 0,
             [ECharge.MINE]: 0,
           },
-          maps: {
-            visited: [],
-          },
-          mines: [],
         },
         phantoms: [],
       },
