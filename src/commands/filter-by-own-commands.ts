@@ -74,8 +74,13 @@ const filterSubmarinesBySonarCommand = ({
 }: {
   ownSubmarines: ISubmarine[];
 }): ISubmarine[] => {
+  const submarine = ownSubmarines[0];
+  if (submarine.charges[ECharge.SONAR] < CHARGE_SONAR) {
+    return ownSubmarines;
+  }
+
   return ownSubmarines.map(ownSubmarine => {
-    useChargeForPhantomSubmarine({ submarine: ownSubmarine, amount: CHARGE_SONAR });
+    useChargeForPhantomSubmarine({ submarine: ownSubmarine, type: ECharge.SONAR });
     return ownSubmarine;
   });
 };
@@ -110,6 +115,11 @@ const filterSubmarinesByTorpedoCommand = ({
   ownMinHealth: number;
   ownSubmarines: ISubmarine[];
 }): ISubmarine[] => {
+  const submarine = ownSubmarines[0];
+  if (submarine.charges[ECharge.TORPEDO] < CHARGE_TORPEDO) {
+    return ownSubmarines;
+  }
+
   const final: ISubmarine[] = [];
   const { parameters } = ownCommand;
   const { coordinates } = parameters as ITorpedoCommandParameters;
@@ -126,7 +136,7 @@ const filterSubmarinesByTorpedoCommand = ({
     if (ownSubmarine.health < ownMinHealth) {
       return;
     }
-    useChargeForPhantomSubmarine({ submarine: ownSubmarine, amount: CHARGE_TORPEDO });
+    useChargeForPhantomSubmarine({ submarine: ownSubmarine, type: ECharge.TORPEDO });
     final.push(ownSubmarine);
   });
 
@@ -138,8 +148,13 @@ const filterSubmarinesByMineCommand = ({
 }: {
   ownSubmarines: ISubmarine[];
 }): ISubmarine[] => {
+  const submarine = ownSubmarines[0];
+  if (submarine.charges[ECharge.MINE] < CHARGE_MINE) {
+    return ownSubmarines;
+  }
+
   return ownSubmarines.map(ownSubmarine => {
-    useChargeForPhantomSubmarine({ submarine: ownSubmarine, amount: CHARGE_MINE });
+    useChargeForPhantomSubmarine({ submarine: ownSubmarine, type: ECharge.MINE });
     return ownSubmarine;
   });
 };
@@ -182,7 +197,7 @@ const filterSubmarinesBySilenceCommandQuick = ({
   const newSubmarinesMap: { [index: string]: ISubmarine } = {};
 
   ownSubmarines.forEach(ownSubmarine => {
-    useChargeForPhantomSubmarine({ submarine: ownSubmarine, amount: CHARGE_SILENCE });
+    useChargeForPhantomSubmarine({ submarine: ownSubmarine, type: ECharge.SILENCE });
 
     const { x, y } = ownSubmarine.coordinates;
     const locationKey = transformCoordinatesToKey({ x, y });
@@ -232,7 +247,7 @@ const filterSubmarinesBySilenceCommandRobust = ({
   const newSubmarinesMap: { [index: string]: ISubmarine[] } = {};
 
   ownSubmarines.forEach(ownSubmarine => {
-    useChargeForPhantomSubmarine({ submarine: ownSubmarine, amount: CHARGE_SILENCE });
+    useChargeForPhantomSubmarine({ submarine: ownSubmarine, type: ECharge.SILENCE });
 
     const clonedOwnSubmarine = cloneSubmarine(ownSubmarine);
     const { x, y } = clonedOwnSubmarine.coordinates;

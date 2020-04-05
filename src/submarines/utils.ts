@@ -56,25 +56,38 @@ export const chargePhantomSubmarine = ({
   submarine: ISubmarine;
   amount: number;
 }): ISubmarine => {
-  submarine.charges[ECharge.TORPEDO] = submarine.charges[ECharge.TORPEDO] += amount;
-  submarine.charges[ECharge.SONAR] = submarine.charges[ECharge.SONAR] += amount;
-  submarine.charges[ECharge.MINE] = submarine.charges[ECharge.MINE] += amount;
-  submarine.charges[ECharge.SILENCE] = submarine.charges[ECharge.SILENCE] += amount;
+  submarine.charges[ECharge.TORPEDO] = Math.min(
+    submarine.charges[ECharge.TORPEDO] + amount,
+    CHARGE_TORPEDO
+  );
+  submarine.charges[ECharge.SONAR] = Math.min(
+    submarine.charges[ECharge.SONAR] + amount,
+    CHARGE_SONAR
+  );
+  submarine.charges[ECharge.MINE] = Math.min(submarine.charges[ECharge.MINE] + amount, CHARGE_MINE);
+  submarine.charges[ECharge.SILENCE] = Math.min(
+    submarine.charges[ECharge.SILENCE] + amount,
+    CHARGE_SILENCE
+  );
 
   return submarine;
 };
 
 export const useChargeForPhantomSubmarine = ({
   submarine,
-  amount,
+  type,
 }: {
   submarine: ISubmarine;
-  amount: number;
+  type: ECharge;
 }): ISubmarine => {
-  submarine.charges[ECharge.TORPEDO] = Math.max(0, submarine.charges[ECharge.TORPEDO] - amount);
-  submarine.charges[ECharge.SONAR] = Math.max(0, submarine.charges[ECharge.SONAR] - amount);
-  submarine.charges[ECharge.MINE] = Math.max(0, submarine.charges[ECharge.MINE] - amount);
-  submarine.charges[ECharge.SILENCE] = Math.max(0, submarine.charges[ECharge.SILENCE] - amount);
+  submarine.charges[ECharge.TORPEDO] =
+    submarine.charges[ECharge.TORPEDO] - (type === ECharge.TORPEDO ? CHARGE_TORPEDO : 0);
+  submarine.charges[ECharge.SONAR] =
+    submarine.charges[ECharge.SONAR] - (type === ECharge.SONAR ? CHARGE_SONAR : 0);
+  submarine.charges[ECharge.MINE] =
+    submarine.charges[ECharge.MINE] - (type === ECharge.MINE ? CHARGE_MINE : 0);
+  submarine.charges[ECharge.SILENCE] =
+    submarine.charges[ECharge.SILENCE] - (type === ECharge.SILENCE ? CHARGE_SILENCE : 0);
 
   return submarine;
 };
