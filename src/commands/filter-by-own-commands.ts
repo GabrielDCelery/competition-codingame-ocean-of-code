@@ -173,7 +173,70 @@ const filterSubmarinesByTriggerCommand = ({
   return final;
 };
 
-const filterSubmarinesBySilenceCommand = ({
+const filterSubmarinesBySilenceCommandQuick = ({
+  gameMap,
+  ownSubmarines,
+}: {
+  gameMap: IGameMap;
+  ownSubmarines: ISubmarine[];
+}): ISubmarine[] => {
+  const newSubmarinesMap: { [index: string]: ISubmarine[] } = {};
+
+  ownSubmarines.forEach(ownSubmarine => {
+    Object.keys(ECharge).forEach(key => {
+      ownSubmarine.charges[key as ECharge] -= CHARGE_SILENCE;
+    });
+
+    const clonedOwnSubmarine = cloneSubmarine(ownSubmarine);
+    clonedOwnSubmarine.walkabilityMatrix = createTerrainWalkabilityMatrix(gameMap);
+    const { x, y } = clonedOwnSubmarine.coordinates;
+    const locationKey = transformCoordinatesToKey({ x, y });
+    if (newSubmarinesMap[locationKey] === undefined) {
+      newSubmarinesMap[locationKey] = [];
+    }
+    newSubmarinesMap[locationKey].push(clonedOwnSubmarine);
+
+    [EDirection.N, EDirection.S, EDirection.W, EDirection.E].forEach(direction => {
+      const vector = transformDirectionToVector(direction);
+      for (let range = 1; range <= RANGE_SILENCE; range++) {
+        const targetCoordinates = addVectorToCoordinates({
+          coordinates: ownSubmarine.coordinates,
+          vector: multiplyVector({ vector, amount: range }),
+        });
+        if (
+          !areCoordinatesWalkable({
+            coordinates: targetCoordinates,
+            walkabilityMatrix: ownSubmarine.walkabilityMatrix,
+          })
+        ) {
+          return;
+        }
+        const clonedOwnSubmarine = cloneSubmarine(ownSubmarine);
+        const { x, y } = clonedOwnSubmarine.coordinates;
+        const locationKey = transformCoordinatesToKey({ x, y });
+        if (newSubmarinesMap[locationKey] === undefined) {
+          newSubmarinesMap[locationKey] = [];
+        }
+        newSubmarinesMap[locationKey].push(clonedOwnSubmarine);
+      }
+    });
+  });
+
+  return Object.keys(newSubmarinesMap).map(locationKey => {
+    const submarines = newSubmarinesMap[locationKey];
+    const transposed = transposeWalkabilityMatrixes(
+      submarines.map(submarine => {
+        return submarine.walkabilityMatrix;
+      })
+    );
+
+    submarines[0].walkabilityMatrix = transposed;
+
+    return submarines[0];
+  });
+};
+
+const filterSubmarinesBySilenceCommandRobust = ({
   ownSubmarines,
 }: {
   ownSubmarines: ISubmarine[];
@@ -242,6 +305,20 @@ const filterSubmarinesBySilenceCommand = ({
   });
 };
 
+const filterSubmarinesBySilenceCommand = ({
+  gameMap,
+  ownSubmarines,
+}: {
+  gameMap: IGameMap;
+  ownSubmarines: ISubmarine[];
+}): ISubmarine[] => {
+  if (ownSubmarines.length / gameMap.numOfWalkableTerrainCells <= 0.5) {
+    return filterSubmarinesBySilenceCommandRobust({ ownSubmarines });
+  }
+
+  return filterSubmarinesBySilenceCommandQuick({ gameMap, ownSubmarines });
+};
+
 export const getSubmarinesFilteredByOwnCommands = ({
   ownMinHealth,
   ownSubmarines,
@@ -290,7 +367,7 @@ export const getSubmarinesFilteredByOwnCommands = ({
       }
 
       case ECommand.SILENCE: {
-        ownSubmarines = filterSubmarinesBySilenceCommand({ ownSubmarines });
+        ownSubmarines = filterSubmarinesBySilenceCommand({ gameMap, ownSubmarines });
         return;
       }
 
