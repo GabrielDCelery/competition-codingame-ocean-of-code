@@ -88,7 +88,7 @@ export const createChainedCommands = ({
 };
 
 export const pickCommandsForTurn = ({ gameState }: { gameState: IGameState }): ICommand[] => {
-  const tierOneCommands = createChainedCommands({
+  const commands1 = createChainedCommands({
     pickedCommands: [],
     mySubmarine: cloneSubmarine(gameState.players.me.real),
     opponentSubmarines: gameState.players.opponent.phantoms,
@@ -101,21 +101,40 @@ export const pickCommandsForTurn = ({ gameState }: { gameState: IGameState }): I
     minUtility: 0.2,
   });
 
-  const tierTwoCommands = createChainedCommands({
-    pickedCommands: tierOneCommands.pickedCommands,
-    mySubmarine: cloneSubmarine(tierOneCommands.mySubmarine),
+  const commands2 = createChainedCommands({
+    pickedCommands: commands1.pickedCommands,
+    mySubmarine: cloneSubmarine(commands1.mySubmarine),
     opponentSubmarines: gameState.players.opponent.phantoms,
     gameMap: gameState.map,
     utilityActions: [
-      { utilityCalculator: calculateMoveActionUtility, types: [ECommand.MOVE] },
       { utilityCalculator: calculateTorpedoActionUtility, types: [ECommand.TORPEDO] },
     ],
-    minUtility: 0.2,
+    minUtility: 0.4,
   });
 
-  const tierThreeCommands = createChainedCommands({
-    pickedCommands: tierTwoCommands.pickedCommands,
-    mySubmarine: cloneSubmarine(tierTwoCommands.mySubmarine),
+  const commands3 = createChainedCommands({
+    pickedCommands: commands2.pickedCommands,
+    mySubmarine: cloneSubmarine(commands2.mySubmarine),
+    opponentSubmarines: gameState.players.opponent.phantoms,
+    gameMap: gameState.map,
+    utilityActions: [{ utilityCalculator: calculateMoveActionUtility, types: [ECommand.MOVE] }],
+    minUtility: 0,
+  });
+
+  const commands4 = createChainedCommands({
+    pickedCommands: commands3.pickedCommands,
+    mySubmarine: cloneSubmarine(commands3.mySubmarine),
+    opponentSubmarines: gameState.players.opponent.phantoms,
+    gameMap: gameState.map,
+    utilityActions: [
+      { utilityCalculator: calculateTorpedoActionUtility, types: [ECommand.TORPEDO] },
+    ],
+    minUtility: 0.4,
+  });
+
+  const commands5 = createChainedCommands({
+    pickedCommands: commands4.pickedCommands,
+    mySubmarine: cloneSubmarine(commands4.mySubmarine),
     opponentSubmarines: gameState.players.opponent.phantoms,
     gameMap: gameState.map,
     utilityActions: [
@@ -126,7 +145,7 @@ export const pickCommandsForTurn = ({ gameState }: { gameState: IGameState }): I
     minUtility: 0.2,
   });
 
-  return tierThreeCommands.pickedCommands.map(({ type, parameters }) => {
+  return commands5.pickedCommands.map(({ type, parameters }) => {
     return { type, parameters };
   });
 };

@@ -23,7 +23,7 @@ const getUtilityForDamage = ({
   }
 
   if (0 < damageToMyOpponent) {
-    return DAMAGE_TORPEDO === damageToMyOpponent ? 1 : 0.7;
+    return DAMAGE_TORPEDO === damageToMyOpponent ? 1 : 0.4;
   }
 
   return 0;

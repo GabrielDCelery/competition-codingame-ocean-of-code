@@ -312,7 +312,13 @@ const filterSubmarinesBySilenceCommand = ({
   gameMap: IGameMap;
   ownSubmarines: ISubmarine[];
 }): ISubmarine[] => {
-  if (ownSubmarines.length / gameMap.numOfWalkableTerrainCells <= 0.5) {
+  const submarine = ownSubmarines[0];
+
+  if (submarine.charges[ECharge.SILENCE] < CHARGE_SILENCE) {
+    return ownSubmarines;
+  }
+
+  if (ownSubmarines.length / gameMap.numOfWalkableTerrainCells <= 0.4) {
     return filterSubmarinesBySilenceCommandRobust({ ownSubmarines });
   }
 

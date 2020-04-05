@@ -14,7 +14,7 @@ import {
   areCoordinatesWalkable,
 } from '../../maps';
 import { chooseChargeCommand } from './charge';
-import { average } from '../../common';
+import { weightedAverage } from '../../common';
 
 export const calculateMoveActionUtility: TActionUtilityCalculator = ({
   mySubmarine,
@@ -70,7 +70,20 @@ export const calculateMoveActionUtility: TActionUtilityCalculator = ({
         opponentSubmarines,
       });
 
-      return average([utility, 1 - coordinatesThreatUtility, freeMovementUtility]);
+      return weightedAverage([
+        {
+          weight: 0.2,
+          value: utility,
+        },
+        {
+          weight: 0.6,
+          value: 1 - coordinatesThreatUtility,
+        },
+        {
+          weight: 0.2,
+          value: freeMovementUtility,
+        },
+      ]);
     }
   );
 
