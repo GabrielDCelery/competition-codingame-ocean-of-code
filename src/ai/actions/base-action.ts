@@ -9,9 +9,11 @@ export interface IWeightedCommand extends ICommand {
 export type TActionUtilityCalculator = ({
   gameMap,
   mySubmarine,
+  myPhantomSubmarines,
   opponentSubmarines,
 }: {
   gameMap: IGameMap;
   mySubmarine: ISubmarine;
+  myPhantomSubmarines: ISubmarine[];
   opponentSubmarines: ISubmarine[];
 }) => IWeightedCommand;

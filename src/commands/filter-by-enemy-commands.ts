@@ -115,6 +115,7 @@ export const getSubmarinesFilteredByEnemyCommands = ({
   enemyCommands: ICommand[];
   enemySonarResult: ESonarResult;
 }): ISubmarine[] => {
+  let filteredSubmarines: ISubmarine[] = [...ownSubmarines];
   enemyCommands.forEach(enemyCommand => {
     const { type } = enemyCommand;
     switch (type) {
@@ -139,9 +140,9 @@ export const getSubmarinesFilteredByEnemyCommands = ({
       }
 
       case ECommand.SONAR: {
-        ownSubmarines = filterSubmarinesBySonarCommand({
+        filteredSubmarines = filterSubmarinesBySonarCommand({
           gameMap,
-          ownSubmarines,
+          ownSubmarines: filteredSubmarines,
           enemyCommand,
           enemySonarResult,
         });
@@ -149,18 +150,18 @@ export const getSubmarinesFilteredByEnemyCommands = ({
       }
 
       case ECommand.TORPEDO: {
-        ownSubmarines = filterSubmarinesByTorpedoCommand({
+        filteredSubmarines = filterSubmarinesByTorpedoCommand({
           ownMinHealth,
-          ownSubmarines,
+          ownSubmarines: filteredSubmarines,
           enemyCommand,
         });
         return;
       }
 
       case ECommand.TRIGGER: {
-        ownSubmarines = filterSubmarinesByTriggerCommand({
+        filteredSubmarines = filterSubmarinesByTriggerCommand({
           ownMinHealth,
-          ownSubmarines,
+          ownSubmarines: filteredSubmarines,
           enemyCommand,
         });
         return;
@@ -172,5 +173,5 @@ export const getSubmarinesFilteredByEnemyCommands = ({
     }
   });
 
-  return ownSubmarines;
+  return filteredSubmarines;
 };

@@ -56,22 +56,25 @@ export const chargePhantomSubmarine = ({
   submarine: ISubmarine;
   amount: number;
 }): ISubmarine => {
-  submarine.charges[ECharge.TORPEDO] = Math.min(
-    CHARGE_TORPEDO,
-    (submarine.charges[ECharge.TORPEDO] += amount)
-  );
-  submarine.charges[ECharge.SONAR] = Math.min(
-    CHARGE_SONAR,
-    (submarine.charges[ECharge.SONAR] += amount)
-  );
-  submarine.charges[ECharge.MINE] = Math.min(
-    CHARGE_MINE,
-    (submarine.charges[ECharge.MINE] += amount)
-  );
-  submarine.charges[ECharge.SILENCE] = Math.min(
-    CHARGE_SILENCE,
-    (submarine.charges[ECharge.SILENCE] += amount)
-  );
+  submarine.charges[ECharge.TORPEDO] = submarine.charges[ECharge.TORPEDO] += amount;
+  submarine.charges[ECharge.SONAR] = submarine.charges[ECharge.SONAR] += amount;
+  submarine.charges[ECharge.MINE] = submarine.charges[ECharge.MINE] += amount;
+  submarine.charges[ECharge.SILENCE] = submarine.charges[ECharge.SILENCE] += amount;
+
+  return submarine;
+};
+
+export const useChargeForPhantomSubmarine = ({
+  submarine,
+  amount,
+}: {
+  submarine: ISubmarine;
+  amount: number;
+}): ISubmarine => {
+  submarine.charges[ECharge.TORPEDO] = Math.max(0, submarine.charges[ECharge.TORPEDO] - amount);
+  submarine.charges[ECharge.SONAR] = Math.max(0, submarine.charges[ECharge.SONAR] - amount);
+  submarine.charges[ECharge.MINE] = Math.max(0, submarine.charges[ECharge.MINE] - amount);
+  submarine.charges[ECharge.SILENCE] = Math.max(0, submarine.charges[ECharge.SILENCE] - amount);
 
   return submarine;
 };

@@ -6,6 +6,7 @@ import {
   IMoveCommandParameters,
   ITorpedoCommandParameters,
   ITriggerCommandParameters,
+  ISilenceCommandParameters,
 } from './interfaces';
 import {
   EDirection,
@@ -14,6 +15,7 @@ import {
   areCoordinatesTheSame,
   createTerrainWalkabilityMatrix,
   transformDirectionToVector,
+  multiplyVector,
 } from '../maps';
 import { CHARGE_ANY_PER_MOVE, CHARGE_TORPEDO, CHARGE_MINE } from '../constants';
 import { getDamageTakenFromTorpedo } from '../weapons';
@@ -47,6 +49,24 @@ export const applyCommandsToSubmarine = ({
           amount: CHARGE_ANY_PER_MOVE,
           type: chargeCommand as ECharge,
         });
+        return;
+      }
+
+      case ECommand.SILENCE: {
+        const { direction, amount } = parameters as ISilenceCommandParameters;
+        const vector = transformDirectionToVector(direction as EDirection);
+        const newCoordinates = addVectorToCoordinates({
+          coordinates: submarine.coordinates,
+          vector: multiplyVector({ vector, amount: amount as number }),
+        });
+        for (let i = 0, iMax = amount as number; i <= iMax; i++) {
+          const { x, y } = addVectorToCoordinates({
+            coordinates: submarine.coordinates,
+            vector: multiplyVector({ vector, amount: i }),
+          });
+          submarine.walkabilityMatrix[x][y] = false;
+        }
+        submarine.coordinates = newCoordinates;
         return;
       }
 

@@ -6,6 +6,7 @@ import {
   calculateSurfaceActionUtility,
   calculateTorpedoActionUtility,
   calculateTriggerMineUtility,
+  calculateSilenceActionUtility,
 } from './actions';
 import { ECommand, ICommand, applyCommandsToSubmarine } from '../commands';
 import { IGameState } from '../game-state';
@@ -15,6 +16,7 @@ import { IGameMap } from '../maps';
 export const createChainedCommands = ({
   pickedCommands,
   mySubmarine,
+  myPhantomSubmarines,
   opponentSubmarines,
   gameMap,
   utilityActions,
@@ -22,6 +24,7 @@ export const createChainedCommands = ({
 }: {
   pickedCommands: IWeightedCommand[];
   mySubmarine: ISubmarine;
+  myPhantomSubmarines: ISubmarine[];
   opponentSubmarines: ISubmarine[];
   gameMap: IGameMap;
   utilityActions: Array<{
@@ -50,6 +53,7 @@ export const createChainedCommands = ({
     toCheckCommands.push(
       utilityCalculator({
         mySubmarine,
+        myPhantomSubmarines,
         opponentSubmarines,
         gameMap,
       })
@@ -80,6 +84,7 @@ export const createChainedCommands = ({
   return createChainedCommands({
     pickedCommands: [...pickedCommands, chosenCommands[0]],
     mySubmarine: clonedSubmarine,
+    myPhantomSubmarines,
     opponentSubmarines,
     gameMap,
     utilityActions,
@@ -91,6 +96,7 @@ export const pickCommandsForTurn = ({ gameState }: { gameState: IGameState }): I
   const commands1 = createChainedCommands({
     pickedCommands: [],
     mySubmarine: cloneSubmarine(gameState.players.me.real),
+    myPhantomSubmarines: gameState.players.me.phantoms,
     opponentSubmarines: gameState.players.opponent.phantoms,
     gameMap: gameState.map,
     utilityActions: [
@@ -104,6 +110,7 @@ export const pickCommandsForTurn = ({ gameState }: { gameState: IGameState }): I
   const commands2 = createChainedCommands({
     pickedCommands: commands1.pickedCommands,
     mySubmarine: cloneSubmarine(commands1.mySubmarine),
+    myPhantomSubmarines: gameState.players.me.phantoms,
     opponentSubmarines: gameState.players.opponent.phantoms,
     gameMap: gameState.map,
     utilityActions: [
@@ -115,6 +122,7 @@ export const pickCommandsForTurn = ({ gameState }: { gameState: IGameState }): I
   const commands3 = createChainedCommands({
     pickedCommands: commands2.pickedCommands,
     mySubmarine: cloneSubmarine(commands2.mySubmarine),
+    myPhantomSubmarines: gameState.players.me.phantoms,
     opponentSubmarines: gameState.players.opponent.phantoms,
     gameMap: gameState.map,
     utilityActions: [{ utilityCalculator: calculateMoveActionUtility, types: [ECommand.MOVE] }],
@@ -124,6 +132,7 @@ export const pickCommandsForTurn = ({ gameState }: { gameState: IGameState }): I
   const commands4 = createChainedCommands({
     pickedCommands: commands3.pickedCommands,
     mySubmarine: cloneSubmarine(commands3.mySubmarine),
+    myPhantomSubmarines: gameState.players.me.phantoms,
     opponentSubmarines: gameState.players.opponent.phantoms,
     gameMap: gameState.map,
     utilityActions: [
@@ -135,6 +144,7 @@ export const pickCommandsForTurn = ({ gameState }: { gameState: IGameState }): I
   const commands5 = createChainedCommands({
     pickedCommands: commands4.pickedCommands,
     mySubmarine: cloneSubmarine(commands4.mySubmarine),
+    myPhantomSubmarines: gameState.players.me.phantoms,
     opponentSubmarines: gameState.players.opponent.phantoms,
     gameMap: gameState.map,
     utilityActions: [
@@ -145,7 +155,19 @@ export const pickCommandsForTurn = ({ gameState }: { gameState: IGameState }): I
     minUtility: 0.2,
   });
 
-  return commands5.pickedCommands.map(({ type, parameters }) => {
+  const commands6 = createChainedCommands({
+    pickedCommands: commands5.pickedCommands,
+    mySubmarine: cloneSubmarine(commands5.mySubmarine),
+    myPhantomSubmarines: gameState.players.me.phantoms,
+    opponentSubmarines: gameState.players.opponent.phantoms,
+    gameMap: gameState.map,
+    utilityActions: [
+      { utilityCalculator: calculateSilenceActionUtility, types: [ECommand.SILENCE] },
+    ],
+    minUtility: 0.4,
+  });
+
+  return commands6.pickedCommands.map(({ type, parameters }) => {
     return { type, parameters };
   });
 };

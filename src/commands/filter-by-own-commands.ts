@@ -1,4 +1,9 @@
-import { ISubmarine, cloneSubmarine, chargePhantomSubmarine } from '../submarines';
+import {
+  ISubmarine,
+  cloneSubmarine,
+  chargePhantomSubmarine,
+  useChargeForPhantomSubmarine,
+} from '../submarines';
 import { ECommand, ECharge } from './enums';
 import {
   ICommand,
@@ -70,9 +75,7 @@ const filterSubmarinesBySonarCommand = ({
   ownSubmarines: ISubmarine[];
 }): ISubmarine[] => {
   return ownSubmarines.map(ownSubmarine => {
-    Object.keys(ECharge).forEach(key => {
-      ownSubmarine.charges[key as ECharge] -= CHARGE_SONAR;
-    });
+    useChargeForPhantomSubmarine({ submarine: ownSubmarine, amount: CHARGE_SONAR });
     return ownSubmarine;
   });
 };
@@ -123,9 +126,7 @@ const filterSubmarinesByTorpedoCommand = ({
     if (ownSubmarine.health < ownMinHealth) {
       return;
     }
-    Object.keys(ECharge).forEach(key => {
-      ownSubmarine.charges[key as ECharge] -= CHARGE_TORPEDO;
-    });
+    useChargeForPhantomSubmarine({ submarine: ownSubmarine, amount: CHARGE_TORPEDO });
     final.push(ownSubmarine);
   });
 
@@ -138,9 +139,7 @@ const filterSubmarinesByMineCommand = ({
   ownSubmarines: ISubmarine[];
 }): ISubmarine[] => {
   return ownSubmarines.map(ownSubmarine => {
-    Object.keys(ECharge).forEach(key => {
-      ownSubmarine.charges[key as ECharge] -= CHARGE_MINE;
-    });
+    useChargeForPhantomSubmarine({ submarine: ownSubmarine, amount: CHARGE_MINE });
     return ownSubmarine;
   });
 };
@@ -180,21 +179,19 @@ const filterSubmarinesBySilenceCommandQuick = ({
   gameMap: IGameMap;
   ownSubmarines: ISubmarine[];
 }): ISubmarine[] => {
-  const newSubmarinesMap: { [index: string]: ISubmarine[] } = {};
+  const newSubmarinesMap: { [index: string]: ISubmarine } = {};
 
   ownSubmarines.forEach(ownSubmarine => {
-    Object.keys(ECharge).forEach(key => {
-      ownSubmarine.charges[key as ECharge] -= CHARGE_SILENCE;
-    });
+    useChargeForPhantomSubmarine({ submarine: ownSubmarine, amount: CHARGE_SILENCE });
 
-    const clonedOwnSubmarine = cloneSubmarine(ownSubmarine);
-    clonedOwnSubmarine.walkabilityMatrix = createTerrainWalkabilityMatrix(gameMap);
-    const { x, y } = clonedOwnSubmarine.coordinates;
+    const { x, y } = ownSubmarine.coordinates;
     const locationKey = transformCoordinatesToKey({ x, y });
-    if (newSubmarinesMap[locationKey] === undefined) {
-      newSubmarinesMap[locationKey] = [];
+
+    if (!newSubmarinesMap[locationKey]) {
+      const clonedOwnSubmarine = cloneSubmarine(ownSubmarine);
+      clonedOwnSubmarine.walkabilityMatrix = createTerrainWalkabilityMatrix(gameMap);
+      newSubmarinesMap[locationKey] = clonedOwnSubmarine;
     }
-    newSubmarinesMap[locationKey].push(clonedOwnSubmarine);
 
     [EDirection.N, EDirection.S, EDirection.W, EDirection.E].forEach(direction => {
       const vector = transformDirectionToVector(direction);
@@ -212,27 +209,18 @@ const filterSubmarinesBySilenceCommandQuick = ({
           return;
         }
         const clonedOwnSubmarine = cloneSubmarine(ownSubmarine);
-        const { x, y } = clonedOwnSubmarine.coordinates;
-        const locationKey = transformCoordinatesToKey({ x, y });
-        if (newSubmarinesMap[locationKey] === undefined) {
-          newSubmarinesMap[locationKey] = [];
+        clonedOwnSubmarine.coordinates = targetCoordinates;
+        const locationKey = transformCoordinatesToKey(clonedOwnSubmarine.coordinates);
+        if (!newSubmarinesMap[locationKey]) {
+          clonedOwnSubmarine.walkabilityMatrix = createTerrainWalkabilityMatrix(gameMap);
+          newSubmarinesMap[locationKey] = clonedOwnSubmarine;
         }
-        newSubmarinesMap[locationKey].push(clonedOwnSubmarine);
       }
     });
   });
 
   return Object.keys(newSubmarinesMap).map(locationKey => {
-    const submarines = newSubmarinesMap[locationKey];
-    const transposed = transposeWalkabilityMatrixes(
-      submarines.map(submarine => {
-        return submarine.walkabilityMatrix;
-      })
-    );
-
-    submarines[0].walkabilityMatrix = transposed;
-
-    return submarines[0];
+    return newSubmarinesMap[locationKey];
   });
 };
 
@@ -244,9 +232,7 @@ const filterSubmarinesBySilenceCommandRobust = ({
   const newSubmarinesMap: { [index: string]: ISubmarine[] } = {};
 
   ownSubmarines.forEach(ownSubmarine => {
-    Object.keys(ECharge).forEach(key => {
-      ownSubmarine.charges[key as ECharge] -= CHARGE_SILENCE;
-    });
+    useChargeForPhantomSubmarine({ submarine: ownSubmarine, amount: CHARGE_SILENCE });
 
     const clonedOwnSubmarine = cloneSubmarine(ownSubmarine);
     const { x, y } = clonedOwnSubmarine.coordinates;
@@ -318,7 +304,7 @@ const filterSubmarinesBySilenceCommand = ({
     return ownSubmarines;
   }
 
-  if (ownSubmarines.length / gameMap.numOfWalkableTerrainCells <= 0.4) {
+  if (ownSubmarines.length / gameMap.numOfWalkableTerrainCells <= 0.3) {
     return filterSubmarinesBySilenceCommandRobust({ ownSubmarines });
   }
 
@@ -336,6 +322,8 @@ export const getSubmarinesFilteredByOwnCommands = ({
   ownCommands: ICommand[];
   gameMap: IGameMap;
 }): ISubmarine[] => {
+  let filteredSubmarines: ISubmarine[] = [...ownSubmarines];
+
   ownCommands.forEach(ownCommand => {
     const { type } = ownCommand;
     switch (type) {
@@ -344,44 +332,54 @@ export const getSubmarinesFilteredByOwnCommands = ({
       }
 
       case ECommand.SONAR: {
-        ownSubmarines = filterSubmarinesBySonarCommand({ ownSubmarines });
+        filteredSubmarines = filterSubmarinesBySonarCommand({ ownSubmarines: filteredSubmarines });
         return;
       }
 
       case ECommand.SURFACE: {
-        ownSubmarines = filterSubmarinesBySurfaceCommand({ ownMinHealth, ownSubmarines, gameMap });
+        filteredSubmarines = filterSubmarinesBySurfaceCommand({
+          ownMinHealth,
+          ownSubmarines: filteredSubmarines,
+          gameMap,
+        });
         return;
       }
 
       case ECommand.MOVE: {
-        ownSubmarines = filterSubmarinesByMoveCommand({ ownSubmarines, ownCommand });
+        filteredSubmarines = filterSubmarinesByMoveCommand({
+          ownSubmarines: filteredSubmarines,
+          ownCommand,
+        });
         return;
       }
 
       case ECommand.TORPEDO: {
-        ownSubmarines = filterSubmarinesByTorpedoCommand({
+        filteredSubmarines = filterSubmarinesByTorpedoCommand({
           ownCommand,
           ownMinHealth,
-          ownSubmarines,
+          ownSubmarines: filteredSubmarines,
         });
         return;
       }
 
       case ECommand.MINE: {
-        ownSubmarines = filterSubmarinesByMineCommand({ ownSubmarines });
+        filteredSubmarines = filterSubmarinesByMineCommand({ ownSubmarines: filteredSubmarines });
         return;
       }
 
       case ECommand.SILENCE: {
-        ownSubmarines = filterSubmarinesBySilenceCommand({ gameMap, ownSubmarines });
+        filteredSubmarines = filterSubmarinesBySilenceCommand({
+          gameMap,
+          ownSubmarines: filteredSubmarines,
+        });
         return;
       }
 
       case ECommand.TRIGGER: {
-        ownSubmarines = filterSubmarinesByTriggerCommand({
+        filteredSubmarines = filterSubmarinesByTriggerCommand({
           ownCommand,
           ownMinHealth,
-          ownSubmarines,
+          ownSubmarines: filteredSubmarines,
         });
         return;
       }
@@ -392,5 +390,5 @@ export const getSubmarinesFilteredByOwnCommands = ({
     }
   });
 
-  return ownSubmarines;
+  return filteredSubmarines;
 };
