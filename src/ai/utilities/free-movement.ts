@@ -7,7 +7,7 @@ import {
 } from '../../maps';
 import { normalizedLogistic } from '../utility-functions';
 
-export const emptySpaceUtility = ({
+export const calculateFreeMovementUtility = ({
   coordinatesToMoveFrom,
   coordinatesToMoveTo,
   gameMap,

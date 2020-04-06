@@ -1,6 +1,6 @@
 import { normalizedExponential } from '../utility-functions';
 
-export const damageUtility = ({
+export const calculateDamageUtility = ({
   maxDamage,
   damageToTarget,
   damageToSource,
@@ -13,6 +13,10 @@ export const damageUtility = ({
   targetHealth: number;
   sourceHealth: number;
 }): number => {
+  if (damageToTarget === 0) {
+    return 0;
+  }
+
   if (targetHealth <= damageToTarget && damageToSource < sourceHealth) {
     return 1;
   }
