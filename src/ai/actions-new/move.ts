@@ -1,3 +1,4 @@
+/*
 import { TActionUtilityCalculator } from './interfaces';
 import { ECommand } from '../../commands';
 import { chooseHighestUtility, calculateTorpedoDamageUtility } from '../utils';
@@ -46,43 +47,6 @@ export const calculateMoveActionUtility: TActionUtilityCalculator = ({
         gameMap,
         walkabilityMatrix: mySubmarine.walkabilityMatrix,
       });
-
-      const { utility } = chooseHighestUtility<ICoordinates>(
-        gameMap.matrixes.torpedoReachability[possibleLocationToMoveTo.x][
-          possibleLocationToMoveTo.y
-        ],
-        coordinatesToShootAt => {
-          const torpedoDamageUtility = calculateTorpedoDamageUtility({
-            coordinatesToShootAt,
-            mySubmarine,
-            opponentSubmarines,
-          });
-
-          return torpedoDamageUtility;
-        }
-      );
-
-      const coordinatesThreatUtility = calculatThreatOfBeingShotAtCoordinatesUtility({
-        gameMap,
-        coordinates: possibleLocationToMoveTo,
-        targetSubmarine: mySubmarine,
-        possibleSourceSubmarines: opponentSubmarines,
-      });
-
-      return weightedAverage([
-        {
-          weight: 0.2,
-          value: utility,
-        },
-        {
-          weight: 0.6,
-          value: 1 - coordinatesThreatUtility,
-        },
-        {
-          weight: 0.2,
-          value: freeMovementUtility,
-        },
-      ]);
     }
   );
 
@@ -102,3 +66,4 @@ export const calculateMoveActionUtility: TActionUtilityCalculator = ({
     },
   };
 };
+*/

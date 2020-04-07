@@ -28,6 +28,7 @@ export const calculateTorpedoActionUtility: TActionUtilityCalculator = ({
         coordinatesToShootAt,
         sourceSubmarine: mySubmarine,
         possibleTargetSubmarines: opponentSubmarines,
+        gameMap,
       });
     }
   );

@@ -24,6 +24,7 @@ export const calculateTorpedoActionUtility: TActionUtilityCalculator = ({
         coordinatesToShootAt,
         mySubmarine,
         opponentSubmarines,
+        gameMap,
       });
 
       return torpedoDamageUtility;

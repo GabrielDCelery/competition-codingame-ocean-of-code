@@ -1,6 +1,6 @@
-import { getDamageTakenFromTorpedo } from '../../weapons';
+import { getTorpedoFiredAtCoordinatesResult } from '../../weapons';
 import { ISubmarine } from '../../submarines';
-import { ICoordinates } from '../../maps';
+import { ICoordinates, IGameMap } from '../../maps';
 import { DAMAGE_TORPEDO } from '../../constants';
 import { calculateDamageUtility } from './damage';
 import { average } from '../utility-functions';
@@ -9,20 +9,19 @@ export const calculateFireTorpedoAtCoordinatesUtility = ({
   coordinatesToShootAt,
   sourceSubmarine,
   possibleTargetSubmarines,
+  gameMap,
 }: {
   coordinatesToShootAt: ICoordinates;
   sourceSubmarine: ISubmarine;
   possibleTargetSubmarines: ISubmarine[];
+  gameMap: IGameMap;
 }): number => {
-  const damageToSource = getDamageTakenFromTorpedo({
-    submarineCoordinates: sourceSubmarine.coordinates,
-    detonatedAtCoordinates: coordinatesToShootAt,
-  });
-
   const utilities = possibleTargetSubmarines.map(opponentSubmarine => {
-    const damageToTarget = getDamageTakenFromTorpedo({
-      submarineCoordinates: opponentSubmarine.coordinates,
+    const [damageToSource, damageToTarget] = getTorpedoFiredAtCoordinatesResult({
+      sourceCoordinates: sourceSubmarine.coordinates,
       detonatedAtCoordinates: coordinatesToShootAt,
+      targetCoordinates: opponentSubmarine.coordinates,
+      gameMap,
     });
 
     return calculateDamageUtility({
