@@ -19,10 +19,11 @@ export const chooseHighestUtility = <T>(
 
 export const averageUtilities = <T>(list: T[], applyFunc: (n: T) => number): number => {
   let total = 0;
+  const iMax = list.length;
 
-  for (let i = 0, iMax = list.length; i < iMax; i++) {
-    total += applyFunc(list[i]) / iMax;
+  for (let i = 0; i < iMax; i++) {
+    total += applyFunc(list[i]);
   }
 
-  return total;
+  return total / iMax;
 };
