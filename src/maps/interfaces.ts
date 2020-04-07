@@ -20,10 +20,6 @@ export interface ITorpedoReachabilityMap {
   };
 }
 
-export interface ITorpedoDamageMap {
-  [index: string]: [number, number];
-}
-
 export interface IGameMap {
   width: number;
   height: number;
@@ -34,7 +30,6 @@ export interface IGameMap {
   matrixes: {
     torpedoReachability: ITorpedoReachabilityMatrix;
     torpedoReachabilityMap: ITorpedoReachabilityMap;
-    torpedoDamageMap: ITorpedoDamageMap;
   };
 }
 

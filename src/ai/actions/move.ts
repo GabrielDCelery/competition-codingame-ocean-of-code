@@ -1,11 +1,6 @@
 import { TActionUtilityCalculator } from './base-action';
 import { ECommand } from '../../commands';
-import {
-  calculateCoordinatesThreatUtility,
-  chooseHighestUtility,
-  calculateTorpedoDamageUtility,
-  calculateFreeMovementUtility,
-} from '../utils';
+import { calculateCoordinatesThreatUtility, chooseHighestUtility } from '../utils';
 import {
   ICoordinates,
   getNeighbouringCells,
@@ -15,6 +10,10 @@ import {
 } from '../../maps';
 import { chooseChargeCommand } from './charge';
 import { weightedAverage } from '../../common';
+import {
+  calculateFireTorpedoAtCoordinatesUtility,
+  calculateFreeMovementUtility,
+} from '../utilities';
 
 export const calculateMoveActionUtility: TActionUtilityCalculator = ({
   mySubmarine,
@@ -53,11 +52,10 @@ export const calculateMoveActionUtility: TActionUtilityCalculator = ({
           possibleLocationToMoveTo.y
         ],
         coordinatesToShootAt => {
-          const torpedoDamageUtility = calculateTorpedoDamageUtility({
+          const torpedoDamageUtility = calculateFireTorpedoAtCoordinatesUtility({
             coordinatesToShootAt,
-            mySubmarine,
-            opponentSubmarines,
-            gameMap,
+            sourceSubmarine: mySubmarine,
+            possibleTargetSubmarines: opponentSubmarines,
           });
 
           return torpedoDamageUtility;

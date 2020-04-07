@@ -1,13 +1,15 @@
 import {
   IWeightedCommand,
   TActionUtilityCalculator,
-  calculateDeployMineUtility,
   calculateMoveActionUtility,
-  calculateSurfaceActionUtility,
-  calculateTorpedoActionUtility,
-  calculateTriggerMineUtility,
   calculateSilenceActionUtility,
 } from './actions';
+import {
+  calculateTorpedoActionUtility,
+  calculateTriggerActionUtility,
+  calculateMineActionUtility,
+  calculateSurfaceActionUtility,
+} from './actions-new';
 import { ECommand, ICommand, applyCommandsToSubmarine } from '../commands';
 import { IGameState } from '../game-state';
 import { ISubmarine, cloneSubmarine } from '../submarines';
@@ -101,8 +103,11 @@ export const pickCommandsForTurn = ({ gameState }: { gameState: IGameState }): I
     gameMap: gameState.map,
     utilityActions: [
       { utilityCalculator: calculateSurfaceActionUtility, types: [ECommand.SURFACE] },
-      { utilityCalculator: calculateDeployMineUtility, types: [ECommand.MINE, ECommand.TRIGGER] },
-      { utilityCalculator: calculateTriggerMineUtility, types: [ECommand.MINE, ECommand.TRIGGER] },
+      { utilityCalculator: calculateMineActionUtility, types: [ECommand.MINE, ECommand.TRIGGER] },
+      {
+        utilityCalculator: calculateTriggerActionUtility,
+        types: [ECommand.MINE, ECommand.TRIGGER],
+      },
     ],
     minUtility: 0.2,
   });
@@ -149,8 +154,11 @@ export const pickCommandsForTurn = ({ gameState }: { gameState: IGameState }): I
     gameMap: gameState.map,
     utilityActions: [
       { utilityCalculator: calculateSurfaceActionUtility, types: [ECommand.SURFACE] },
-      { utilityCalculator: calculateDeployMineUtility, types: [ECommand.MINE, ECommand.TRIGGER] },
-      { utilityCalculator: calculateTriggerMineUtility, types: [ECommand.MINE, ECommand.TRIGGER] },
+      { utilityCalculator: calculateMineActionUtility, types: [ECommand.MINE, ECommand.TRIGGER] },
+      {
+        utilityCalculator: calculateTriggerActionUtility,
+        types: [ECommand.MINE, ECommand.TRIGGER],
+      },
     ],
     minUtility: 0.2,
   });

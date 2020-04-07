@@ -19,7 +19,6 @@ import {
 import { createBlankGameState } from './game-state';
 import { createSubmarine, setNewSubmarineState } from './submarines';
 import { HEALTH_SUBMARINE } from './constants';
-import { initTorpedoDamageMap } from './weapons';
 
 declare const readline: any;
 
@@ -52,7 +51,6 @@ try {
 
   initTorpedoReachabilityMatrix(gameState.map);
   initTorpedoReachabilityMapMatrix(gameState.map);
-  initTorpedoDamageMap(gameState.map);
 
   const walkableTerrainCells = getWalkableCoordinates(gameState.map.walkabilityMatrix);
 

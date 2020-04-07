@@ -3,7 +3,7 @@ import { ISubmarine } from '../../submarines';
 import { ICoordinates } from '../../maps';
 import { DAMAGE_TORPEDO } from '../../constants';
 import { calculateDamageUtility } from './damage';
-import { average } from '../utility-functions';
+import { averageUtilities } from '../utility-helpers';
 
 export const calculateTriggerMineAtCoordinatesUtility = ({
   coordinatesToDetonateAt,
@@ -19,9 +19,9 @@ export const calculateTriggerMineAtCoordinatesUtility = ({
     detonatedAtCoordinates: coordinatesToDetonateAt,
   });
 
-  const utilities = possibleTargetSubmarines.map(opponentSubmarine => {
+  return averageUtilities<ISubmarine>(possibleTargetSubmarines, possibleTargetSubmarine => {
     const damageToTarget = getDamageTakenFromMine({
-      submarineCoordinates: opponentSubmarine.coordinates,
+      submarineCoordinates: possibleTargetSubmarine.coordinates,
       detonatedAtCoordinates: coordinatesToDetonateAt,
     });
 
@@ -30,9 +30,7 @@ export const calculateTriggerMineAtCoordinatesUtility = ({
       damageToSource,
       damageToTarget,
       sourceHealth: sourceSubmarine.health,
-      targetHealth: opponentSubmarine.health,
+      targetHealth: possibleTargetSubmarine.health,
     });
   });
-
-  return average(utilities);
 };
