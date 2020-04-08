@@ -28,7 +28,16 @@ export const createSubmarine = ({
 };
 
 export const cloneSubmarine = (submarine: ISubmarine): ISubmarine => {
-  return JSON.parse(JSON.stringify(submarine));
+  return {
+    health: submarine.health,
+    coordinates: { x: submarine.coordinates.x, y: submarine.coordinates.y },
+    lastCommands: submarine.lastCommands.slice(0),
+    charges: {
+      ...submarine.charges,
+    },
+    mines: submarine.mines.slice(0),
+    walkabilityMatrix: submarine.walkabilityMatrix.map(e => e.slice(0)),
+  };
 };
 
 export const setNewSubmarineState = ({

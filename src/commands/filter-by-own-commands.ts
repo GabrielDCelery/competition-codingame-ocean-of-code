@@ -319,7 +319,7 @@ const filterSubmarinesBySilenceCommand = ({
     return ownSubmarines;
   }
 
-  if (ownSubmarines.length / gameMap.numOfWalkableTerrainCells <= 0.3) {
+  if (ownSubmarines.length / gameMap.numOfWalkableTerrainCells <= 0.4) {
     return filterSubmarinesBySilenceCommandRobust({ ownSubmarines });
   }
 

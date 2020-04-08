@@ -13,13 +13,13 @@ export const createBlankWalkabilityMatrix = ({
 };
 
 export const createTerrainWalkabilityMatrix = (gameMap: IGameMap): TWalkabilityMatrix => {
-  return JSON.parse(JSON.stringify(gameMap.walkabilityMatrix));
+  return gameMap.walkabilityMatrix.map(e => e.slice(0));
 };
 
 export const cloneWalkabilityMatrix = (
   walkabilityMatrix: TWalkabilityMatrix
 ): TWalkabilityMatrix => {
-  return JSON.parse(JSON.stringify(walkabilityMatrix));
+  return walkabilityMatrix.map(e => e.slice(0));
 };
 
 const combineWalkabilityMatrixesAtCoordinates = (
