@@ -4,6 +4,7 @@ import {
   TWalkabilityMatrix,
   cloneWalkabilityMatrix,
   getRegionSize,
+  getOpenRegionSize,
 } from '../../maps';
 import { normalizedLogistic } from '../utility-functions';
 
@@ -18,6 +19,14 @@ export const calculateFreeMovementUtility = ({
   gameMap: IGameMap;
   walkabilityMatrix: TWalkabilityMatrix;
 }): number => {
+  console.error(
+    getOpenRegionSize({
+      maxSize: 25,
+      coordinatesToCalculateFrom: coordinatesToMoveTo,
+      walkabilityMatrix: cloneWalkabilityMatrix(walkabilityMatrix),
+    })
+  );
+
   const clonedWalkabilityMatrix = cloneWalkabilityMatrix(walkabilityMatrix);
   const { x, y } = coordinatesToMoveFrom;
   clonedWalkabilityMatrix[x][y] = false;

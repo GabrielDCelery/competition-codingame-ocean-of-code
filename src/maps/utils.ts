@@ -1,6 +1,12 @@
 import { ICoordinates, TWalkabilityMatrix, IGameMap } from './interfaces';
-import { transformCoordinatesToKey, getNeighbouringCells } from './common-utils';
+import {
+  transformCoordinatesToKey,
+  getNeighbouringCells,
+  multiplyVector,
+  addVectorToCoordinates,
+} from './common-utils';
 import { getCoordinatesReachableByTorpedo } from '../weapons';
+import { vectors } from './common-utils';
 
 export const createBlankWalkabilityMatrix = ({
   width,
@@ -254,4 +260,66 @@ export const initTorpedoReachabilityMapMatrix = (gameMap: IGameMap): void => {
   }
 
   gameMap.matrixes.torpedoReachabilityMap = matrix;
+};
+
+export const getListOfCoordinatesBetweenCoordinatesConnectedByStraightLine = ({
+  source,
+  target,
+}: {
+  source: ICoordinates;
+  target: ICoordinates;
+}): ICoordinates[] => {
+  const diffX = target.x - source.x;
+  const diffY = target.y - source.y;
+  const vectorX = 0 <= diffX ? vectors.RIGHT : vectors.LEFT;
+  const vectorY = 0 <= diffY ? vectors.DOWN : vectors.UP;
+
+  const diffToUse = diffX === 0 ? Math.abs(diffY) : Math.abs(diffX);
+  const vector = diffX === 0 ? vectorY : vectorX;
+
+  const listOfCoordinates: ICoordinates[] = [];
+
+  for (let amount = 0; amount <= diffToUse; amount++) {
+    listOfCoordinates.push(
+      addVectorToCoordinates({
+        coordinates: source,
+        vector: multiplyVector({ amount, vector }),
+      })
+    );
+  }
+
+  return listOfCoordinates;
+};
+
+export const getOpenRegionSize = ({
+  size = 0,
+  maxSize,
+  coordinatesToCalculateFrom,
+  walkabilityMatrix,
+}: {
+  size?: number;
+  maxSize: number;
+  coordinatesToCalculateFrom: ICoordinates;
+  walkabilityMatrix: TWalkabilityMatrix;
+}): number => {
+  if (maxSize <= size) {
+    return 0;
+  }
+  let currentSize = 1;
+  const { x, y } = coordinatesToCalculateFrom;
+  walkabilityMatrix[x][y] = false;
+  getNeighbouringCells({ x, y }).forEach(neighbouringCell => {
+    if (!areCoordinatesWalkable({ coordinates: neighbouringCell, walkabilityMatrix })) {
+      return;
+    }
+
+    currentSize += getOpenRegionSize({
+      size: currentSize,
+      maxSize: maxSize,
+      walkabilityMatrix,
+      coordinatesToCalculateFrom: neighbouringCell,
+    });
+  });
+
+  return currentSize;
 };

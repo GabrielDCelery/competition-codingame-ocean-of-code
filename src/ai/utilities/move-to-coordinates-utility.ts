@@ -1,26 +1,40 @@
-/*
+import {
+  ICoordinates,
+  IGameMap,
+  TWalkabilityMatrix,
+  cloneWalkabilityMatrix,
+  getRegionSize,
+  getListOfCoordinatesBetweenCoordinatesConnectedByStraightLine,
+} from '../../maps';
+import { normalizedLogistic } from '../utility-functions';
 import { ISubmarine } from '../../submarines';
-import { ICoordinates, IGameMap } from '../../maps';
-import { calculatThreatOfBeingShotAtCoordinatesUtility } from './threat-of-being-shot-at-coordinates';
 
-export const calculateMoveToCoordinatesUtility = ({
+/*
+export const calculateMoveToCoordinatestUtility = ({
+  coordinatesToMoveFrom,
+  coordinatesToMoveTo,
   gameMap,
-  coordinatesMoveFrom,
-  coordinatesMoveTo,
-  submarine,
-  opposingSubmarines,
+  mySubmarine,
+  opponentSubmarines,
 }: {
+  coordinatesToMoveFrom: ICoordinates;
+  coordinatesToMoveTo: ICoordinates;
   gameMap: IGameMap;
-  coordinatesMoveFrom: ICoordinates;
-  coordinatesMoveTo: ICoordinates;
-  submarine: ISubmarine;
-  opposingSubmarines: ISubmarine[];
+  mySubmarine: ISubmarine;
+  opponentSubmarines: ISubmarine[];
 }): number => {
-  const threatOfBeingFiredAtUtility = calculatThreatOfBeingShotAtCoordinatesUtility({
-    gameMap,
-    coordinates,
-    targetSubmarine: submarine,
-    possibleSourceSubmarines: opposingSubmarines,
+  const clonedWalkabilityMatrix = cloneWalkabilityMatrix(mySubmarine.walkabilityMatrix);
+
+  getListOfCoordinatesBetweenCoordinatesConnectedByStraightLine({
+    source: coordinatesToMoveTo,
+    target: coordinatesToMoveFrom,
+  }).forEach(({ x, y }) => {
+    clonedWalkabilityMatrix[x][y] = false;
+  });
+
+  const regionSize = getRegionSize({
+    coordinatesToCalculateFrom: coordinatesToMoveTo,
+    walkabilityMatrix: clonedWalkabilityMatrix,
   });
 };
 */

@@ -1,7 +1,7 @@
 import { EDirection, ETerrain } from './enums';
 import { ICoordinates, IVector } from './interfaces';
 
-const vectors = {
+export const vectors = {
   UP: { x: 0, y: -1 },
   DOWN: { x: 0, y: 1 },
   LEFT: { x: -1, y: 0 },

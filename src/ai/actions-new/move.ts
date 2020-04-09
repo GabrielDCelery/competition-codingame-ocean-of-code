@@ -1,20 +1,9 @@
 /*
-import { TActionUtilityCalculator } from './interfaces';
+import { TActionUtilityCalculator } from './base-action';
 import { ECommand } from '../../commands';
-import { chooseHighestUtility, calculateTorpedoDamageUtility } from '../utils';
-import {
-  ICoordinates,
-  getNeighbouringCells,
-  transformVectorToDirection,
-  createVectorFromCoordinates,
-  areCoordinatesWalkable,
-} from '../../maps';
-import { chooseChargeCommand } from './move-charge';
-import { weightedAverage } from '../../common';
-import {
-  calculateFreeMovementUtility,
-  calculatThreatOfBeingShotAtCoordinatesUtility,
-} from '../utilities';
+import { getNeighbouringCells, areCoordinatesWalkable, ICoordinates } from '../../maps';
+import { chooseHighestUtility } from '../utility-helpers';
+import { calculateFreeMovementUtility } from '../utilities';
 
 export const calculateMoveActionUtility: TActionUtilityCalculator = ({
   mySubmarine,
@@ -49,21 +38,5 @@ export const calculateMoveActionUtility: TActionUtilityCalculator = ({
       });
     }
   );
-
-  const vector = createVectorFromCoordinates({ source: mySubmarine.coordinates, target: params });
-  const direction = transformVectorToDirection(vector);
-
-  return {
-    type: ECommand.MOVE,
-    utility,
-    parameters: {
-      direction,
-      chargeCommand: chooseChargeCommand({
-        mySubmarine,
-        opponentSubmarines,
-        gameMap,
-      }),
-    },
-  };
 };
 */
