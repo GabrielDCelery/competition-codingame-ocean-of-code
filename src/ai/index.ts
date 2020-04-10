@@ -1,14 +1,12 @@
 import {
   IWeightedCommand,
   TActionUtilityCalculator,
-  calculateSilenceActionUtility,
-} from './actions';
-import {
   calculateTorpedoActionUtility,
   calculateTriggerActionUtility,
   calculateMineActionUtility,
   calculateSurfaceActionUtility,
   calculateMoveActionUtility,
+  calculateSilenceActionUtility,
 } from './actions-new';
 import { ECommand, ICommand, applyCommandsToSubmarine } from '../commands';
 import { IGameState } from '../game-state';
@@ -172,7 +170,7 @@ export const pickCommandsForTurn = ({ gameState }: { gameState: IGameState }): I
     utilityActions: [
       { utilityCalculator: calculateSilenceActionUtility, types: [ECommand.SILENCE] },
     ],
-    minUtility: 0.4,
+    minUtility: 0.8,
   });
 
   return commands6.pickedCommands.map(({ type, parameters }) => {

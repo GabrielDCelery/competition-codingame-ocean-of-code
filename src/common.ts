@@ -34,16 +34,10 @@ export const average = (array: Array<number>): number => {
 
 export const weightedAverage = (array: Array<{ value: number; weight: number }>): number => {
   let final = 0;
-  let totalWeight = 0;
 
   array.forEach(({ weight, value }) => {
     final += weight * value;
-    totalWeight += weight;
   });
-
-  if (totalWeight !== 1) {
-    throw new Error(`Total weight shoul be 1, intead recieved: ${totalWeight}`);
-  }
 
   return final;
 };

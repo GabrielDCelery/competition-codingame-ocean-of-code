@@ -313,9 +313,7 @@ const filterSubmarinesBySilenceCommand = ({
   gameMap: IGameMap;
   ownSubmarines: ISubmarine[];
 }): ISubmarine[] => {
-  const submarine = ownSubmarines[0];
-
-  if (submarine.charges[ECharge.SILENCE] < CHARGE_SILENCE) {
+  if (ownSubmarines[0].charges[ECharge.SILENCE] < CHARGE_SILENCE) {
     return ownSubmarines;
   }
 

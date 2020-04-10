@@ -121,7 +121,7 @@ try {
       ownSubmarines: gameState.players.opponent.phantoms,
       ownCommands: opponentCommands,
     });
-    //console.error(new Date().getTime() - start);
+    console.error(new Date().getTime() - start);
     //console.error(gameState.players.opponent.phantoms.map(e => e.coordinates));
     gameState.players.me.phantoms = getSubmarinesFilteredByEnemyCommands({
       gameMap: gameState.map,
@@ -141,7 +141,7 @@ try {
       ownSubmarines: gameState.players.me.phantoms,
       ownCommands: gameState.players.me.real.lastCommands,
     });
-    //console.error(new Date().getTime() - start);
+    console.error(new Date().getTime() - start);
 
     setNewSubmarineState({
       submarine: gameState.players.me.real,
@@ -157,7 +157,7 @@ try {
     });
 
     const myCommands = pickCommandsForTurn({ gameState });
-    //console.error(new Date().getTime() - start);
+    console.error(new Date().getTime() - start);
 
     applyCommandsToSubmarine({
       commands: myCommands,
