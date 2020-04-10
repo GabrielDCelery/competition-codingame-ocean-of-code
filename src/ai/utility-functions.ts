@@ -35,6 +35,19 @@ export const normalizedLinear = ({
   return a < 1 ? Math.min(1, x / a) : x / a;
 };
 
+export const normalizedLinearDecay = ({
+  value,
+  max,
+  a = 1,
+}: {
+  value: number;
+  max: number;
+  a?: number;
+}): number => {
+  const x = 1 - value / max;
+  return a < 1 ? Math.min(1, x / a) : x / a;
+};
+
 export const normalizedExponential = ({
   value,
   max,

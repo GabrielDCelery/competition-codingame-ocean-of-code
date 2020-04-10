@@ -5,10 +5,10 @@ import {
 } from '../../weapons';
 import { ISubmarine } from '../../submarines';
 import { ICoordinates, IGameMap } from '../../maps';
-import { average } from '../../common';
 import { ECharge } from '../../commands';
 import { CHARGE_TORPEDO, DAMAGE_TORPEDO } from '../../constants';
 import { calculateDamageUtility } from './damage';
+import { averageUtilities } from '../utility-helpers';
 
 export const calculatThreatOfBeingShotAtCoordinatesUtility = ({
   gameMap,
@@ -21,13 +21,11 @@ export const calculatThreatOfBeingShotAtCoordinatesUtility = ({
   targetSubmarine: ISubmarine;
   possibleSourceSubmarines: ISubmarine[];
 }): number => {
-  const sourceSubmarine = possibleSourceSubmarines[0];
-
-  if (sourceSubmarine.charges[ECharge.TORPEDO] < CHARGE_TORPEDO - 1) {
+  if (possibleSourceSubmarines[0].charges[ECharge.TORPEDO] < CHARGE_TORPEDO - 1) {
     return 0;
   }
 
-  const utils = possibleSourceSubmarines.map(sourceSubmarine => {
+  return averageUtilities<ISubmarine>(possibleSourceSubmarines, sourceSubmarine => {
     if (
       canTorpedoDirectlyHitTheTarget({
         source: sourceSubmarine.coordinates,
@@ -60,6 +58,4 @@ export const calculatThreatOfBeingShotAtCoordinatesUtility = ({
 
     return 0;
   });
-
-  return average(utils);
 };

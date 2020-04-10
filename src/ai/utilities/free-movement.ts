@@ -1,43 +1,29 @@
 import {
   ICoordinates,
-  IGameMap,
   TWalkabilityMatrix,
   cloneWalkabilityMatrix,
-  getRegionSize,
   getOpenRegionSize,
 } from '../../maps';
 import { normalizedLogistic } from '../utility-functions';
 
+const MAX_REGION_SIZE_TO_CHECK = 100;
+
 export const calculateFreeMovementUtility = ({
-  coordinatesToMoveFrom,
-  coordinatesToMoveTo,
-  gameMap,
+  coordinatesMoveTo,
   walkabilityMatrix,
 }: {
-  coordinatesToMoveFrom: ICoordinates;
-  coordinatesToMoveTo: ICoordinates;
-  gameMap: IGameMap;
+  coordinatesMoveTo: ICoordinates;
   walkabilityMatrix: TWalkabilityMatrix;
 }): number => {
-  console.error(
-    getOpenRegionSize({
-      maxSize: 25,
-      coordinatesToCalculateFrom: coordinatesToMoveTo,
-      walkabilityMatrix: cloneWalkabilityMatrix(walkabilityMatrix),
-    })
-  );
-
-  const clonedWalkabilityMatrix = cloneWalkabilityMatrix(walkabilityMatrix);
-  const { x, y } = coordinatesToMoveFrom;
-  clonedWalkabilityMatrix[x][y] = false;
-  const regionSize = getRegionSize({
-    coordinatesToCalculateFrom: coordinatesToMoveTo,
-    walkabilityMatrix: clonedWalkabilityMatrix,
+  const regionSize = getOpenRegionSize({
+    maxSize: MAX_REGION_SIZE_TO_CHECK,
+    coordinatesToCalculateFrom: coordinatesMoveTo,
+    walkabilityMatrix: cloneWalkabilityMatrix(walkabilityMatrix),
   });
 
   return normalizedLogistic({
     value: regionSize,
-    max: gameMap.numOfWalkableTerrainCells,
+    max: MAX_REGION_SIZE_TO_CHECK,
     a: 0.8,
   });
 };

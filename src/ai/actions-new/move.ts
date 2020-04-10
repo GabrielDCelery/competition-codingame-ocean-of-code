@@ -1,9 +1,15 @@
-/*
-import { TActionUtilityCalculator } from './base-action';
+import { TActionUtilityCalculator } from './interfaces';
 import { ECommand } from '../../commands';
-import { getNeighbouringCells, areCoordinatesWalkable, ICoordinates } from '../../maps';
+import {
+  getNeighbouringCells,
+  areCoordinatesWalkable,
+  ICoordinates,
+  createVectorFromCoordinates,
+  transformVectorToDirection,
+} from '../../maps';
 import { chooseHighestUtility } from '../utility-helpers';
-import { calculateFreeMovementUtility } from '../utilities';
+import { calculateMoveToCoordinatestUtility } from '../utilities';
+import { chooseChargeCommand } from './move-charge';
 
 export const calculateMoveActionUtility: TActionUtilityCalculator = ({
   mySubmarine,
@@ -30,13 +36,29 @@ export const calculateMoveActionUtility: TActionUtilityCalculator = ({
   const { utility, params } = chooseHighestUtility<ICoordinates>(
     possibleLocationsToMoveTo,
     possibleLocationToMoveTo => {
-      const freeMovementUtility = calculateFreeMovementUtility({
-        coordinatesToMoveFrom: mySubmarine.coordinates,
-        coordinatesToMoveTo: possibleLocationToMoveTo,
+      return calculateMoveToCoordinatestUtility({
+        coordinatesMoveFrom: mySubmarine.coordinates,
+        coordinatesMoveTo: possibleLocationToMoveTo,
         gameMap,
-        walkabilityMatrix: mySubmarine.walkabilityMatrix,
+        mySubmarine,
+        opponentSubmarines,
       });
     }
   );
+
+  const vector = createVectorFromCoordinates({ source: mySubmarine.coordinates, target: params });
+  const direction = transformVectorToDirection(vector);
+
+  return {
+    type: ECommand.MOVE,
+    utility,
+    parameters: {
+      direction,
+      chargeCommand: chooseChargeCommand({
+        mySubmarine,
+        opponentSubmarines,
+        gameMap,
+      }),
+    },
+  };
 };
-*/

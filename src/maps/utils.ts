@@ -292,20 +292,20 @@ export const getListOfCoordinatesBetweenCoordinatesConnectedByStraightLine = ({
 };
 
 export const getOpenRegionSize = ({
-  size = 0,
+  sizeRef = { count: 0 },
   maxSize,
   coordinatesToCalculateFrom,
   walkabilityMatrix,
 }: {
-  size?: number;
+  sizeRef?: { count: number };
   maxSize: number;
   coordinatesToCalculateFrom: ICoordinates;
   walkabilityMatrix: TWalkabilityMatrix;
 }): number => {
-  if (maxSize <= size) {
-    return 0;
+  if (maxSize <= sizeRef.count) {
+    return sizeRef.count;
   }
-  let currentSize = 1;
+  sizeRef.count += 1;
   const { x, y } = coordinatesToCalculateFrom;
   walkabilityMatrix[x][y] = false;
   getNeighbouringCells({ x, y }).forEach(neighbouringCell => {
@@ -313,13 +313,13 @@ export const getOpenRegionSize = ({
       return;
     }
 
-    currentSize += getOpenRegionSize({
-      size: currentSize,
-      maxSize: maxSize,
+    getOpenRegionSize({
+      sizeRef,
+      maxSize,
       walkabilityMatrix,
       coordinatesToCalculateFrom: neighbouringCell,
     });
   });
 
-  return currentSize;
+  return sizeRef.count;
 };

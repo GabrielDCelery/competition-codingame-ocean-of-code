@@ -102,7 +102,7 @@ try {
     const opponentCommandsString = readNextLine();
 
     const opponentCommands = transformCommandsStringToCommands(opponentCommandsString);
-    //const start = new Date().getTime();
+    const start = new Date().getTime();
     //console.error(gameState.players.opponent.phantoms.map(e => e.coordinates));
     //console.error(JSON.stringify(gameState.players.me.real.lastCommands));
     gameState.players.opponent.phantoms = getSubmarinesFilteredByEnemyCommands({
@@ -157,6 +157,7 @@ try {
     });
 
     const myCommands = pickCommandsForTurn({ gameState });
+    //console.error(new Date().getTime() - start);
 
     applyCommandsToSubmarine({
       commands: myCommands,

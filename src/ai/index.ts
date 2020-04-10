@@ -1,7 +1,6 @@
 import {
   IWeightedCommand,
   TActionUtilityCalculator,
-  calculateMoveActionUtility,
   calculateSilenceActionUtility,
 } from './actions';
 import {
@@ -9,6 +8,7 @@ import {
   calculateTriggerActionUtility,
   calculateMineActionUtility,
   calculateSurfaceActionUtility,
+  calculateMoveActionUtility,
 } from './actions-new';
 import { ECommand, ICommand, applyCommandsToSubmarine } from '../commands';
 import { IGameState } from '../game-state';
