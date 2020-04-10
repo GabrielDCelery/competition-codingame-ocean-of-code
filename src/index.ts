@@ -102,9 +102,10 @@ try {
     const opponentCommandsString = readNextLine();
 
     const opponentCommands = transformCommandsStringToCommands(opponentCommandsString);
-    const start = new Date().getTime();
+    //const start = new Date().getTime();
     //console.error(gameState.players.opponent.phantoms.map(e => e.coordinates));
     //console.error(JSON.stringify(gameState.players.me.real.lastCommands));
+    //console.error(gameState.players.opponent.phantoms.map(e => e.coordinates));
     gameState.players.opponent.phantoms = getSubmarinesFilteredByEnemyCommands({
       gameMap: gameState.map,
       ownMinHealth: opponentHealth,
@@ -113,16 +114,23 @@ try {
       enemySonarResult: sonarResultByMe,
     });
     //console.error(new Date().getTime() - start);
-    //console.error(gameState.players.opponent.phantoms.map(e => e.coordinates));
-    //console.error(JSON.stringify(opponentCommands));
     gameState.players.opponent.phantoms = getSubmarinesFilteredByOwnCommands({
       gameMap: gameState.map,
       ownMinHealth: opponentHealth,
       ownSubmarines: gameState.players.opponent.phantoms,
       ownCommands: opponentCommands,
     });
-    console.error(new Date().getTime() - start);
     //console.error(gameState.players.opponent.phantoms.map(e => e.coordinates));
+    //console.error('--------------------');
+    //console.error(new Date().getTime() - start);
+    gameState.players.me.phantoms = getSubmarinesFilteredByOwnCommands({
+      gameMap: gameState.map,
+      ownMinHealth: myHealth,
+      ownSubmarines: gameState.players.me.phantoms,
+      ownCommands: gameState.players.me.real.lastCommands,
+    });
+    //console.error(new Date().getTime() - start);
+    //console.error(gameState.players.me.phantoms.map(e => e.coordinates));
     gameState.players.me.phantoms = getSubmarinesFilteredByEnemyCommands({
       gameMap: gameState.map,
       ownMinHealth: myHealth,
@@ -134,14 +142,8 @@ try {
         commands: opponentCommands,
       }),
     });
+    //console.error(gameState.players.me.phantoms.map(e => e.coordinates));
     //console.error(new Date().getTime() - start);
-    gameState.players.me.phantoms = getSubmarinesFilteredByOwnCommands({
-      gameMap: gameState.map,
-      ownMinHealth: myHealth,
-      ownSubmarines: gameState.players.me.phantoms,
-      ownCommands: gameState.players.me.real.lastCommands,
-    });
-    console.error(new Date().getTime() - start);
 
     setNewSubmarineState({
       submarine: gameState.players.me.real,
@@ -157,7 +159,7 @@ try {
     });
 
     const myCommands = pickCommandsForTurn({ gameState });
-    console.error(new Date().getTime() - start);
+    //console.error(new Date().getTime() - start);
 
     applyCommandsToSubmarine({
       commands: myCommands,

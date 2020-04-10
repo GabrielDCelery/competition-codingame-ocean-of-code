@@ -24,11 +24,13 @@ export const calculateTorpedoActionUtility: TActionUtilityCalculator = ({
   const { utility, params } = chooseHighestUtility<ICoordinates>(
     coordinatesToShootAtList,
     coordinatesToShootAt => {
-      return calculateFireTorpedoAtCoordinatesUtility({
+      const utility = calculateFireTorpedoAtCoordinatesUtility({
         coordinatesToShootAt,
         sourceSubmarine: mySubmarine,
         possibleTargetSubmarines: opponentSubmarines,
       });
+
+      return utility;
     }
   );
 

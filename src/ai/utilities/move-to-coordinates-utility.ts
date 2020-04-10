@@ -38,7 +38,7 @@ export const calculateMoveToCoordinatestUtility = ({
     coordinatesMoveTo,
     walkabilityMatrix: clonedWalkabilityMatrix,
   });
-
+  /*
   const threatOfBeingShotaAtUtility = calculatThreatOfBeingShotAtCoordinatesUtility({
     gameMap,
     coordinates: coordinatesMoveTo,
@@ -56,7 +56,7 @@ export const calculateMoveToCoordinatestUtility = ({
       });
     }
   ).utility;
-
+    */
   const optimalDistanceFromTargetUtility = calculateOptimalDistanceFromTargetUtility({
     coordinatesMoveFrom,
     coordinatesMoveTo,
@@ -66,9 +66,10 @@ export const calculateMoveToCoordinatestUtility = ({
 
   return weightedAverage([
     {
-      weight: 0.2,
+      weight: 0.7,
       value: optimalDistanceFromTargetUtility,
     },
+    /*
     {
       weight: 0.2,
       value: bestChanceForSettingUpShotUtility,
@@ -77,8 +78,9 @@ export const calculateMoveToCoordinatestUtility = ({
       weight: 0.4,
       value: 1 - threatOfBeingShotaAtUtility,
     },
+    */
     {
-      weight: 0.2,
+      weight: 0.3,
       value: freeMovementUtility,
     },
   ]);
