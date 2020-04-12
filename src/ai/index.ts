@@ -7,7 +7,7 @@ import {
   calculateSurfaceActionUtility,
   calculateTorpedoActionUtility,
   calculateTriggerActionUtility,
-} from './actions-new';
+} from './actions';
 import { ECommand, ICommand, applyCommandsToRealSubmarine } from '../commands';
 import { IGameState } from '../game-state';
 import { cloneRealSubmarine, IPhantomSubmarine, IRealSubmarine } from '../submarines';
