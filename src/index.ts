@@ -2,8 +2,6 @@ import { pickCommandsForTurn } from './ai';
 import {
   getWalkableCoordinates,
   transformGameInputToTerrain,
-  initTorpedoReachabilityMatrix,
-  initTorpedoReachabilityMapMatrix,
   createBlankWalkabilityMatrix,
   isTerrainWater,
 } from './maps';
@@ -23,6 +21,7 @@ import {
   applyNewStateToRealSubmarine,
 } from './submarines';
 import { HEALTH_SUBMARINE } from './constants';
+import { createTorpedoReachabilityListMatrix, createTorpedoReachabilityMapMatrix } from './weapons';
 
 declare const readline: any;
 
@@ -53,8 +52,12 @@ try {
     }
   }
 
-  initTorpedoReachabilityMatrix(gameState.map);
-  initTorpedoReachabilityMapMatrix(gameState.map);
+  gameState.map.cache.torpedoReachabilityListMatrix = createTorpedoReachabilityListMatrix(
+    gameState.map
+  );
+  gameState.map.cache.torpedoReachabilityMapMatrix = createTorpedoReachabilityMapMatrix(
+    gameState.map
+  );
 
   const walkableTerrainCells = getWalkableCoordinates(gameState.map.walkabilityMatrix);
 
@@ -155,7 +158,7 @@ try {
       },
     });
 
-    const myCommands = pickCommandsForTurn({ gameState });
+    const myCommands = pickCommandsForTurn(gameState);
 
     applyCommandsToRealSubmarine({
       commands: myCommands,

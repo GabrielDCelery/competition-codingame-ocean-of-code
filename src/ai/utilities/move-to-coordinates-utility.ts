@@ -10,7 +10,7 @@ import { calculatThreatOfBeingShotAtCoordinatesUtility } from './threat-of-being
 import { calculateFireTorpedoAtCoordinatesUtility } from './fire-torpedo-at-coordinates';
 import { chooseHighestUtility } from '../utility-helpers';
 import { calculateOptimalDistanceFromTargetUtility } from './optimal-distance-from-target';
-import { weightedAverage } from '../utility-functions';
+import { weightedAverage } from '../utility-helpers';
 
 export const calculateMoveToCoordinatestUtility = ({
   coordinatesMoveFrom,
@@ -47,7 +47,7 @@ export const calculateMoveToCoordinatestUtility = ({
   });
 
   const bestChanceForSettingUpShotUtility = chooseHighestUtility<ICoordinates>(
-    gameMap.cache.torpedoReachability[coordinatesMoveTo.x][coordinatesMoveTo.y],
+    gameMap.cache.torpedoReachabilityListMatrix[coordinatesMoveTo.x][coordinatesMoveTo.y],
     coordinatesToShootAt => {
       return calculateFireTorpedoAtCoordinatesUtility({
         coordinatesToShootAt,

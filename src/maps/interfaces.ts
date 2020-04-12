@@ -8,13 +8,13 @@ export interface IVector {
   y: number;
 }
 
-export interface ITorpedoReachabilityMatrix {
+export interface ITorpedoReachabilityListMatrix {
   [index: number]: {
     [index: number]: ICoordinates[];
   };
 }
 
-export interface ITorpedoReachabilityMap {
+export interface ITorpedoReachabilityMapMatrix {
   [index: number]: {
     [index: number]: { [index: string]: boolean };
   };
@@ -27,8 +27,8 @@ export interface IGameMap {
   walkabilityMatrix: TWalkabilityMatrix;
   cache: {
     numOfWalkableTerrainCells: number;
-    torpedoReachability: ITorpedoReachabilityMatrix;
-    torpedoReachabilityMap: ITorpedoReachabilityMap;
+    torpedoReachabilityListMatrix: ITorpedoReachabilityListMatrix;
+    torpedoReachabilityMapMatrix: ITorpedoReachabilityMapMatrix;
   };
 }
 

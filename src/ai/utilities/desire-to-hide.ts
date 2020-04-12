@@ -1,4 +1,4 @@
-import { normalizedExponentialDecay } from '../utility-functions';
+import { normalizedExponentialDecay } from '../utility-helpers';
 import { IPhantomSubmarine } from '../../submarines';
 import { IGameMap } from '../../maps';
 

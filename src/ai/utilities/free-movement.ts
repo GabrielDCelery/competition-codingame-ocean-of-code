@@ -4,7 +4,7 @@ import {
   cloneWalkabilityMatrix,
   getOpenRegionSize,
 } from '../../maps';
-import { normalizedLogistic } from '../utility-functions';
+import { normalizedLogistic } from '../utility-helpers';
 
 const MAX_REGION_SIZE_TO_CHECK = 100;
 

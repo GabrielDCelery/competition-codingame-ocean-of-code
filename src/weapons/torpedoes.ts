@@ -1,11 +1,13 @@
 import {
   ICoordinates,
   IGameMap,
+  ITorpedoReachabilityListMatrix,
   areCoordinatesTheSame,
   getDistanceBetweenCoordinates,
   getNeighbouringCellsIncludingDiagonal,
   getReachableCoordinatesAtMaxDistance,
   transformCoordinatesToKey,
+  ITorpedoReachabilityMapMatrix,
 } from '../maps';
 import { DAMAGE_TORPEDO, RANGE_TORPEDO } from '../constants';
 
@@ -26,8 +28,9 @@ export const canTorpedoDirectlyHitTheTarget = ({
   gameMap: IGameMap;
 }): boolean => {
   return (
-    gameMap.cache.torpedoReachabilityMap[source.x][source.y][transformCoordinatesToKey(target)] ===
-    true
+    gameMap.cache.torpedoReachabilityMapMatrix[source.x][source.y][
+      transformCoordinatesToKey(target)
+    ] === true
   );
 };
 
@@ -40,7 +43,7 @@ export const canTorpedoSplashDamageTheTarget = ({
   target: ICoordinates;
   gameMap: IGameMap;
 }): boolean => {
-  const reachabilityMap = gameMap.cache.torpedoReachabilityMap[source.x][source.y];
+  const reachabilityMap = gameMap.cache.torpedoReachabilityMapMatrix[source.x][source.y];
   const neighbouringCells = getNeighbouringCellsIncludingDiagonal(target);
 
   for (let i = 0, iMax = neighbouringCells.length; i < iMax; i++) {
@@ -105,4 +108,44 @@ export const createKeyOfTorpedoAction = ({
     detonatedAtCoordinates.x,
     detonatedAtCoordinates.y,
   ].join('_');
+};
+
+export const createTorpedoReachabilityListMatrix = (
+  gameMap: IGameMap
+): ITorpedoReachabilityListMatrix => {
+  const { width, height } = gameMap;
+  const matrix = new Array(width).fill(null).map(() => new Array(height).fill(null));
+  for (let x = 0; x < width; x++) {
+    for (let y = 0; y < height; y++) {
+      matrix[x][y] = getCoordinatesReachableByTorpedo({
+        coordinatesToShootFrom: { x, y },
+        gameMap,
+      });
+    }
+  }
+
+  return matrix;
+};
+
+export const createTorpedoReachabilityMapMatrix = (
+  gameMap: IGameMap
+): ITorpedoReachabilityMapMatrix => {
+  const { width, height } = gameMap;
+  const matrix = new Array(width).fill(null).map(() => new Array(height).fill(null));
+  for (let x = 0; x < width; x++) {
+    for (let y = 0; y < height; y++) {
+      const map: { [index: string]: boolean } = {};
+
+      getCoordinatesReachableByTorpedo({
+        coordinatesToShootFrom: { x, y },
+        gameMap,
+      }).forEach(coordinates => {
+        map[transformCoordinatesToKey(coordinates)] = true;
+      });
+
+      matrix[x][y] = map;
+    }
+  }
+
+  return matrix;
 };

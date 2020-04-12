@@ -8,10 +8,9 @@ import {
   addVectorToCoordinates,
   multiplyVector,
 } from '../../maps';
-import { chooseHighestUtility } from '../utility-helpers';
+import { chooseHighestUtility, normalizedLogistic, weightedAverage } from '../utility-helpers';
 import { calculateMoveToCoordinatestUtility, calculateDesireToHideUtility } from '../utilities';
 import { CHARGE_SILENCE, RANGE_SILENCE } from '../../constants';
-import { normalizedLogistic, weightedAverage } from '../utility-functions';
 
 interface IPossibleMove {
   direction: EDirection;

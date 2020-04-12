@@ -1,4 +1,4 @@
-import { normalizedExponential } from '../utility-functions';
+import { normalizedExponential } from '../utility-helpers';
 
 export const calculateDamageUtility = ({
   maxDamage,

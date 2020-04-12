@@ -1,5 +1,5 @@
 import { ISubmarine } from '../../submarines';
-import { average, normalizedLogisticDecay, normalizedLinear } from '../utility-functions';
+import { average, normalizedLogisticDecay, normalizedLinear } from '../utility-helpers';
 import { HEALTH_SUBMARINE, CHARGE_TORPEDO } from '../../constants';
 import { ECharge } from '../../commands';
 

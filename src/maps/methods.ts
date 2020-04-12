@@ -353,42 +353,6 @@ export const getReachableCoordinatesAtMaxDistance = ({
   return reachableCoordinates;
 };
 
-export const initTorpedoReachabilityMatrix = (gameMap: IGameMap): void => {
-  const { width, height } = gameMap;
-  const matrix = new Array(width).fill(null).map(() => new Array(height).fill(null));
-  for (let x = 0; x < width; x++) {
-    for (let y = 0; y < height; y++) {
-      matrix[x][y] = getCoordinatesReachableByTorpedo({
-        coordinatesToShootFrom: { x, y },
-        gameMap,
-      });
-    }
-  }
-
-  gameMap.cache.torpedoReachability = matrix;
-};
-
-export const initTorpedoReachabilityMapMatrix = (gameMap: IGameMap): void => {
-  const { width, height } = gameMap;
-  const matrix = new Array(width).fill(null).map(() => new Array(height).fill(null));
-  for (let x = 0; x < width; x++) {
-    for (let y = 0; y < height; y++) {
-      const map: { [index: string]: boolean } = {};
-
-      getCoordinatesReachableByTorpedo({
-        coordinatesToShootFrom: { x, y },
-        gameMap,
-      }).forEach(coordinates => {
-        map[transformCoordinatesToKey(coordinates)] = true;
-      });
-
-      matrix[x][y] = map;
-    }
-  }
-
-  gameMap.cache.torpedoReachabilityMap = matrix;
-};
-
 export const getListOfCoordinatesBetweenCoordinatesConnectedByStraightLine = ({
   source,
   target,

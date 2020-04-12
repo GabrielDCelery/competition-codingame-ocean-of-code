@@ -22,7 +22,11 @@ export const createBlankGameStateTemplate = (): IGameState => {
       height: 0,
       sectorSize: 0,
       walkabilityMatrix: [],
-      cache: { torpedoReachability: [], torpedoReachabilityMap: [], numOfWalkableTerrainCells: 0 },
+      cache: {
+        torpedoReachabilityListMatrix: [],
+        torpedoReachabilityMapMatrix: [],
+        numOfWalkableTerrainCells: 0,
+      },
     },
     players: {
       me: {
