@@ -8,9 +8,9 @@ import { ISubmarine } from '../../submarines';
 import { calculateFreeMovementUtility } from './free-movement';
 import { calculatThreatOfBeingShotAtCoordinatesUtility } from './threat-of-being-shot-at-coordinates';
 import { calculateFireTorpedoAtCoordinatesUtility } from './fire-torpedo-at-coordinates';
-import { weightedAverage } from '../../common';
-import { chooseHighestUtility } from '../utils';
+import { chooseHighestUtility } from '../utility-helpers';
 import { calculateOptimalDistanceFromTargetUtility } from './optimal-distance-from-target';
+import { weightedAverage } from '../utility-functions';
 
 export const calculateMoveToCoordinatestUtility = ({
   coordinatesMoveFrom,

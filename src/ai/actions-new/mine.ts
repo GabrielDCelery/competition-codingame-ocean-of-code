@@ -7,9 +7,12 @@ import {
   transformCoordinatesToKey,
   transformVectorToDirection,
 } from '../../maps';
-import { getRandomElemFromList } from '../../common';
 import { CHARGE_MINE } from '../../constants';
 import { TActionUtilityCalculator } from './interfaces';
+
+export const getRandomElemFromList = <T>(items: T[]): T => {
+  return items[Math.floor(Math.random() * items.length)];
+};
 
 export const calculateMineActionUtility: TActionUtilityCalculator = ({ gameMap, mySubmarine }) => {
   if (mySubmarine.charges[ECharge.MINE] < CHARGE_MINE) {

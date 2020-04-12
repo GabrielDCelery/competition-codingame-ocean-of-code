@@ -11,8 +11,7 @@ import {
 import { chooseHighestUtility } from '../utility-helpers';
 import { calculateMoveToCoordinatestUtility, calculateDesireToHideUtility } from '../utilities';
 import { CHARGE_SILENCE, RANGE_SILENCE } from '../../constants';
-import { weightedAverage } from '../../common';
-import { normalizedLogistic } from '../utility-functions';
+import { normalizedLogistic, weightedAverage } from '../utility-functions';
 
 interface IPossibleMove {
   direction: EDirection;
