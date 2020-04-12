@@ -1,16 +1,16 @@
 import {
   IWeightedCommand,
   TActionUtilityCalculator,
-  calculateTorpedoActionUtility,
-  calculateTriggerActionUtility,
   calculateMineActionUtility,
-  calculateSurfaceActionUtility,
   calculateMoveActionUtility,
   calculateSilenceActionUtility,
+  calculateSurfaceActionUtility,
+  calculateTorpedoActionUtility,
+  calculateTriggerActionUtility,
 } from './actions-new';
 import { ECommand, ICommand, applyCommandsToRealSubmarine } from '../commands';
 import { IGameState } from '../game-state';
-import { ISubmarine, cloneSubmarine } from '../submarines';
+import { cloneRealSubmarine, IPhantomSubmarine, IRealSubmarine } from '../submarines';
 import { IGameMap } from '../maps';
 
 export const createChainedCommands = ({
@@ -23,16 +23,16 @@ export const createChainedCommands = ({
   minUtility,
 }: {
   pickedCommands: IWeightedCommand[];
-  mySubmarine: ISubmarine;
-  myPhantomSubmarines: ISubmarine[];
-  opponentSubmarines: ISubmarine[];
+  mySubmarine: IRealSubmarine;
+  myPhantomSubmarines: IPhantomSubmarine[];
+  opponentSubmarines: IPhantomSubmarine[];
   gameMap: IGameMap;
   utilityActions: Array<{
     utilityCalculator: TActionUtilityCalculator;
     types: ECommand[];
   }>;
   minUtility: number;
-}): { mySubmarine: ISubmarine; pickedCommands: IWeightedCommand[] } => {
+}): { mySubmarine: IRealSubmarine; pickedCommands: IWeightedCommand[] } => {
   let highestUtility = minUtility;
 
   const alreadyPickedCommansMap: { [index: string]: boolean } = {};
@@ -73,7 +73,7 @@ export const createChainedCommands = ({
     return { mySubmarine, pickedCommands };
   }
 
-  const clonedSubmarine = cloneSubmarine(mySubmarine);
+  const clonedSubmarine = cloneRealSubmarine(mySubmarine);
 
   applyCommandsToRealSubmarine({
     commands: chosenCommands,
@@ -95,7 +95,7 @@ export const createChainedCommands = ({
 export const pickCommandsForTurn = ({ gameState }: { gameState: IGameState }): ICommand[] => {
   const commands1 = createChainedCommands({
     pickedCommands: [],
-    mySubmarine: cloneSubmarine(gameState.players.me.real),
+    mySubmarine: cloneRealSubmarine(gameState.players.me.real),
     myPhantomSubmarines: gameState.players.me.phantoms,
     opponentSubmarines: gameState.players.opponent.phantoms,
     gameMap: gameState.map,
@@ -112,7 +112,7 @@ export const pickCommandsForTurn = ({ gameState }: { gameState: IGameState }): I
 
   const commands2 = createChainedCommands({
     pickedCommands: commands1.pickedCommands,
-    mySubmarine: cloneSubmarine(commands1.mySubmarine),
+    mySubmarine: cloneRealSubmarine(commands1.mySubmarine),
     myPhantomSubmarines: gameState.players.me.phantoms,
     opponentSubmarines: gameState.players.opponent.phantoms,
     gameMap: gameState.map,
@@ -124,7 +124,7 @@ export const pickCommandsForTurn = ({ gameState }: { gameState: IGameState }): I
 
   const commands3 = createChainedCommands({
     pickedCommands: commands2.pickedCommands,
-    mySubmarine: cloneSubmarine(commands2.mySubmarine),
+    mySubmarine: cloneRealSubmarine(commands2.mySubmarine),
     myPhantomSubmarines: gameState.players.me.phantoms,
     opponentSubmarines: gameState.players.opponent.phantoms,
     gameMap: gameState.map,
@@ -134,7 +134,7 @@ export const pickCommandsForTurn = ({ gameState }: { gameState: IGameState }): I
 
   const commands4 = createChainedCommands({
     pickedCommands: commands3.pickedCommands,
-    mySubmarine: cloneSubmarine(commands3.mySubmarine),
+    mySubmarine: cloneRealSubmarine(commands3.mySubmarine),
     myPhantomSubmarines: gameState.players.me.phantoms,
     opponentSubmarines: gameState.players.opponent.phantoms,
     gameMap: gameState.map,
@@ -146,7 +146,7 @@ export const pickCommandsForTurn = ({ gameState }: { gameState: IGameState }): I
 
   const commands5 = createChainedCommands({
     pickedCommands: commands4.pickedCommands,
-    mySubmarine: cloneSubmarine(commands4.mySubmarine),
+    mySubmarine: cloneRealSubmarine(commands4.mySubmarine),
     myPhantomSubmarines: gameState.players.me.phantoms,
     opponentSubmarines: gameState.players.opponent.phantoms,
     gameMap: gameState.map,
@@ -163,7 +163,7 @@ export const pickCommandsForTurn = ({ gameState }: { gameState: IGameState }): I
 
   const commands6 = createChainedCommands({
     pickedCommands: commands5.pickedCommands,
-    mySubmarine: cloneSubmarine(commands5.mySubmarine),
+    mySubmarine: cloneRealSubmarine(commands5.mySubmarine),
     myPhantomSubmarines: gameState.players.me.phantoms,
     opponentSubmarines: gameState.players.opponent.phantoms,
     gameMap: gameState.map,

@@ -1,12 +1,12 @@
 import { normalizedExponentialDecay } from '../utility-functions';
-import { ISubmarine } from '../../submarines';
+import { IPhantomSubmarine } from '../../submarines';
 import { IGameMap } from '../../maps';
 
 export const calculateDesireToHideUtility = ({
   phantomSubmarines,
   gameMap,
 }: {
-  phantomSubmarines: ISubmarine[];
+  phantomSubmarines: IPhantomSubmarine[];
   gameMap: IGameMap;
 }): number => {
   return normalizedExponentialDecay({

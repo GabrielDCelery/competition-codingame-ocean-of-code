@@ -19,7 +19,7 @@ import {
 const COMMANDS_DELIMITER = '|';
 const COMMAND_PARAMS_DELIMITER = ' ';
 
-export const uTransformCommandStringToCommand = (commandString: string): ICommand => {
+export const transformCommandStringToCommand = (commandString: string): ICommand => {
   const [command, ...restOfParams] = commandString
     .split(COMMAND_PARAMS_DELIMITER)
     .map(elem => elem.trim());
@@ -96,7 +96,7 @@ export const uTransformCommandStringToCommand = (commandString: string): IComman
 
 export const transformCommandsStringToCommands = (commandsString: string): ICommand[] => {
   return commandsString.split(COMMANDS_DELIMITER).map(commandString => {
-    return uTransformCommandStringToCommand(commandString.trim());
+    return transformCommandStringToCommand(commandString.trim());
   });
 };
 

@@ -1,5 +1,5 @@
 import { IGameMap } from './maps';
-import { ISubmarine, IRealSubmarine } from './submarines';
+import { IRealSubmarine, IPhantomSubmarine } from './submarines';
 import { ECharge } from './commands';
 
 export interface IGameState {
@@ -7,10 +7,10 @@ export interface IGameState {
   players: {
     me: {
       real: IRealSubmarine;
-      phantoms: ISubmarine[];
+      phantoms: IPhantomSubmarine[];
     };
     opponent: {
-      phantoms: ISubmarine[];
+      phantoms: IPhantomSubmarine[];
     };
   };
 }

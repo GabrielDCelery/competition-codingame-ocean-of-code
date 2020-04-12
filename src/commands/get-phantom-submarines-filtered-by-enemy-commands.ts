@@ -1,4 +1,4 @@
-import { ISubmarine } from '../submarines';
+import { IPhantomSubmarine } from '../submarines';
 import { ECommand, ESonarResult } from './enums';
 import {
   ICommand,
@@ -10,81 +10,85 @@ import { getDamageTakenFromTorpedo, getDamageTakenFromMine } from '../weapons';
 import { getSectorForCoordinates, IGameMap } from '../maps';
 
 const filterSubmarinesByTorpedoCommand = ({
-  ownMinHealth,
-  ownSubmarines,
   enemyCommand,
+  phantomSubmarineMinHealth,
+  phantomSubmarines,
 }: {
-  ownMinHealth: number;
-  ownSubmarines: ISubmarine[];
   enemyCommand: ICommand;
-}): ISubmarine[] => {
-  const final: ISubmarine[] = [];
+  phantomSubmarineMinHealth: number;
+  phantomSubmarines: IPhantomSubmarine[];
+}): IPhantomSubmarine[] => {
+  const final: IPhantomSubmarine[] = [];
   const { parameters } = enemyCommand;
   const { coordinates } = parameters as ITriggerCommandParameters;
 
-  ownSubmarines.forEach(ownSubmarine => {
+  phantomSubmarines.forEach(phantomSubmarine => {
     const damageTaken = getDamageTakenFromMine({
-      submarineCoordinates: ownSubmarine.coordinates,
+      submarineCoordinates: phantomSubmarine.coordinates,
       detonatedAtCoordinates: coordinates,
     });
-    ownSubmarine.health = ownSubmarine.health - damageTaken;
-    if (ownSubmarine.health < ownMinHealth) {
+    phantomSubmarine.health = phantomSubmarine.health - damageTaken;
+    if (phantomSubmarine.health < phantomSubmarineMinHealth) {
       return;
     }
-    final.push(ownSubmarine);
+    final.push(phantomSubmarine);
   });
 
   return final;
 };
 
 const filterSubmarinesByTriggerCommand = ({
-  ownMinHealth,
-  ownSubmarines,
   enemyCommand,
+  phantomSubmarineMinHealth,
+  phantomSubmarines,
 }: {
-  ownMinHealth: number;
-  ownSubmarines: ISubmarine[];
   enemyCommand: ICommand;
-}): ISubmarine[] => {
-  const final: ISubmarine[] = [];
+  phantomSubmarineMinHealth: number;
+  phantomSubmarines: IPhantomSubmarine[];
+}): IPhantomSubmarine[] => {
+  const final: IPhantomSubmarine[] = [];
   const { parameters } = enemyCommand;
   const { coordinates } = parameters as ITorpedoCommandParameters;
 
-  ownSubmarines.forEach(ownSubmarine => {
+  phantomSubmarines.forEach(phantomSubmarine => {
     const damageTaken = getDamageTakenFromTorpedo({
-      submarineCoordinates: ownSubmarine.coordinates,
+      submarineCoordinates: phantomSubmarine.coordinates,
       detonatedAtCoordinates: coordinates,
     });
-    ownSubmarine.health = ownSubmarine.health - damageTaken;
-    if (ownSubmarine.health < ownMinHealth) {
+    phantomSubmarine.health = phantomSubmarine.health - damageTaken;
+    if (phantomSubmarine.health < phantomSubmarineMinHealth) {
       return;
     }
-    final.push(ownSubmarine);
+    final.push(phantomSubmarine);
   });
 
   return final;
 };
 
 const filterSubmarinesBySonarCommand = ({
-  gameMap,
-  ownSubmarines,
   enemyCommand,
   enemySonarResult,
+  gameMap,
+  phantomSubmarines,
 }: {
-  gameMap: IGameMap;
-  ownSubmarines: ISubmarine[];
   enemyCommand: ICommand;
   enemySonarResult: ESonarResult;
-}): ISubmarine[] => {
-  const final: ISubmarine[] = [];
+  gameMap: IGameMap;
+  phantomSubmarines: IPhantomSubmarine[];
+}): IPhantomSubmarine[] => {
+  const final: IPhantomSubmarine[] = [];
   const { parameters } = enemyCommand;
   const { sector } = parameters as ISonarCommandParameters;
 
-  ownSubmarines.forEach(ownSubmarine => {
-    const mySector = getSectorForCoordinates({ coordinates: ownSubmarine.coordinates, gameMap });
+  phantomSubmarines.forEach(phantomSubmarine => {
+    const mySector = getSectorForCoordinates({
+      coordinates: phantomSubmarine.coordinates,
+      gameMap,
+    });
+
     if (enemySonarResult === ESonarResult.YES) {
       if (mySector === sector) {
-        return final.push(ownSubmarine);
+        return final.push(phantomSubmarine);
       }
 
       return;
@@ -94,7 +98,7 @@ const filterSubmarinesBySonarCommand = ({
         return;
       }
 
-      return final.push(ownSubmarine);
+      return final.push(phantomSubmarine);
     }
     throw new Error(`Unexpected result for processing sonar action`);
   });
@@ -102,20 +106,21 @@ const filterSubmarinesBySonarCommand = ({
   return final;
 };
 
-export const getSubmarinesFilteredByEnemyCommands = ({
+export const getPhantomSubmarinesFilteredByEnemyCommands = ({
   gameMap,
-  ownMinHealth,
-  ownSubmarines,
+  phantomSubmarineMinHealth,
+  phantomSubmarines,
   enemyCommands,
   enemySonarResult,
 }: {
   gameMap: IGameMap;
-  ownMinHealth: number;
-  ownSubmarines: ISubmarine[];
+  phantomSubmarineMinHealth: number;
+  phantomSubmarines: IPhantomSubmarine[];
   enemyCommands: ICommand[];
   enemySonarResult: ESonarResult;
-}): ISubmarine[] => {
-  let filteredSubmarines: ISubmarine[] = [...ownSubmarines];
+}): IPhantomSubmarine[] => {
+  let filteredSubmarines: IPhantomSubmarine[] = [...phantomSubmarines];
+
   enemyCommands.forEach(enemyCommand => {
     const { type } = enemyCommand;
     switch (type) {
@@ -142,7 +147,7 @@ export const getSubmarinesFilteredByEnemyCommands = ({
       case ECommand.SONAR: {
         filteredSubmarines = filterSubmarinesBySonarCommand({
           gameMap,
-          ownSubmarines: filteredSubmarines,
+          phantomSubmarines: filteredSubmarines,
           enemyCommand,
           enemySonarResult,
         });
@@ -151,8 +156,8 @@ export const getSubmarinesFilteredByEnemyCommands = ({
 
       case ECommand.TORPEDO: {
         filteredSubmarines = filterSubmarinesByTorpedoCommand({
-          ownMinHealth,
-          ownSubmarines: filteredSubmarines,
+          phantomSubmarineMinHealth,
+          phantomSubmarines: filteredSubmarines,
           enemyCommand,
         });
         return;
@@ -160,8 +165,8 @@ export const getSubmarinesFilteredByEnemyCommands = ({
 
       case ECommand.TRIGGER: {
         filteredSubmarines = filterSubmarinesByTriggerCommand({
-          ownMinHealth,
-          ownSubmarines: filteredSubmarines,
+          phantomSubmarineMinHealth,
+          phantomSubmarines: filteredSubmarines,
           enemyCommand,
         });
         return;

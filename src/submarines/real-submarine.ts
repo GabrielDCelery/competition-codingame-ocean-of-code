@@ -2,23 +2,14 @@ import { ECharge, ICommand } from '../commands';
 import {
   ICoordinates,
   IGameMap,
-  TWalkabilityMatrix,
   cloneWalkabilityMatrix,
   createTerrainWalkabilityMatrix,
 } from '../maps';
 import { CHARGE_MINE, CHARGE_SILENCE, CHARGE_TORPEDO, CHARGE_SONAR } from '../constants';
+import { ISubmarine, INewSubmarineState } from './interfaces';
 
-export interface IRealSubmarine {
-  health: number;
-  charges: {
-    [ECharge.TORPEDO]: number;
-    [ECharge.SONAR]: number;
-    [ECharge.SILENCE]: number;
-    [ECharge.MINE]: number;
-  };
-  coordinates: ICoordinates;
+export interface IRealSubmarine extends ISubmarine {
   lastCommands: ICommand[];
-  walkabilityMatrix: TWalkabilityMatrix;
   mines: ICoordinates[];
 }
 
@@ -31,6 +22,10 @@ export const createRealSubmarine = ({
   coordinates: ICoordinates;
   gameMap: IGameMap;
 }): IRealSubmarine => {
+  const { x, y } = coordinates;
+  const walkabilityMatrix = createTerrainWalkabilityMatrix(gameMap);
+  walkabilityMatrix[x][y] = false;
+
   return {
     health,
     coordinates,
@@ -41,16 +36,12 @@ export const createRealSubmarine = ({
       [ECharge.SILENCE]: 0,
       [ECharge.MINE]: 0,
     },
-    walkabilityMatrix: createTerrainWalkabilityMatrix(gameMap),
+    walkabilityMatrix,
     mines: [],
   };
 };
 
-export const cloneRealSubmarine = ({
-  submarine,
-}: {
-  submarine: IRealSubmarine;
-}): IRealSubmarine => {
+export const cloneRealSubmarine = (submarine: IRealSubmarine): IRealSubmarine => {
   return {
     health: submarine.health,
     coordinates: submarine.coordinates,
@@ -106,4 +97,24 @@ export const chargeRealSubmarine = ({
       throw new Error(`Invalid charge command -> ${type}`);
     }
   }
+};
+
+export const applyNewStateToRealSubmarine = ({
+  submarine,
+  newState,
+}: {
+  submarine: IRealSubmarine;
+  newState: INewSubmarineState;
+}): IRealSubmarine => {
+  const { x, y, health, torpedoCooldown, sonarCooldown, silenceCooldown, mineCooldown } = newState;
+  submarine.health = health;
+  submarine.coordinates = { x, y };
+  submarine.charges = {
+    [ECharge.TORPEDO]: CHARGE_TORPEDO - (torpedoCooldown < 0 ? 0 : torpedoCooldown),
+    [ECharge.SONAR]: CHARGE_SONAR - (sonarCooldown < 0 ? 0 : sonarCooldown),
+    [ECharge.MINE]: CHARGE_MINE - (mineCooldown < 0 ? 0 : mineCooldown),
+    [ECharge.SILENCE]: CHARGE_SILENCE - (silenceCooldown < 0 ? 0 : silenceCooldown),
+  };
+
+  return submarine;
 };

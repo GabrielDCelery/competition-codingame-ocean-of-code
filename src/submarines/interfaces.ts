@@ -1,12 +1,10 @@
-import { ECharge, ICommand } from '../commands';
+import { ECharge } from '../commands';
 import { ICoordinates, TWalkabilityMatrix } from '../maps';
 
 export interface ISubmarine {
   health: number;
   coordinates: ICoordinates;
-  lastCommands: ICommand[];
   walkabilityMatrix: TWalkabilityMatrix;
-  mines: ICoordinates[];
   charges: {
     [ECharge.TORPEDO]: number;
     [ECharge.SONAR]: number;
