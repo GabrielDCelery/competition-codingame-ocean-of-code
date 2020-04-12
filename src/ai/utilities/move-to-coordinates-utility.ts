@@ -47,7 +47,7 @@ export const calculateMoveToCoordinatestUtility = ({
   });
 
   const bestChanceForSettingUpShotUtility = chooseHighestUtility<ICoordinates>(
-    gameMap.matrixes.torpedoReachability[coordinatesMoveTo.x][coordinatesMoveTo.y],
+    gameMap.cache.torpedoReachability[coordinatesMoveTo.x][coordinatesMoveTo.y],
     coordinatesToShootAt => {
       return calculateFireTorpedoAtCoordinatesUtility({
         coordinatesToShootAt,

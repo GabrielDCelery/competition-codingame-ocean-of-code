@@ -19,7 +19,7 @@ export const calculateTorpedoActionUtility: TActionUtilityCalculator = ({
   }
 
   const coordinatesToShootAtList =
-    gameMap.matrixes.torpedoReachability[mySubmarine.coordinates.x][mySubmarine.coordinates.y];
+    gameMap.cache.torpedoReachability[mySubmarine.coordinates.x][mySubmarine.coordinates.y];
 
   const { utility, params } = chooseHighestUtility<ICoordinates>(
     coordinatesToShootAtList,

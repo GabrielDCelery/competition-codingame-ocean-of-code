@@ -1,7 +1,7 @@
 import {
   ISubmarine,
-  cloneSubmarine,
   chargePhantomSubmarine,
+  cloneSubmarine,
   useChargeForPhantomSubmarine,
 } from '../submarines';
 import { ECommand, ECharge } from './enums';
@@ -23,9 +23,9 @@ import {
   areCoordinatesWalkable,
   createTerrainWalkabilityMatrix,
   multiplyVector,
+  transformCoordinatesToKey,
   transformDirectionToVector,
   transposeWalkabilityMatrixes,
-  transformCoordinatesToKey,
 } from '../maps';
 import {
   CHARGE_ANY_PER_MOVE,
@@ -317,7 +317,7 @@ const filterSubmarinesBySilenceCommand = ({
     return ownSubmarines;
   }
 
-  if (ownSubmarines.length / gameMap.numOfWalkableTerrainCells <= 0.4) {
+  if (ownSubmarines.length / gameMap.cache.numOfWalkableTerrainCells <= 0.4) {
     return filterSubmarinesBySilenceCommandRobust({ ownSubmarines });
   }
 

@@ -24,10 +24,9 @@ export interface IGameMap {
   width: number;
   height: number;
   sectorSize: number;
-  numOfWalkableTerrainCells: number;
-  numOfSectors: number;
   walkabilityMatrix: TWalkabilityMatrix;
-  matrixes: {
+  cache: {
+    numOfWalkableTerrainCells: number;
     torpedoReachability: ITorpedoReachabilityMatrix;
     torpedoReachabilityMap: ITorpedoReachabilityMap;
   };

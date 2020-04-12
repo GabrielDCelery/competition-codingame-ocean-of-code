@@ -8,7 +8,7 @@ import {
   calculateMoveActionUtility,
   calculateSilenceActionUtility,
 } from './actions-new';
-import { ECommand, ICommand, applyCommandsToSubmarine } from '../commands';
+import { ECommand, ICommand, applyCommandsToRealSubmarine } from '../commands';
 import { IGameState } from '../game-state';
 import { ISubmarine, cloneSubmarine } from '../submarines';
 import { IGameMap } from '../maps';
@@ -75,7 +75,7 @@ export const createChainedCommands = ({
 
   const clonedSubmarine = cloneSubmarine(mySubmarine);
 
-  applyCommandsToSubmarine({
+  applyCommandsToRealSubmarine({
     commands: chosenCommands,
     gameMap,
     submarine: clonedSubmarine,

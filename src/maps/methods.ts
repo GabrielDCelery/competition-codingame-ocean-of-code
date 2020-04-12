@@ -1,12 +1,139 @@
-import { ICoordinates, TWalkabilityMatrix, IGameMap } from './interfaces';
-import {
-  transformCoordinatesToKey,
-  getNeighbouringCells,
-  multiplyVector,
-  addVectorToCoordinates,
-} from './common-utils';
+import { ICoordinates, TWalkabilityMatrix, IGameMap, IVector } from './interfaces';
 import { getCoordinatesReachableByTorpedo } from '../weapons';
-import { vectors } from './common-utils';
+import { EDirection, ETerrain } from './enums';
+import { baseVectors, gameDirectionToVectorTransformations } from './configs';
+
+export const isTerrainWater = (terrain: ETerrain): boolean => {
+  return terrain === ETerrain.WATER;
+};
+
+export const transformGameInputToTerrain = (gameInput: string): ETerrain => {
+  if (gameInput === '.') {
+    return ETerrain.WATER;
+  }
+
+  if (gameInput === 'x') {
+    return ETerrain.ISLAND;
+  }
+
+  throw new Error(`Cannot process game input -> ${gameInput}`);
+};
+
+export const transformDirectionToVector = (direction: EDirection): IVector => {
+  return gameDirectionToVectorTransformations[direction];
+};
+
+export const transformVectorToDirection = ({ x, y }: IVector): EDirection => {
+  if (x === baseVectors.UP.x && y === baseVectors.UP.y) {
+    return EDirection.N;
+  }
+
+  if (x === baseVectors.DOWN.x && y === baseVectors.DOWN.y) {
+    return EDirection.S;
+  }
+
+  if (x === baseVectors.LEFT.x && y === baseVectors.LEFT.y) {
+    return EDirection.W;
+  }
+
+  if (x === baseVectors.RIGHT.x && y === baseVectors.RIGHT.y) {
+    return EDirection.E;
+  }
+
+  throw new Error(`Invalid vector transformation -> ${{ x, y }}`);
+};
+
+export const areCoordinatesTheSame = (source: ICoordinates, target: ICoordinates): boolean => {
+  return source.x === target.x && source.y === target.y;
+};
+
+export const multiplyVector = ({
+  vector,
+  amount,
+}: {
+  vector: IVector;
+  amount: number;
+}): IVector => {
+  const { x, y } = vector;
+  return {
+    x: x * amount,
+    y: y * amount,
+  };
+};
+
+export const addVectorToCoordinates = ({
+  coordinates,
+  vector,
+}: {
+  coordinates: ICoordinates;
+  vector: IVector;
+}): ICoordinates => {
+  return {
+    x: coordinates.x + vector.x,
+    y: coordinates.y + vector.y,
+  };
+};
+
+export const createVectorFromCoordinates = ({
+  source,
+  target,
+}: {
+  source: ICoordinates;
+  target: ICoordinates;
+}): IVector => {
+  return {
+    x: target.x - source.x,
+    y: target.y - source.y,
+  };
+};
+
+export const getDistanceBetweenCoordinates = (
+  source: ICoordinates,
+  target: ICoordinates
+): number => {
+  const distX = Math.abs(source.x - target.x);
+  const distY = Math.abs(source.y - target.y);
+
+  return distX + distY;
+};
+
+export const getNeighbouringCells = (coordinates: ICoordinates): ICoordinates[] => {
+  const { UP, DOWN, LEFT, RIGHT } = baseVectors;
+  return [
+    addVectorToCoordinates({ coordinates, vector: UP }),
+    addVectorToCoordinates({ coordinates, vector: DOWN }),
+    addVectorToCoordinates({ coordinates, vector: LEFT }),
+    addVectorToCoordinates({ coordinates, vector: RIGHT }),
+  ];
+};
+
+export const getNeighbouringCellsIncludingDiagonal = (
+  coordinates: ICoordinates
+): ICoordinates[] => {
+  const { UP, DOWN, LEFT, RIGHT } = baseVectors;
+  const coordinatesUp = addVectorToCoordinates({ coordinates, vector: UP });
+  const coordinatesDown = addVectorToCoordinates({ coordinates, vector: DOWN });
+  return [
+    coordinatesUp,
+    addVectorToCoordinates({ coordinates: coordinatesUp, vector: LEFT }),
+    addVectorToCoordinates({ coordinates: coordinatesUp, vector: RIGHT }),
+    coordinatesDown,
+    addVectorToCoordinates({ coordinates: coordinatesDown, vector: LEFT }),
+    addVectorToCoordinates({ coordinates: coordinatesDown, vector: RIGHT }),
+    addVectorToCoordinates({ coordinates, vector: LEFT }),
+    addVectorToCoordinates({ coordinates, vector: RIGHT }),
+  ];
+};
+
+export const transformCoordinatesToKey = ({ x, y }: ICoordinates): string => {
+  return `${x}_${y}`;
+};
+
+export const transformKeyToCoordinates = (key: string): ICoordinates => {
+  const [x, y] = key.split('_').map(elem => parseInt(elem, 10));
+
+  return { x, y };
+};
 
 export const createBlankWalkabilityMatrix = ({
   width,
@@ -238,7 +365,7 @@ export const initTorpedoReachabilityMatrix = (gameMap: IGameMap): void => {
     }
   }
 
-  gameMap.matrixes.torpedoReachability = matrix;
+  gameMap.cache.torpedoReachability = matrix;
 };
 
 export const initTorpedoReachabilityMapMatrix = (gameMap: IGameMap): void => {
@@ -259,7 +386,7 @@ export const initTorpedoReachabilityMapMatrix = (gameMap: IGameMap): void => {
     }
   }
 
-  gameMap.matrixes.torpedoReachabilityMap = matrix;
+  gameMap.cache.torpedoReachabilityMap = matrix;
 };
 
 export const getListOfCoordinatesBetweenCoordinatesConnectedByStraightLine = ({
@@ -271,8 +398,8 @@ export const getListOfCoordinatesBetweenCoordinatesConnectedByStraightLine = ({
 }): ICoordinates[] => {
   const diffX = target.x - source.x;
   const diffY = target.y - source.y;
-  const vectorX = 0 <= diffX ? vectors.RIGHT : vectors.LEFT;
-  const vectorY = 0 <= diffY ? vectors.DOWN : vectors.UP;
+  const vectorX = 0 <= diffX ? baseVectors.RIGHT : baseVectors.LEFT;
+  const vectorY = 0 <= diffY ? baseVectors.DOWN : baseVectors.UP;
 
   const diffToUse = diffX === 0 ? Math.abs(diffY) : Math.abs(diffX);
   const vector = diffX === 0 ? vectorY : vectorX;

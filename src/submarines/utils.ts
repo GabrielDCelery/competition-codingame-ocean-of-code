@@ -100,7 +100,7 @@ export const useChargeForPhantomSubmarine = ({
 
   return submarine;
 };
-
+/*
 export const chargeRealSubmarine = ({
   submarine,
   type,
@@ -147,3 +147,4 @@ export const chargeRealSubmarine = ({
     }
   }
 };
+*/

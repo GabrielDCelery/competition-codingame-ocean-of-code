@@ -11,7 +11,7 @@ export const calculateDesireToHideUtility = ({
 }): number => {
   return normalizedExponentialDecay({
     value: phantomSubmarines.length,
-    max: gameMap.numOfWalkableTerrainCells,
+    max: gameMap.cache.numOfWalkableTerrainCells,
     a: 4,
   });
 };

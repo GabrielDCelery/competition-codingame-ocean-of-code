@@ -26,9 +26,8 @@ export const canTorpedoDirectlyHitTheTarget = ({
   gameMap: IGameMap;
 }): boolean => {
   return (
-    gameMap.matrixes.torpedoReachabilityMap[source.x][source.y][
-      transformCoordinatesToKey(target)
-    ] === true
+    gameMap.cache.torpedoReachabilityMap[source.x][source.y][transformCoordinatesToKey(target)] ===
+    true
   );
 };
 
@@ -41,7 +40,7 @@ export const canTorpedoSplashDamageTheTarget = ({
   target: ICoordinates;
   gameMap: IGameMap;
 }): boolean => {
-  const reachabilityMap = gameMap.matrixes.torpedoReachabilityMap[source.x][source.y];
+  const reachabilityMap = gameMap.cache.torpedoReachabilityMap[source.x][source.y];
   const neighbouringCells = getNeighbouringCellsIncludingDiagonal(target);
 
   for (let i = 0, iMax = neighbouringCells.length; i < iMax; i++) {

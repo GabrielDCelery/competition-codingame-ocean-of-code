@@ -1,4 +1,4 @@
-import { ISubmarine, chargeRealSubmarine } from '../submarines';
+import { chargeRealSubmarine, IRealSubmarine } from '../submarines';
 import { ECommand, ECharge } from './enums';
 import {
   ICommand,
@@ -20,14 +20,14 @@ import {
 import { CHARGE_ANY_PER_MOVE, CHARGE_TORPEDO, CHARGE_MINE } from '../constants';
 import { getDamageTakenFromTorpedo } from '../weapons';
 
-export const applyCommandsToSubmarine = ({
+export const applyCommandsToRealSubmarine = ({
   commands,
   gameMap,
   submarine,
 }: {
   commands: ICommand[];
   gameMap: IGameMap;
-  submarine: ISubmarine;
+  submarine: IRealSubmarine;
 }): void => {
   submarine.lastCommands = commands;
 

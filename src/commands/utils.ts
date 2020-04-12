@@ -153,33 +153,6 @@ export const transformCommandsToCommandString = (commands: ICommand[]): string =
     .join(COMMANDS_DELIMITER);
 };
 
-export const uGetSonaredSectorFromCommands = (commands: ICommand[]): number | null => {
-  for (let i = 0, iMax = commands.length; i < iMax; i++) {
-    const { type, parameters } = commands[i];
-
-    if (type === ECommand.SONAR) {
-      const { sector } = parameters as ISonarCommandParameters;
-
-      return sector;
-    }
-  }
-
-  return null;
-};
-
-export const uGetSonarResultFromSectors = ({
-  entitySector,
-  targetedSector,
-}: {
-  entitySector: number;
-  targetedSector: number | null;
-}): ESonarResult => {
-  if (targetedSector === null) {
-    return ESonarResult.NA;
-  }
-  return entitySector === targetedSector ? ESonarResult.YES : ESonarResult.NO;
-};
-
 export const calculateSonarResult = ({
   gameMap,
   entityCoordinates,

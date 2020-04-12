@@ -1,4 +1,4 @@
-export * from './common-utils';
+export * from './configs';
 export * from './enums';
 export * from './interfaces';
-export * from './utils';
+export * from './methods';

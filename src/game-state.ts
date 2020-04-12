@@ -1,12 +1,12 @@
 import { IGameMap } from './maps';
-import { ISubmarine } from './submarines';
+import { ISubmarine, IRealSubmarine } from './submarines';
 import { ECharge } from './commands';
 
 export interface IGameState {
   map: IGameMap;
   players: {
     me: {
-      real: ISubmarine;
+      real: IRealSubmarine;
       phantoms: ISubmarine[];
     };
     opponent: {
@@ -15,19 +15,14 @@ export interface IGameState {
   };
 }
 
-export const createBlankGameState = (): IGameState => {
+export const createBlankGameStateTemplate = (): IGameState => {
   return {
     map: {
       width: 0,
       height: 0,
       sectorSize: 0,
-      numOfWalkableTerrainCells: 0,
-      numOfSectors: 0,
       walkabilityMatrix: [],
-      matrixes: {
-        torpedoReachability: [],
-        torpedoReachabilityMap: [],
-      },
+      cache: { torpedoReachability: [], torpedoReachabilityMap: [], numOfWalkableTerrainCells: 0 },
     },
     players: {
       me: {

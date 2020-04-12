@@ -5,19 +5,19 @@ import {
   initTorpedoReachabilityMatrix,
   initTorpedoReachabilityMapMatrix,
   createBlankWalkabilityMatrix,
-  ETerrain,
+  isTerrainWater,
 } from './maps';
 import {
   ESonarResult,
-  applyCommandsToSubmarine,
+  applyCommandsToRealSubmarine,
   calculateSonarResult,
   getSubmarinesFilteredByEnemyCommands,
   getSubmarinesFilteredByOwnCommands,
   transformCommandsStringToCommands,
   transformCommandsToCommandString,
 } from './commands';
-import { createBlankGameState } from './game-state';
-import { createSubmarine, setNewSubmarineState } from './submarines';
+import { createBlankGameStateTemplate } from './game-state';
+import { createSubmarine, setNewSubmarineState, createRealSubmarine } from './submarines';
 import { HEALTH_SUBMARINE } from './constants';
 
 declare const readline: any;
@@ -27,7 +27,7 @@ try {
     return readline();
   };
 
-  const gameState = createBlankGameState();
+  const gameState = createBlankGameStateTemplate();
 
   const [width, height /*, myId*/] = readNextLine()
     .split(' ')
@@ -45,7 +45,7 @@ try {
     const cells = [...line.split('')];
     for (let x = 0; x < width; x++) {
       const cell = cells[x];
-      gameState.map.walkabilityMatrix[x][y] = transformGameInputToTerrain(cell) === ETerrain.WATER;
+      gameState.map.walkabilityMatrix[x][y] = isTerrainWater(transformGameInputToTerrain(cell));
     }
   }
 
@@ -54,13 +54,12 @@ try {
 
   const walkableTerrainCells = getWalkableCoordinates(gameState.map.walkabilityMatrix);
 
-  gameState.map.numOfWalkableTerrainCells = walkableTerrainCells.length;
-  gameState.map.numOfSectors = 9;
+  gameState.map.cache.numOfWalkableTerrainCells = walkableTerrainCells.length;
 
   const mySubmarineStartingCoordinates =
     walkableTerrainCells[Math.floor(Math.random() * walkableTerrainCells.length)];
 
-  gameState.players.me.real = createSubmarine({
+  gameState.players.me.real = createRealSubmarine({
     health: HEALTH_SUBMARINE,
     coordinates: mySubmarineStartingCoordinates,
     gameMap: gameState.map,
@@ -161,7 +160,7 @@ try {
     const myCommands = pickCommandsForTurn({ gameState });
     //console.error(new Date().getTime() - start);
 
-    applyCommandsToSubmarine({
+    applyCommandsToRealSubmarine({
       commands: myCommands,
       gameMap: gameState.map,
       submarine: gameState.players.me.real,
