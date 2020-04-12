@@ -1,5 +1,4 @@
 import { ICoordinates, TWalkabilityMatrix, IGameMap, IVector } from './interfaces';
-import { getCoordinatesReachableByTorpedo } from '../weapons';
 import { EDirection, ETerrain } from './enums';
 import { baseVectors, gameDirectionToVectorTransformations } from './configs';
 
