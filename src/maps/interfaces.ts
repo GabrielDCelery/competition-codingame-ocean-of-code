@@ -20,6 +20,12 @@ export interface ITorpedoReachabilityMapMatrix {
   };
 }
 
+export interface IMineField {
+  [index: number]: {
+    [index: number]: number;
+  };
+}
+
 export interface IGameMap {
   width: number;
   height: number;
@@ -29,6 +35,8 @@ export interface IGameMap {
     numOfWalkableTerrainCells: number;
     torpedoReachabilityListMatrix: ITorpedoReachabilityListMatrix;
     torpedoReachabilityMapMatrix: ITorpedoReachabilityMapMatrix;
+    mineDirectDamageProbabilityMatrix: IMineField;
+    mineSplashDamageProbabilityMatrix: IMineField;
   };
 }
 

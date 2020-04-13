@@ -18,6 +18,7 @@ import {
   getDamageTakenFromTorpedo,
   mergeMineTrackers,
   canMineBeTriggeredAtCoordinates,
+  IMineTracker,
 } from '../weapons';
 import {
   EDirection,
@@ -29,6 +30,7 @@ import {
   transformCoordinatesToKey,
   transformDirectionToVector,
   transposeWalkabilityMatrixes,
+  TWalkabilityMatrix,
 } from '../maps';
 import {
   CHARGE_ANY_PER_MOVE,
@@ -180,6 +182,7 @@ const filterSubmarinesByTriggerCommand = ({
   const { coordinates } = parameters as ITriggerCommandParameters;
 
   phantomSubmarines.forEach(phantomSubmarine => {
+    /*
     if (
       !canMineBeTriggeredAtCoordinates({
         triggeredAt: coordinates,
@@ -188,6 +191,7 @@ const filterSubmarinesByTriggerCommand = ({
     ) {
       return;
     }
+    */
     const damageTaken = getDamageTakenFromMine({
       submarineCoordinates: phantomSubmarine.coordinates,
       detonatedAtCoordinates: coordinates,
@@ -251,9 +255,7 @@ const filterSubmarinesBySilenceCommand = ({
           clonedPhantomSubmarine.walkabilityMatrix[x][y] = false;
         }
         const locationKey = transformCoordinatesToKey(clonedPhantomSubmarine.coordinates);
-        if (newSubmarinesMap[locationKey] === undefined) {
-          newSubmarinesMap[locationKey] = [];
-        }
+        newSubmarinesMap[locationKey] = newSubmarinesMap[locationKey] || [];
         newSubmarinesMap[locationKey].push(clonedPhantomSubmarine);
       }
     });
@@ -261,19 +263,21 @@ const filterSubmarinesBySilenceCommand = ({
 
   return Object.keys(newSubmarinesMap).map(locationKey => {
     const submarines = newSubmarinesMap[locationKey];
-    const transposed = transposeWalkabilityMatrixes(
-      submarines.map(submarine => {
-        return submarine.walkabilityMatrix;
-      })
-    );
-    const mergedMineTracker = mergeMineTrackers(
-      submarines.map(submarine => {
-        return submarine.mineTracker;
-      })
-    );
 
-    submarines[0].walkabilityMatrix = transposed;
-    submarines[0].mineTracker = mergedMineTracker;
+    if (submarines.length === 1) {
+      return submarines[0];
+    }
+
+    const walkabilityMatrixes: TWalkabilityMatrix[] = [];
+    const mineTrackers: IMineTracker[] = [];
+
+    submarines.forEach(submarine => {
+      walkabilityMatrixes.push(submarine.walkabilityMatrix);
+      mineTrackers.push(submarine.mineTracker);
+    });
+
+    submarines[0].walkabilityMatrix = transposeWalkabilityMatrixes(walkabilityMatrixes);
+    submarines[0].mineTracker = mergeMineTrackers(mineTrackers);
 
     return submarines[0];
   });

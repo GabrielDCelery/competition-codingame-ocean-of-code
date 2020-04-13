@@ -11,6 +11,7 @@ import { calculateFireTorpedoAtCoordinatesUtility } from './fire-torpedo-at-coor
 import { chooseHighestUtility } from '../utility-helpers';
 import { calculateOptimalDistanceFromTargetUtility } from './optimal-distance-from-target';
 import { weightedAverage } from '../utility-helpers';
+import { calculateThreatOfTakingMineDamageUtility } from './threat-of-taking-mine-damage';
 
 export const calculateMoveToCoordinatestUtility = ({
   coordinatesMoveFrom,
@@ -64,10 +65,19 @@ export const calculateMoveToCoordinatestUtility = ({
     targetSubmarines: opponentSubmarines,
   });
 
+  const threatOfTakingMineDamageUtility = calculateThreatOfTakingMineDamageUtility({
+    coordinatesMoveTo,
+    gameMap,
+  });
+
   return weightedAverage([
     {
-      weight: 0.7,
+      weight: 0.3,
       value: optimalDistanceFromTargetUtility,
+    },
+    {
+      weight: 0.5,
+      value: 1 - threatOfTakingMineDamageUtility,
     },
     /*
     {
@@ -80,7 +90,7 @@ export const calculateMoveToCoordinatestUtility = ({
     },
     */
     {
-      weight: 0.3,
+      weight: 0.2,
       value: freeMovementUtility,
     },
   ]);

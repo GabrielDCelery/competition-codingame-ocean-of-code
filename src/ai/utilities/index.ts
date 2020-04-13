@@ -5,3 +5,4 @@ export * from './free-movement';
 export * from './move-to-coordinates-utility';
 export * from './threat-of-being-shot-at-coordinates';
 export * from './trigger-mine-at-coordinates';
+export * from './threat-of-taking-mine-damage';

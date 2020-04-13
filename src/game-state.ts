@@ -26,6 +26,8 @@ export const createBlankGameStateTemplate = (): IGameState => {
         torpedoReachabilityListMatrix: [],
         torpedoReachabilityMapMatrix: [],
         numOfWalkableTerrainCells: 0,
+        mineDirectDamageProbabilityMatrix: [],
+        mineSplashDamageProbabilityMatrix: [],
       },
     },
     players: {
