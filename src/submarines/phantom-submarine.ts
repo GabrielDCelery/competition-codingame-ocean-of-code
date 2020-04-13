@@ -7,8 +7,11 @@ import {
 } from '../maps';
 import { CHARGE_MINE, CHARGE_SILENCE, CHARGE_TORPEDO, CHARGE_SONAR } from '../constants';
 import { ISubmarine } from './interfaces';
+import { IMineTracker } from '../weapons';
 
-export interface IPhantomSubmarine extends ISubmarine {}
+export interface IPhantomSubmarine extends ISubmarine {
+  mineTracker: IMineTracker;
+}
 
 export const createPhantomSubmarine = ({
   health,
@@ -33,6 +36,10 @@ export const createPhantomSubmarine = ({
       [ECharge.MINE]: 0,
     },
     walkabilityMatrix,
+    mineTracker: {
+      count: 0,
+      deploys: {},
+    },
   };
 };
 
@@ -42,6 +49,7 @@ export const clonePhantomSubmarine = (submarine: IPhantomSubmarine): IPhantomSub
     coordinates: submarine.coordinates,
     charges: { ...submarine.charges },
     walkabilityMatrix: cloneWalkabilityMatrix(submarine.walkabilityMatrix),
+    mineTracker: JSON.parse(JSON.stringify(submarine.mineTracker)),
   };
 };
 

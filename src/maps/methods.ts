@@ -46,6 +46,22 @@ export const areCoordinatesTheSame = (source: ICoordinates, target: ICoordinates
   return source.x === target.x && source.y === target.y;
 };
 
+export const isCoordinatesInCoordinatesList = ({
+  coordinatesList,
+  coordinates,
+}: {
+  coordinatesList: ICoordinates[];
+  coordinates: ICoordinates;
+}): boolean => {
+  for (let i = 0, iMax = coordinatesList.length; i < iMax; i++) {
+    if (areCoordinatesTheSame(coordinates, coordinatesList[i])) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
 export const multiplyVector = ({
   vector,
   amount,

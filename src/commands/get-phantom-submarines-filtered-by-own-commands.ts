@@ -12,9 +12,12 @@ import {
   ITriggerCommandParameters,
 } from './interfaces';
 import {
+  appendMineToTracker,
   areCoordinatesReachableByTorpedo,
   getDamageTakenFromMine,
   getDamageTakenFromTorpedo,
+  mergeMineTrackers,
+  canMineBeTriggeredAtCoordinates,
 } from '../weapons';
 import {
   EDirection,
@@ -155,6 +158,10 @@ const filterSubmarinesByMineCommand = ({
 
   return phantomSubmarines.map(phantomSubmarine => {
     useChargeForPhantomSubmarine({ submarine: phantomSubmarine, type: ECharge.MINE });
+    appendMineToTracker({
+      deployedFrom: phantomSubmarine.coordinates,
+      mineTracker: phantomSubmarine.mineTracker,
+    });
     return phantomSubmarine;
   });
 };
@@ -173,6 +180,14 @@ const filterSubmarinesByTriggerCommand = ({
   const { coordinates } = parameters as ITriggerCommandParameters;
 
   phantomSubmarines.forEach(phantomSubmarine => {
+    if (
+      !canMineBeTriggeredAtCoordinates({
+        triggeredAt: coordinates,
+        mineTracker: phantomSubmarine.mineTracker,
+      })
+    ) {
+      return;
+    }
     const damageTaken = getDamageTakenFromMine({
       submarineCoordinates: phantomSubmarine.coordinates,
       detonatedAtCoordinates: coordinates,
@@ -251,8 +266,14 @@ const filterSubmarinesBySilenceCommand = ({
         return submarine.walkabilityMatrix;
       })
     );
+    const mergedMineTracker = mergeMineTrackers(
+      submarines.map(submarine => {
+        return submarine.mineTracker;
+      })
+    );
 
     submarines[0].walkabilityMatrix = transposed;
+    submarines[0].mineTracker = mergedMineTracker;
 
     return submarines[0];
   });
