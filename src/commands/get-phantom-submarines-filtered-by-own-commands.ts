@@ -149,8 +149,10 @@ const filterSubmarinesByTorpedoCommand = ({
 };
 
 const filterSubmarinesByMineCommand = ({
+  gameMap,
   phantomSubmarines,
 }: {
+  gameMap: IGameMap;
   phantomSubmarines: IPhantomSubmarine[];
 }): IPhantomSubmarine[] => {
   const submarine = phantomSubmarines[0];
@@ -161,6 +163,7 @@ const filterSubmarinesByMineCommand = ({
   return phantomSubmarines.map(phantomSubmarine => {
     useChargeForPhantomSubmarine({ submarine: phantomSubmarine, type: ECharge.MINE });
     appendMineToTracker({
+      gameMap,
       deployedFrom: phantomSubmarine.coordinates,
       mineTracker: phantomSubmarine.mineTracker,
     });
@@ -332,6 +335,7 @@ export const getPhantomSubmarinesFilteredByOwnCommands = ({
 
       case ECommand.MINE: {
         filteredSubmarines = filterSubmarinesByMineCommand({
+          gameMap,
           phantomSubmarines: filteredSubmarines,
         });
         return;

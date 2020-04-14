@@ -16,6 +16,10 @@ const DIRECT_DAMAGE_INDEX = 0;
 const SPLASH_DAMAGE_INDEX = 1;
 
 export interface IMineTracker {
+  mineCount: number;
+  mines: {
+    [index: string]: { [index: string]: true };
+  };
   deployCount: number;
   deploys: {
     [index: string]: { [index: string]: true };
@@ -54,15 +58,28 @@ export const getDamageTakenFromMine = ({
 };
 
 export const appendMineToTracker = ({
+  gameMap,
   deployedFrom,
   mineTracker,
 }: {
+  gameMap: IGameMap;
   deployedFrom: ICoordinates;
   mineTracker: IMineTracker;
 }): void => {
+  const neighbouringCoordinatesList = getNeighbouringCells(deployedFrom).filter(coordinates => {
+    return areCoordinatesWalkable({
+      coordinates,
+      walkabilityMatrix: gameMap.walkabilityMatrix,
+    });
+  });
+  mineTracker.mines[mineTracker.mineCount] = {};
+  neighbouringCoordinatesList.forEach(coordinates => {
+    mineTracker.mines[mineTracker.mineCount][transformCoordinatesToKey(coordinates)] = true;
+  });
   mineTracker.deploys[mineTracker.deployCount] = {
     [transformCoordinatesToKey(deployedFrom)]: true,
   };
+  mineTracker.mineCount += 1;
   mineTracker.deployCount += 1;
 };
 
@@ -79,6 +96,8 @@ export const appendTriggerToTracker = ({
 
 export const mergeMineTrackers = (mineTrackers: IMineTracker[]): IMineTracker => {
   const mergedMineTracker: IMineTracker = {
+    mineCount: mineTrackers[0].mineCount,
+    mines: {},
     deployCount: mineTrackers[0].deployCount,
     deploys: {},
     triggerCount: mineTrackers[0].triggerCount,
@@ -97,6 +116,22 @@ export const mergeMineTrackers = (mineTrackers: IMineTracker[]): IMineTracker =>
 
     mergedMineTracker.deploys[i] = coordinatesMap;
   }
+
+  for (let i = 0; i < mergedMineTracker.mineCount; i++) {
+    let minesMap: { [index: string]: true } = {};
+
+    mineTrackers.forEach(mineTracker => {
+      minesMap = {
+        ...minesMap,
+        ...mineTracker.mines[i],
+      };
+    });
+
+    mergedMineTracker.mines[i] = minesMap;
+  }
+
+  console.error(mergedMineTracker.mineCount);
+  console.error(mergedMineTracker.mines);
 
   return mergedMineTracker;
 };

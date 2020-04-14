@@ -37,6 +37,8 @@ export const createPhantomSubmarine = ({
     },
     walkabilityMatrix,
     mineTracker: {
+      mineCount: 0,
+      mines: {},
       deployCount: 0,
       deploys: {},
       triggerCount: 0,
@@ -52,12 +54,18 @@ export const clonePhantomSubmarine = (submarine: IPhantomSubmarine): IPhantomSub
     charges: { ...submarine.charges },
     walkabilityMatrix: cloneWalkabilityMatrix(submarine.walkabilityMatrix),
     mineTracker: {
+      mineCount: submarine.mineTracker.mineCount,
+      mines: {},
       deployCount: submarine.mineTracker.deployCount,
       deploys: {},
       triggerCount: submarine.mineTracker.triggerCount,
       triggers: { ...submarine.mineTracker.triggers },
     },
   };
+
+  for (let i = 0, iMax = submarine.mineTracker.mineCount; i < iMax; i++) {
+    clonedSubmarine.mineTracker.mines[i] = { ...submarine.mineTracker.mines[i] };
+  }
 
   for (let i = 0, iMax = submarine.mineTracker.deployCount; i < iMax; i++) {
     clonedSubmarine.mineTracker.deploys[i] = { ...submarine.mineTracker.deploys[i] };
