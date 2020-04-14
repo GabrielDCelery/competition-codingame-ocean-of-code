@@ -37,20 +37,33 @@ export const createPhantomSubmarine = ({
     },
     walkabilityMatrix,
     mineTracker: {
-      count: 0,
+      deployCount: 0,
       deploys: {},
+      triggerCount: 0,
+      triggers: {},
     },
   };
 };
 
 export const clonePhantomSubmarine = (submarine: IPhantomSubmarine): IPhantomSubmarine => {
-  return {
+  const clonedSubmarine: IPhantomSubmarine = {
     health: submarine.health,
     coordinates: submarine.coordinates,
     charges: { ...submarine.charges },
     walkabilityMatrix: cloneWalkabilityMatrix(submarine.walkabilityMatrix),
-    mineTracker: JSON.parse(JSON.stringify(submarine.mineTracker)),
+    mineTracker: {
+      deployCount: submarine.mineTracker.deployCount,
+      deploys: {},
+      triggerCount: submarine.mineTracker.triggerCount,
+      triggers: { ...submarine.mineTracker.triggers },
+    },
   };
+
+  for (let i = 0, iMax = submarine.mineTracker.deployCount; i < iMax; i++) {
+    clonedSubmarine.mineTracker.deploys[i] = { ...submarine.mineTracker.deploys[i] };
+  }
+
+  return clonedSubmarine;
 };
 
 export const chargePhantomSubmarine = ({

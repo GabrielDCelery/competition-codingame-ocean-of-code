@@ -62,11 +62,11 @@ export const getDamageTakenFromTorpedo = ({
   submarineCoordinates: ICoordinates;
   detonatedAtCoordinates: ICoordinates;
 }): number => {
-  if (areCoordinatesTheSame(submarineCoordinates, detonatedAtCoordinates)) {
-    return DAMAGE_TORPEDO;
-  }
   if (2 < getDistanceBetweenCoordinates(submarineCoordinates, detonatedAtCoordinates)) {
     return 0;
+  }
+  if (areCoordinatesTheSame(submarineCoordinates, detonatedAtCoordinates)) {
+    return DAMAGE_TORPEDO;
   }
   const splashCoordinatesList = getNeighbouringCellsIncludingDiagonal(detonatedAtCoordinates);
   for (let i = 0, iMax = splashCoordinatesList.length; i < iMax; i++) {

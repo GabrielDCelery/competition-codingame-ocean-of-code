@@ -17,8 +17,8 @@ import {
   getDamageTakenFromMine,
   getDamageTakenFromTorpedo,
   mergeMineTrackers,
-  canMineBeTriggeredAtCoordinates,
   IMineTracker,
+  appendTriggerToTracker,
 } from '../weapons';
 import {
   EDirection,
@@ -182,16 +182,6 @@ const filterSubmarinesByTriggerCommand = ({
   const { coordinates } = parameters as ITriggerCommandParameters;
 
   phantomSubmarines.forEach(phantomSubmarine => {
-    /*
-    if (
-      !canMineBeTriggeredAtCoordinates({
-        triggeredAt: coordinates,
-        mineTracker: phantomSubmarine.mineTracker,
-      })
-    ) {
-      return;
-    }
-    */
     const damageTaken = getDamageTakenFromMine({
       submarineCoordinates: phantomSubmarine.coordinates,
       detonatedAtCoordinates: coordinates,
@@ -200,6 +190,10 @@ const filterSubmarinesByTriggerCommand = ({
     if (phantomSubmarine.health < phantomSubmarineMinHealth) {
       return;
     }
+    appendTriggerToTracker({
+      triggeredAt: coordinates,
+      mineTracker: phantomSubmarine.mineTracker,
+    });
     return final.push(phantomSubmarine);
   });
 
