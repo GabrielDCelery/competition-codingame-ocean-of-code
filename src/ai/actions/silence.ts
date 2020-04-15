@@ -7,9 +7,19 @@ import {
   EDirection,
   addVectorToCoordinates,
   multiplyVector,
+  getDistanceBetweenCoordinates,
 } from '../../maps';
-import { chooseHighestUtility, normalizedLogistic, weightedAverage } from '../utility-helpers';
-import { calculateMoveToCoordinatestUtility, calculateDesireToHideUtility } from '../utilities';
+import {
+  chooseHighestUtility,
+  normalizedLogistic,
+  weightedAverage,
+  normalizedLinear,
+} from '../utility-helpers';
+import {
+  calculateMoveToCoordinatestUtility,
+  calculateDesireToHideUtility,
+  calculatThreatOfBeingShotAtCoordinatesUtility,
+} from '../utilities';
 import { CHARGE_SILENCE, RANGE_SILENCE } from '../../constants';
 
 interface IPossibleMove {
@@ -58,19 +68,33 @@ export const calculateSilenceActionUtility: TActionUtilityCalculator = ({
     }
   });
 
+  const threatOfBeingShotaAtUtility = calculatThreatOfBeingShotAtCoordinatesUtility({
+    gameMap,
+    coordinates: mySubmarine.coordinates,
+    targetSubmarine: mySubmarine,
+    possibleSourceSubmarines: opponentSubmarines,
+  });
+
   const availableMovesUtility = normalizedLogistic({
     value: possibleMoves.length,
     max: 17,
   });
 
   const desireToHideUtility = calculateDesireToHideUtility({
-    phantomSubmarines: myPhantomSubmarines,
+    mySubmarine,
+    myPhantomSubmarines,
+    opponentSubmarines,
     gameMap,
   });
 
   const { utility, params } = chooseHighestUtility<IPossibleMove>(
     possibleMoves,
     ({ coordinatesMoveTo }) => {
+      const numOfMovesBeingMadeUtility = normalizedLinear({
+        value: getDistanceBetweenCoordinates(coordinatesMoveTo, mySubmarine.coordinates),
+        max: 4,
+      });
+
       const moveToCoordinatesUtility = calculateMoveToCoordinatestUtility({
         coordinatesMoveFrom: mySubmarine.coordinates,
         coordinatesMoveTo,
@@ -80,9 +104,11 @@ export const calculateSilenceActionUtility: TActionUtilityCalculator = ({
       });
 
       return weightedAverage([
-        { weight: 0.2, value: availableMovesUtility },
-        { weight: 0.5, value: desireToHideUtility },
-        { weight: 0.3, value: moveToCoordinatesUtility },
+        { weight: 0.1, value: numOfMovesBeingMadeUtility },
+        { weight: 0.1, value: availableMovesUtility },
+        { weight: 0.3, value: threatOfBeingShotaAtUtility },
+        { weight: 0.4, value: desireToHideUtility },
+        { weight: 0.1, value: moveToCoordinatesUtility },
       ]);
     }
   );

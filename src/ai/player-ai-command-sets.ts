@@ -13,6 +13,11 @@ export const playerAiCommandSets = {
     {
       utilityActions: [
         { utilityCalculator: calculateSurfaceActionUtility, types: [ECommand.SURFACE] },
+      ],
+      minUtility: 0.3,
+    },
+    {
+      utilityActions: [
         {
           utilityCalculator: calculateMineActionUtility,
           types: [ECommand.MINE, ECommand.TRIGGER],
@@ -38,11 +43,10 @@ export const playerAiCommandSets = {
       utilityActions: [
         { utilityCalculator: calculateTorpedoActionUtility, types: [ECommand.TORPEDO] },
       ],
-      minUtility: 0.4,
+      minUtility: 0.7,
     },
     {
       utilityActions: [
-        { utilityCalculator: calculateSurfaceActionUtility, types: [ECommand.SURFACE] },
         {
           utilityCalculator: calculateMineActionUtility,
           types: [ECommand.MINE, ECommand.TRIGGER],

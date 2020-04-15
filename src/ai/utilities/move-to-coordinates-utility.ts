@@ -35,10 +35,6 @@ export const calculateMoveToCoordinatestUtility = ({
     clonedWalkabilityMatrix[x][y] = false;
   });
 
-  const freeMovementUtility = calculateFreeMovementUtility({
-    coordinatesMoveTo,
-    walkabilityMatrix: clonedWalkabilityMatrix,
-  });
   /*
   const threatOfBeingShotaAtUtility = calculatThreatOfBeingShotAtCoordinatesUtility({
     gameMap,
@@ -57,7 +53,14 @@ export const calculateMoveToCoordinatestUtility = ({
       });
     }
   ).utility;
-    */
+  */
+
+  const freeMovementUtility = calculateFreeMovementUtility({
+    coordinatesMoveTo,
+    walkabilityMatrix: clonedWalkabilityMatrix,
+    gameMap,
+  });
+
   const optimalDistanceFromTargetUtility = calculateOptimalDistanceFromTargetUtility({
     coordinatesMoveFrom,
     coordinatesMoveTo,
@@ -76,7 +79,7 @@ export const calculateMoveToCoordinatestUtility = ({
       value: optimalDistanceFromTargetUtility,
     },
     {
-      weight: 0.5,
+      weight: 0.3,
       value: 1 - threatOfTakingMineDamageUtility,
     },
     /*
@@ -90,7 +93,7 @@ export const calculateMoveToCoordinatestUtility = ({
     },
     */
     {
-      weight: 0.2,
+      weight: 0.4,
       value: freeMovementUtility,
     },
   ]);

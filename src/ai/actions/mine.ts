@@ -9,6 +9,8 @@ import {
 } from '../../maps';
 import { CHARGE_MINE } from '../../constants';
 import { TActionUtilityCalculator } from './interfaces';
+import { chooseHighestUtility } from '../utility-helpers';
+import { calculateMinePlacementUtility } from '../utilities';
 
 export const getRandomElemFromList = <T>(items: T[]): T => {
   return items[Math.floor(Math.random() * items.length)];
@@ -45,9 +47,19 @@ export const calculateMineActionUtility: TActionUtilityCalculator = ({ gameMap, 
     };
   }
 
+  const { params } = chooseHighestUtility<ICoordinates>(
+    possibleLocationsToDeploy,
+    possibleLocationToDeploy => {
+      return calculateMinePlacementUtility({
+        deployCoordinates: possibleLocationToDeploy,
+        gameMap,
+      });
+    }
+  );
+
   const vector = createVectorFromCoordinates({
     source: mySubmarine.coordinates,
-    target: getRandomElemFromList<ICoordinates>(possibleLocationsToDeploy),
+    target: params,
   });
   const direction = transformVectorToDirection(vector);
 

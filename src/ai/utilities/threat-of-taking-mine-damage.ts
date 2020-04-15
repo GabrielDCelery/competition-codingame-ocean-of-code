@@ -1,5 +1,5 @@
 import { ICoordinates, IGameMap } from '../../maps';
-import { average } from '../utility-helpers';
+import { average, normalizedLogistic } from '../utility-helpers';
 
 export const calculateThreatOfTakingMineDamageUtility = ({
   coordinatesMoveTo,
@@ -9,8 +9,17 @@ export const calculateThreatOfTakingMineDamageUtility = ({
   gameMap: IGameMap;
 }): number => {
   const { x, y } = coordinatesMoveTo;
-  const probabilityOfTakingDirectDamage = gameMap.cache.mineDirectDamageProbabilityMatrix[x][y];
-  const probabilityOfTakingSplashDamage = gameMap.cache.mineSplashDamageProbabilityMatrix[x][y];
 
-  return average([probabilityOfTakingDirectDamage, probabilityOfTakingSplashDamage]);
+  return average([
+    normalizedLogistic({
+      value: gameMap.cache.mineDirectDamageProbabilityMatrix[x][y],
+      max: 1,
+      a: 0.5,
+    }),
+    normalizedLogistic({
+      value: gameMap.cache.mineSplashDamageProbabilityMatrix[x][y],
+      max: 1,
+      a: 0.5,
+    }),
+  ]);
 };

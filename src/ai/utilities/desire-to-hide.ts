@@ -1,16 +1,18 @@
 import { normalizedExponentialDecay } from '../utility-helpers';
-import { IPhantomSubmarine } from '../../submarines';
+import { IPhantomSubmarine, IRealSubmarine } from '../../submarines';
 import { IGameMap } from '../../maps';
 
 export const calculateDesireToHideUtility = ({
-  phantomSubmarines,
+  myPhantomSubmarines,
   gameMap,
 }: {
-  phantomSubmarines: IPhantomSubmarine[];
+  mySubmarine: IRealSubmarine;
+  myPhantomSubmarines: IPhantomSubmarine[];
+  opponentSubmarines: IPhantomSubmarine[];
   gameMap: IGameMap;
 }): number => {
   return normalizedExponentialDecay({
-    value: phantomSubmarines.length,
+    value: myPhantomSubmarines.length,
     max: gameMap.cache.numOfWalkableTerrainCells,
     a: 4,
   });
