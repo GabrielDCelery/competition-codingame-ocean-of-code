@@ -20,10 +20,6 @@ export interface IMineTracker {
   mines: {
     [index: string]: { [index: string]: true };
   };
-  deployCount: number;
-  deploys: {
-    [index: string]: { [index: string]: true };
-  };
   triggerCount: number;
   triggers: {
     [index: string]: ICoordinates;
@@ -76,11 +72,7 @@ export const appendMineToTracker = ({
   neighbouringCoordinatesList.forEach(coordinates => {
     mineTracker.mines[mineTracker.mineCount][transformCoordinatesToKey(coordinates)] = true;
   });
-  mineTracker.deploys[mineTracker.deployCount] = {
-    [transformCoordinatesToKey(deployedFrom)]: true,
-  };
   mineTracker.mineCount += 1;
-  mineTracker.deployCount += 1;
 };
 
 export const appendTriggerToTracker = ({
@@ -98,24 +90,9 @@ export const mergeMineTrackers = (mineTrackers: IMineTracker[]): IMineTracker =>
   const mergedMineTracker: IMineTracker = {
     mineCount: mineTrackers[0].mineCount,
     mines: {},
-    deployCount: mineTrackers[0].deployCount,
-    deploys: {},
     triggerCount: mineTrackers[0].triggerCount,
     triggers: mineTrackers[0].triggers,
   };
-
-  for (let i = 0; i < mergedMineTracker.deployCount; i++) {
-    let coordinatesMap: { [index: string]: true } = {};
-
-    mineTrackers.forEach(mineTracker => {
-      coordinatesMap = {
-        ...coordinatesMap,
-        ...mineTracker.deploys[i],
-      };
-    });
-
-    mergedMineTracker.deploys[i] = coordinatesMap;
-  }
 
   for (let i = 0; i < mergedMineTracker.mineCount; i++) {
     let minesMap: { [index: string]: true } = {};
@@ -130,31 +107,9 @@ export const mergeMineTrackers = (mineTrackers: IMineTracker[]): IMineTracker =>
     mergedMineTracker.mines[i] = minesMap;
   }
 
-  console.error(mergedMineTracker.mineCount);
-  console.error(mergedMineTracker.mines);
-
   return mergedMineTracker;
 };
 
-export const canMineBeTriggeredAtCoordinates = ({
-  triggeredAt,
-  mineTracker,
-}: {
-  triggeredAt: ICoordinates;
-  mineTracker: IMineTracker;
-}): boolean => {
-  const neighbouringCellsAsKeys = getNeighbouringCells(triggeredAt).map(transformCoordinatesToKey);
-
-  for (let i = 0, iMax = mineTracker.deployCount; i < iMax; i++) {
-    for (let j = 0, jMax = neighbouringCellsAsKeys.length; j < jMax; j++) {
-      if (mineTracker.deploys[i][neighbouringCellsAsKeys[j]] === true) {
-        return true;
-      }
-    }
-  }
-
-  return false;
-};
 /*
 export const filterMineDeploysByTriggers = (mineTracker: IMineTracker): void => {
   if (mineTracker.triggerCount === 0) {
@@ -181,45 +136,22 @@ export const filterMineDeploysByTriggers = (mineTracker: IMineTracker): void => 
 };
 */
 const calculateSingleDeployProbabilityMap = ({
-  gameMap,
-  deployId,
+  mineId,
   mineTrackers,
 }: {
-  gameMap: IGameMap;
-  deployId: string;
+  mineId: string;
   mineTrackers: IMineTracker[];
 }): any => {
   const probabilityMap: any = {};
   const numOfMineTrackers = mineTrackers.length;
 
   mineTrackers.forEach(mineTracker => {
-    const singleMineProbabilityMap: any = {};
-    let numOfPossibleCoordinatesToDropMineTo = 0;
+    const mineLocationsAsKeys = Object.keys(mineTracker.mines[mineId]);
+    const numOfMines = mineLocationsAsKeys.length;
 
-    Object.keys(mineTracker.deploys[deployId]).forEach(deployKey => {
-      const deploy = transformKeyToCoordinates(deployKey);
-      const coordinatesListToDropMineTo = getNeighbouringCells(deploy).filter(coordinates => {
-        return areCoordinatesWalkable({
-          coordinates,
-          walkabilityMatrix: gameMap.walkabilityMatrix,
-        });
-      });
-
-      numOfPossibleCoordinatesToDropMineTo += coordinatesListToDropMineTo.length;
-
-      coordinatesListToDropMineTo.forEach(coordinatesToDropMineTo => {
-        const locationKey = transformCoordinatesToKey(coordinatesToDropMineTo);
-        singleMineProbabilityMap[locationKey] = singleMineProbabilityMap[locationKey] || 0;
-        singleMineProbabilityMap[locationKey] += 1;
-      });
-    });
-
-    Object.keys(singleMineProbabilityMap).forEach(locationKey => {
-      probabilityMap[locationKey] = probabilityMap[locationKey] || 0;
-      probabilityMap[locationKey] +=
-        singleMineProbabilityMap[locationKey] /
-        numOfPossibleCoordinatesToDropMineTo /
-        numOfMineTrackers;
+    mineLocationsAsKeys.forEach(mineLocationAsKey => {
+      probabilityMap[mineLocationAsKey] = probabilityMap[mineLocationAsKey] || 0;
+      probabilityMap[mineLocationAsKey] += 1 / numOfMines / numOfMineTrackers;
     });
   });
 
@@ -270,10 +202,9 @@ export const createMineFieldUsingMineTrackers = ({
 }): [IMineField, IMineField] => {
   const damageProbabilityMaps: any[] = [];
 
-  for (let i = 0, iMax = mineTrackers[0].deployCount; i < iMax; i++) {
+  for (let i = 0, iMax = mineTrackers[0].mineCount; i < iMax; i++) {
     const singleDeployProbabilityMap = calculateSingleDeployProbabilityMap({
-      gameMap,
-      deployId: `${i}`,
+      mineId: `${i}`,
       mineTrackers,
     });
 
