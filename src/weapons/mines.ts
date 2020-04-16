@@ -107,31 +107,6 @@ export const mergeMineTrackers = (mineTrackers: IMineTracker[]): IMineTracker =>
   return mergedMineTracker;
 };
 
-/*
-export const filterMineDeploysByTriggers = (mineTracker: IMineTracker): void => {
-  if (mineTracker.triggerCount === 0) {
-    return;
-  }
-
-  const possibleDeployLocationsAsKeys = getNeighbouringCells(mineTracker).map(
-    transformCoordinatesToKey
-  );
-  const temp: { [index: string]: string[] } = {};
-
-  for (let i = 0, iMax = mineTracker.deployCount; i < iMax; i++) {
-    for (let j = 0, jMax = possibleDeployLocationsAsKeys.length; j < jMax; j++) {
-      const possibleDeployLocationKey = possibleDeployLocationsAsKeys[j];
-
-      if (mineTracker.deploys[i][possibleDeployLocationKey] === true) {
-        temp[i] = temp[i] || [];
-        temp[i].push(possibleDeployLocationKey);
-      }
-    }
-  }
-
-  console.error(temp);
-};
-*/
 export const calculateMineProbabilityMatrix = ({
   gameMap,
   mineTrackers,

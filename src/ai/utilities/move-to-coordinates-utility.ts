@@ -7,8 +7,6 @@ import {
 import { ISubmarine } from '../../submarines';
 import { calculateFreeMovementUtility } from './free-movement';
 import { calculatThreatOfBeingShotAtCoordinatesUtility } from './threat-of-being-shot-at-coordinates';
-//import { calculateFireTorpedoAtCoordinatesUtility } from './fire-torpedo-at-coordinates';
-//import { chooseHighestUtility } from '../utility-helpers';
 import { calculateOptimalDistanceFromTargetUtility } from './optimal-distance-from-target';
 import { weightedAverage } from '../utility-helpers';
 import { calculateThreatOfTakingMineDamageUtility } from './threat-of-taking-mine-damage';
@@ -34,19 +32,6 @@ export const calculateMoveToCoordinatestUtility = ({
   }).forEach(({ x, y }) => {
     clonedWalkabilityMatrix[x][y] = false;
   });
-
-  /*
-  const bestChanceForSettingUpShotUtility = chooseHighestUtility<ICoordinates>(
-    gameMap.cache.torpedoReachabilityListMatrix[coordinatesMoveTo.x][coordinatesMoveTo.y],
-    coordinatesToShootAt => {
-      return calculateFireTorpedoAtCoordinatesUtility({
-        coordinatesToShootAt,
-        sourceSubmarine: mySubmarine,
-        possibleTargetSubmarines: opponentSubmarines,
-      });
-    }
-  ).utility;
-  */
 
   const freeMovementUtility = calculateFreeMovementUtility({
     coordinatesMoveTo,
@@ -74,12 +59,6 @@ export const calculateMoveToCoordinatestUtility = ({
   });
 
   return weightedAverage([
-    /*
-    {
-      weight: 0.2,
-      value: bestChanceForSettingUpShotUtility,
-    },
-    */
     {
       weight: 0.2,
       value: optimalDistanceFromTargetUtility,
