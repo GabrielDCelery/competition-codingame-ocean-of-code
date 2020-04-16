@@ -47,8 +47,6 @@ const createWeightedCommandsFromActionsSets = ({
 };
 
 export const pickCommandsForTurn = (gameState: IGameState): ICommand[] => {
-  console.error(gameState.players.opponent.phantoms.length);
-  console.error(gameState.players.me.phantoms.length);
   gameState.map.cache.mineLocationsProbabilityMatrix = calculateMineProbabilityMatrix({
     gameMap: gameState.map,
     mineTrackers: gameState.players.opponent.phantoms.map(e => e.mineTracker),
