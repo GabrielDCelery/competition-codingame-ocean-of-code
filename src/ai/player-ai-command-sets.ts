@@ -43,7 +43,7 @@ export const playerAiCommandSets = {
       utilityActions: [
         { utilityCalculator: calculateTorpedoActionUtility, types: [ECommand.TORPEDO] },
       ],
-      minUtility: 0.7,
+      minUtility: 0.4,
     },
     {
       utilityActions: [
@@ -62,7 +62,7 @@ export const playerAiCommandSets = {
       utilityActions: [
         { utilityCalculator: calculateSilenceActionUtility, types: [ECommand.SILENCE] },
       ],
-      minUtility: 0.8,
+      minUtility: 0.75,
     },
   ],
 };

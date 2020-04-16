@@ -4,7 +4,7 @@ import { IGameState } from '../game-state';
 import { cloneRealSubmarine } from '../submarines';
 import { ICommandsSubSet, pickCommandsFromCommandSet } from './pick-commands-from-command-set';
 import { playerAiCommandSets } from './player-ai-command-sets';
-import { createMineFieldUsingMineTrackers } from '../weapons';
+import { calculateMineProbabilityMatrix } from '../weapons';
 
 export interface IUtilityAction {
   utilityCalculator: TActionUtilityCalculator;
@@ -47,16 +47,12 @@ const createWeightedCommandsFromActionsSets = ({
 };
 
 export const pickCommandsForTurn = (gameState: IGameState): ICommand[] => {
-  const [
-    mineDirectDamageProbabilityMatrix,
-    mineSplashDamageProbabilityMatrix,
-  ] = createMineFieldUsingMineTrackers({
+  console.error(gameState.players.opponent.phantoms.length);
+  console.error(gameState.players.me.phantoms.length);
+  gameState.map.cache.mineLocationsProbabilityMatrix = calculateMineProbabilityMatrix({
     gameMap: gameState.map,
     mineTrackers: gameState.players.opponent.phantoms.map(e => e.mineTracker),
   });
-
-  gameState.map.cache.mineDirectDamageProbabilityMatrix = mineDirectDamageProbabilityMatrix;
-  gameState.map.cache.mineSplashDamageProbabilityMatrix = mineSplashDamageProbabilityMatrix;
 
   const weightedCommands = createWeightedCommandsFromActionsSets({
     gameState,

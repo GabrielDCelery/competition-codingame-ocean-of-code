@@ -2,12 +2,12 @@ import {
   ICoordinates,
   TWalkabilityMatrix,
   cloneWalkabilityMatrix,
-  getOpenRegionSize,
+  getOpenRegionAnalysis,
   IGameMap,
 } from '../../maps';
 import { normalizedLogistic, normalizedLogisticDecay, average } from '../utility-helpers';
 
-const MAX_REGION_SIZE_TO_CHECK = 50;
+const MAX_REGION_SIZE_TO_CHECK = 100;
 
 export const calculateFreeMovementUtility = ({
   coordinatesMoveTo,
@@ -18,7 +18,7 @@ export const calculateFreeMovementUtility = ({
   walkabilityMatrix: TWalkabilityMatrix;
   gameMap: IGameMap;
 }): number => {
-  const { count, threat } = getOpenRegionSize({
+  const { count, threat } = getOpenRegionAnalysis({
     maxSize: MAX_REGION_SIZE_TO_CHECK,
     coordinatesToCalculateFrom: coordinatesMoveTo,
     walkabilityMatrix: cloneWalkabilityMatrix(walkabilityMatrix),
@@ -33,7 +33,7 @@ export const calculateFreeMovementUtility = ({
 
   const mineFreeAreaUtility = normalizedLogisticDecay({
     value: threat,
-    max: MAX_REGION_SIZE_TO_CHECK,
+    max: Math.min(count, MAX_REGION_SIZE_TO_CHECK),
   });
 
   return average([emptySpaceUtility, mineFreeAreaUtility]);

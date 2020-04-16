@@ -12,9 +12,6 @@ import {
 } from '../maps';
 import { DAMAGE_MINE } from '../constants';
 
-const DIRECT_DAMAGE_INDEX = 0;
-const SPLASH_DAMAGE_INDEX = 1;
-
 export interface IMineTracker {
   mineCount: number;
   mines: {
@@ -135,115 +132,40 @@ export const filterMineDeploysByTriggers = (mineTracker: IMineTracker): void => 
   console.error(temp);
 };
 */
-const calculateSingleDeployProbabilityMap = ({
-  mineId,
+export const calculateMineProbabilityMatrix = ({
+  gameMap,
   mineTrackers,
 }: {
-  mineId: string;
+  gameMap: IGameMap;
   mineTrackers: IMineTracker[];
-}): any => {
-  const probabilityMap: any = {};
+}): IMineField => {
+  const { width, height } = gameMap;
+  const probabilityMatrix = new Array(width).fill(null).map(() => new Array(height).fill(0));
   const numOfMineTrackers = mineTrackers.length;
 
   mineTrackers.forEach(mineTracker => {
-    const mineLocationsAsKeys = Object.keys(mineTracker.mines[mineId]);
-    const numOfMines = mineLocationsAsKeys.length;
+    const { mineCount } = mineTracker;
+    for (let i = 0, iMax = mineCount; i < iMax; i++) {
+      const possibleMineLocationsAsKeys = Object.keys(mineTracker.mines[i]);
+      const numOfPossibleLocationsForMine = possibleMineLocationsAsKeys.length;
 
-    mineLocationsAsKeys.forEach(mineLocationAsKey => {
-      probabilityMap[mineLocationAsKey] = probabilityMap[mineLocationAsKey] || 0;
-      probabilityMap[mineLocationAsKey] += 1 / numOfMines / numOfMineTrackers;
-    });
-  });
+      possibleMineLocationsAsKeys.forEach(possibleMineLocationAsKey => {
+        const { x, y } = transformKeyToCoordinates(possibleMineLocationAsKey);
 
-  return probabilityMap;
-};
-
-const convertSingleDeployProbabilityMapToDamageProbabilityMap = ({
-  gameMap,
-  singleDeployProbabilityMap,
-}: {
-  gameMap: IGameMap;
-  singleDeployProbabilityMap: any;
-}): any => {
-  const damageProbabilityMap: any = {};
-
-  Object.keys(singleDeployProbabilityMap).forEach(detonatedAtLocationKey => {
-    damageProbabilityMap[detonatedAtLocationKey] = damageProbabilityMap[detonatedAtLocationKey] || [
-      0,
-      0,
-    ];
-    damageProbabilityMap[detonatedAtLocationKey][DIRECT_DAMAGE_INDEX] +=
-      singleDeployProbabilityMap[detonatedAtLocationKey];
-
-    getNeighbouringCells(transformKeyToCoordinates(detonatedAtLocationKey))
-      .filter(coordinates => {
-        return areCoordinatesWalkable({
-          coordinates,
-          walkabilityMatrix: gameMap.walkabilityMatrix,
-        });
-      })
-      .forEach(splashCoordinates => {
-        const splashLocationKey = transformCoordinatesToKey(splashCoordinates);
-        damageProbabilityMap[splashLocationKey] = damageProbabilityMap[splashLocationKey] || [0, 0];
-        damageProbabilityMap[splashLocationKey][SPLASH_DAMAGE_INDEX] +=
-          singleDeployProbabilityMap[detonatedAtLocationKey];
+        probabilityMatrix[x][y] = probabilityMatrix[x][y] || new Array(mineCount).fill(0);
+        probabilityMatrix[x][y][i] += 1 / numOfPossibleLocationsForMine / numOfMineTrackers;
       });
+    }
   });
 
-  return damageProbabilityMap;
-};
-
-export const createMineFieldUsingMineTrackers = ({
-  gameMap,
-  mineTrackers,
-}: {
-  gameMap: IGameMap;
-  mineTrackers: IMineTracker[];
-}): [IMineField, IMineField] => {
-  const damageProbabilityMaps: any[] = [];
-
-  for (let i = 0, iMax = mineTrackers[0].mineCount; i < iMax; i++) {
-    const singleDeployProbabilityMap = calculateSingleDeployProbabilityMap({
-      mineId: `${i}`,
-      mineTrackers,
-    });
-
-    const singleDamageProbabilityMap = convertSingleDeployProbabilityMapToDamageProbabilityMap({
-      gameMap,
-      singleDeployProbabilityMap,
-    });
-
-    damageProbabilityMaps.push(singleDamageProbabilityMap);
+  for (let x = 0; x < width; x++) {
+    for (let y = 0; y < height; y++) {
+      if (Array.isArray(probabilityMatrix[x][y])) {
+        probabilityMatrix[x][y] =
+          1 - probabilityMatrix[x][y].reduce((a: number, b: number) => (1 - b) * a, 1);
+      }
+    }
   }
 
-  const directDamageProbabilityMap: any = {};
-  const splashDamageProbabilityMap: any = {};
-
-  damageProbabilityMaps.forEach(damageProbabilityMap => {
-    Object.keys(damageProbabilityMap).forEach(key => {
-      directDamageProbabilityMap[key] = directDamageProbabilityMap[key] || [];
-      splashDamageProbabilityMap[key] = splashDamageProbabilityMap[key] || [];
-      directDamageProbabilityMap[key].push(damageProbabilityMap[key][DIRECT_DAMAGE_INDEX]);
-      splashDamageProbabilityMap[key].push(damageProbabilityMap[key][SPLASH_DAMAGE_INDEX]);
-    });
-  });
-
-  const mineDirectDamageProbabilityMatrix = createBlankMineField(gameMap);
-  const mineSplashDamageProbabilityMatrix = createBlankMineField(gameMap);
-
-  Object.keys(directDamageProbabilityMap).forEach(key => {
-    const { x, y } = transformKeyToCoordinates(key);
-
-    mineDirectDamageProbabilityMatrix[x][y] =
-      directDamageProbabilityMap[key].length === 1
-        ? directDamageProbabilityMap[key][0]
-        : 1 - directDamageProbabilityMap[key].reduce((a: number, b: number) => (1 - b) * a, 1);
-
-    mineSplashDamageProbabilityMatrix[x][y] =
-      splashDamageProbabilityMap[key].length === 1
-        ? splashDamageProbabilityMap[key][0]
-        : 1 - splashDamageProbabilityMap[key].reduce((a: number, b: number) => (1 - b) * a, 1);
-  });
-
-  return [mineDirectDamageProbabilityMatrix, mineSplashDamageProbabilityMatrix];
+  return probabilityMatrix;
 };

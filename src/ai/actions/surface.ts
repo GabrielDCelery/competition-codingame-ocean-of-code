@@ -1,19 +1,8 @@
 import { ECommand } from '../../commands';
-import {
-  getNeighbouringCells,
-  areCoordinatesWalkable,
-  getOpenRegionSize,
-  cloneWalkabilityMatrix,
-} from '../../maps';
+import { getNeighbouringCells, areCoordinatesWalkable } from '../../maps';
 import { TActionUtilityCalculator } from './interfaces';
-import { normalizedLogistic } from '../utility-helpers';
 
-const MAX_REGION_SIZE_TO_CHECK = 50;
-
-export const calculateSurfaceActionUtility: TActionUtilityCalculator = ({
-  mySubmarine,
-  gameMap,
-}) => {
+export const calculateSurfaceActionUtility: TActionUtilityCalculator = ({ mySubmarine }) => {
   if (mySubmarine.health === 1) {
     return {
       type: ECommand.SURFACE,
@@ -39,21 +28,9 @@ export const calculateSurfaceActionUtility: TActionUtilityCalculator = ({
     };
   }
 
-  const { count, threat } = getOpenRegionSize({
-    maxSize: MAX_REGION_SIZE_TO_CHECK,
-    coordinatesToCalculateFrom: mySubmarine.coordinates,
-    walkabilityMatrix: cloneWalkabilityMatrix(mySubmarine.walkabilityMatrix),
-    gameMap,
-  });
-
-  const utility = normalizedLogistic({
-    value: threat,
-    max: Math.min(count, MAX_REGION_SIZE_TO_CHECK),
-  });
-
   return {
     type: ECommand.SURFACE,
-    utility,
+    utility: 0,
     parameters: {},
   };
 };

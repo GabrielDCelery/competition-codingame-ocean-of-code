@@ -62,8 +62,7 @@ try {
   gameState.map.cache.torpedoReachabilityMapMatrix = createTorpedoReachabilityMapMatrix(
     gameState.map
   );
-  gameState.map.cache.mineDirectDamageProbabilityMatrix = createBlankMineField(gameState.map);
-  gameState.map.cache.mineSplashDamageProbabilityMatrix = createBlankMineField(gameState.map);
+  gameState.map.cache.mineLocationsProbabilityMatrix = createBlankMineField(gameState.map);
 
   const walkableTerrainCells = getWalkableCoordinates(gameState.map.walkabilityMatrix);
 

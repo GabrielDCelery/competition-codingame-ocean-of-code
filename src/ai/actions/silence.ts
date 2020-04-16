@@ -106,9 +106,9 @@ export const calculateSilenceActionUtility: TActionUtilityCalculator = ({
       return weightedAverage([
         { weight: 0.1, value: numOfMovesBeingMadeUtility },
         { weight: 0.1, value: availableMovesUtility },
-        { weight: 0.3, value: threatOfBeingShotaAtUtility },
+        { weight: 0.2, value: threatOfBeingShotaAtUtility },
         { weight: 0.4, value: desireToHideUtility },
-        { weight: 0.1, value: moveToCoordinatesUtility },
+        { weight: 0.2, value: moveToCoordinatesUtility },
       ]);
     }
   );

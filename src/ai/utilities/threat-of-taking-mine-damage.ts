@@ -1,5 +1,4 @@
-import { ICoordinates, IGameMap } from '../../maps';
-import { average, normalizedLogistic } from '../utility-helpers';
+import { ICoordinates, IGameMap, getNeighbouringCells, areCoordinatesWalkable } from '../../maps';
 
 export const calculateThreatOfTakingMineDamageUtility = ({
   coordinatesMoveTo,
@@ -8,18 +7,19 @@ export const calculateThreatOfTakingMineDamageUtility = ({
   coordinatesMoveTo: ICoordinates;
   gameMap: IGameMap;
 }): number => {
-  const { x, y } = coordinatesMoveTo;
+  const probabilityOfTakingDamage =
+    1 -
+    [coordinatesMoveTo, ...getNeighbouringCells(coordinatesMoveTo)]
+      .filter(coordinates => {
+        return areCoordinatesWalkable({
+          coordinates,
+          walkabilityMatrix: gameMap.walkabilityMatrix,
+        });
+      })
+      .map(({ x, y }) => {
+        return gameMap.cache.mineLocationsProbabilityMatrix[x][y];
+      })
+      .reduce((a: number, b: number) => (1 - b) * a, 1);
 
-  return average([
-    normalizedLogistic({
-      value: gameMap.cache.mineDirectDamageProbabilityMatrix[x][y],
-      max: 1,
-      a: 0.5,
-    }),
-    normalizedLogistic({
-      value: gameMap.cache.mineSplashDamageProbabilityMatrix[x][y],
-      max: 1,
-      a: 0.5,
-    }),
-  ]);
+  return 1 * probabilityOfTakingDamage;
 };

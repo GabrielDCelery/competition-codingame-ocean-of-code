@@ -397,7 +397,7 @@ export const getListOfCoordinatesBetweenCoordinatesConnectedByStraightLine = ({
   return listOfCoordinates;
 };
 
-export const getOpenRegionSize = ({
+export const getOpenRegionAnalysis = ({
   result = { count: 0, threat: 0 },
   maxSize,
   coordinatesToCalculateFrom,
@@ -415,15 +415,16 @@ export const getOpenRegionSize = ({
   }
   result.count += 1;
   const { x, y } = coordinatesToCalculateFrom;
-  result.threat += gameMap.cache.mineDirectDamageProbabilityMatrix[x][y];
-  result.threat += gameMap.cache.mineSplashDamageProbabilityMatrix[x][y];
   walkabilityMatrix[x][y] = false;
-  getNeighbouringCells({ x, y }).forEach(neighbouringCell => {
-    if (!areCoordinatesWalkable({ coordinates: neighbouringCell, walkabilityMatrix })) {
-      return;
-    }
+  const neighbouringCells = getNeighbouringCells({ x, y }).filter(coordinates => {
+    return areCoordinatesWalkable({ coordinates, walkabilityMatrix });
+  });
 
-    getOpenRegionSize({
+  result.threat +=
+    gameMap.cache.mineLocationsProbabilityMatrix[x][y] * (neighbouringCells.length + 1);
+
+  neighbouringCells.forEach(neighbouringCell => {
+    getOpenRegionAnalysis({
       result,
       maxSize,
       walkabilityMatrix,
