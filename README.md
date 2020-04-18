@@ -56,4 +56,4 @@ Overall I was more satisfied with the bot than not, I wish I could get with it t
 
 ## Parts of the code that I am dissatisfied with
 
-- Although the building blocks for the utility AI were in place, the actual implementation for decision making had its "issues", the efficiency of tweaking was near impossible.
+- Although the building blocks for the utility AI were in place, the actual implementation for decision making had its "issues", measuring the efficiency of tweaking was near impossible with the above mentioned generic AI solution
