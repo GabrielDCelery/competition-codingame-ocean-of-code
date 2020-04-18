@@ -52,7 +52,7 @@ Overall I was more satisfied with the bot than not, I wish I could get with it t
 ## Parts of the code that I am proud of
 
 - The code that tracks the possible locations for the opponent and mines came together nicely
-- The smaller utility functions that were the core building block in the decision making
+- The smaller utility functions that were the core building blocks in the decision making
 
 ## Parts of the code that I am dissatisfied with
 
