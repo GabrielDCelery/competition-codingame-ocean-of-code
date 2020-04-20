@@ -8,6 +8,10 @@ This is my bot for the CodinGame Ocean of Code competition. It is a 1v1 game whe
 
 Visit: `https://www.codingame.com/contests/ocean-of-code`
 
+## Final Place
+
+109 out of 2279 competitors.
+
 # Highlights of the game strategy
 
 ## Tracking the enemy
