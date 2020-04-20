@@ -21,26 +21,22 @@
   },
   "homepage": "https://github.com/GabrielDCelery/competition-codingame-ocean-of-code#readme",
   "devDependencies": {
-    "@types/node": "^13.9.2",
-    "@types/pathfinding": "0.0.4",
-    "@typescript-eslint/eslint-plugin": "^2.15.0",
-    "@typescript-eslint/parser": "^2.15.0",
+    "@types/node": "^13.13.1",
+    "@typescript-eslint/eslint-plugin": "^2.29.0",
+    "@typescript-eslint/parser": "^2.29.0",
     "eslint": "^6.8.0",
-    "eslint-config-prettier": "^6.9.0",
+    "eslint-config-prettier": "^6.10.1",
     "eslint-formatter-friendly": "^7.0.0",
     "eslint-friendly-formatter": "^4.0.1",
-    "eslint-loader": "^3.0.3",
-    "eslint-plugin-import": "^2.20.0",
-    "eslint-plugin-prettier": "^3.1.2",
+    "eslint-loader": "^3.0.4",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-prettier": "^3.1.3",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-unicorn": "^17.2.0",
     "lodash": "^4.17.15",
     "parcel": "^1.12.4",
     "prettier": "^1.19.1",
-    "ts-node": "^8.1.0",
+    "ts-node": "^8.8.2",
     "typescript": "^3.8.3"
-  },
-  "dependencies": {
-    "pathfinding": "^0.4.18"
   }
 }
