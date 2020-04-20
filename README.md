@@ -10,7 +10,7 @@ Visit: `https://www.codingame.com/contests/ocean-of-code`
 
 ## Final Place
 
-109 out of 2279 competitors.
+`109` out of `2279` competitors.
 
 # Highlights of the game strategy
 
