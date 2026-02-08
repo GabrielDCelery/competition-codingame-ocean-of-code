@@ -4,6 +4,8 @@
 
 Final rank: **Top 5%** (109th of 2,2279)
 
+Language: Typescript (transpiled to JS)
+
 This is my bot for the CodinGame Ocean of Code competition. It is a 1v1 game where both players control a submarine on a 15x15 map and try to track down and sink the opponent using torpedoes and mines.
 
 ![Codingame Ocean of Code](./assets/screenshot-codingame-oceanofcode.jpg)
