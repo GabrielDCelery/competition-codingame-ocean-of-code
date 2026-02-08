@@ -2,11 +2,13 @@
 
 ## What is this project for?
 
+Final rank: **Top 5%** (109th of 2,2279)
+
 This is my bot for the CodinGame Ocean of Code competition. It is a 1v1 game where both players control a submarine on a 15x15 map and try to track down and sink the opponent using torpedoes and mines.
 
-## Rules
+![Codingame Ocean of Code](./assets/screenshot-codingame-oceanofcode.jpg)
 
-Visit: `https://www.codingame.com/contests/ocean-of-code`
+[Link to the competition](https://www.codingame.com/contests/ocean-of-code)
 
 ## Final Place
 
